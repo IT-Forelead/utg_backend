@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  endpoints:
+    restart: always
+    container_name: utg-endpoints
+    hostname: utg-endpoints
+    image: utg/endpoints:latest
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "8000:8000"
+    environment:
+      ROOT_PATH: /opt/docker
+    volumes:
+      - "/srv/logs/utg/:/opt/docker/logs/"
+      - "/srv/conf/utg/:/opt/docker/conf/"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '1G'
+    networks:
+      - db-net
+networks:
+  db-net:
+    name: db-net
+    internal: true

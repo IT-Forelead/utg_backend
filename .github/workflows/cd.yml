@@ -1,0 +1,78 @@
+name: Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_ECR_REPOSITORY: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "${{ vars.AWS_REGION }}"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Download Java (temurin@11)
+        id: download-java-temurin-11
+        uses: typelevel/download-java@v1
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Setup Java (temurin@11)
+        uses: actions/setup-java@v2
+        with:
+          distribution: jdkfile
+          java-version: 11
+          jdkFile: ${{ steps.download-java-temurin-11.outputs.jdkFile }}
+
+      - name: Cache sbt
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.coursier/cache/v1
+            ~/.cache/coursier/v1
+            ~/AppData/Local/Coursier/Cache/v1
+            ~/Library/Caches/Coursier/v1
+          key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+
+      - name: "Building base image 🏗"
+        run: |
+          cd .build
+          bash base.sh
+      - name: "Building image 🏗"
+        id: build-image
+        run: |
+          export CI_SHORT_COMMIT_ID=$(echo "$GITHUB_SHA" | cut -c1-8)
+          echo "::set-output name=tag::$CI_SHORT_COMMIT_ID"
+          sbt docker:publish
+      - name: Install SSH key of timeweb
+        uses: appleboy/ssh-action@master
+        env:
+          IMAGE_TAG: ${{ steps.build-image.outputs.tag }}
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd utg
+            aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ECR_REPOSITORY }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
+            bash run
+            docker restart nginx

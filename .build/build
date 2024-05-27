@@ -1,0 +1,48 @@
+#!/bin/bash
+ # Find local address and set to variable
+ # shellcheck disable=SC2155
+ export local_ip=$(hostname -I | cut -d' ' -f1)
+ source base.sh
+
+ echo "$local_ip"
+ if [ ! -d "/srv" ]; then
+    # Create the folder
+    sudo mkdir /srv
+    echo "Folder /srv created."
+ fi
+ if [ ! -d "/srv/conf" ]; then
+    # Create the folder
+    sudo mkdir /srv/conf
+    echo "Folder /srv/conf/ created."
+ fi
+ if [ ! -d "/srv/conf/utg" ]; then
+    # Create the folder
+    sudo mkdir /srv/conf/utg
+    echo "Folder /srv/conf/utg created."
+ fi
+
+ sudo touch /srv/conf/utg/local.conf
+ sudo bash -c 'echo "include \"reference.conf\"" > /srv/conf/utg/local.conf'
+ sudo bash -c 'echo "REDIS_URI=\"redis://'"$local_ip"'\"" >> /srv/conf/utg/local.conf'
+
+ # shellcheck disable=SC2164
+ cd postgres
+ docker compose down
+ docker compose up -d
+ docker exec -i postgres psql -U postgres < setup.sql
+ # shellcheck disable=SC2164
+ cd ../redis
+ docker compose down
+ docker compose up -d
+ cd ../../
+ sbt "docker:publishLocal"
+
+ # shellcheck disable=SC2164
+ cd .build
+ docker compose down
+ docker compose up -d
+
+ # shellcheck disable=SC2164
+ cd nginx
+ docker compose down
+ docker compose up -d
