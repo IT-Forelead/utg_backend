@@ -1,1 +1,0 @@
-docker build -t base-image:1.0 .
