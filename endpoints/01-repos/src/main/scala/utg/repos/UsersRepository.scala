@@ -7,25 +7,27 @@ import cats.effect.Resource
 import cats.implicits.catsSyntaxApplicativeErrorId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
-import utg.domain.{ResponseData, Role}
-import utg.domain.auth.AccessCredentials
-import utg.domain.args.users.UserFilters
+import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
 import utg.domain.AuthedUser.User
+import utg.domain.ResponseData
+import utg.domain.Role
+import utg.domain.UserId
+import utg.domain.args.users.UserFilters
+import utg.domain.auth.AccessCredentials
+import utg.exception.AError
 import utg.repos.sql.RolesSql
 import utg.repos.sql.UsersSql
 import utg.repos.sql.dto
-import utg.EmailAddress
-import utg.domain.UserId
-import utg.exception.AError
 
 trait UsersRepository[F[_]] {
-  def find(email: EmailAddress): F[Option[AccessCredentials[User]]]
+  def find(login: NonEmptyString): F[Option[AccessCredentials[User]]]
   def findById(id: UserId): F[Option[User]]
   def create(userAndHash: AccessCredentials[dto.User]): F[Unit]
   def update(id: UserId)(update: dto.User => dto.User): F[Unit]
@@ -68,8 +70,8 @@ object UsersRepository {
         )
     }
 
-    override def find(email: EmailAddress): F[Option[AccessCredentials[User]]] =
-      OptionT(UsersSql.findByLogin.queryOption(email)).semiflatMap { userData =>
+    override def find(login: NonEmptyString): F[Option[AccessCredentials[User]]] =
+      OptionT(UsersSql.findByLogin.queryOption(login)).semiflatMap { userData =>
         makeUser(userData.data).map(user => userData.copy(data = user))
       }.value
 

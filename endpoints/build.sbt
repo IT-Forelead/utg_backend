@@ -32,7 +32,6 @@ lazy val `endpoints-core` =
       `endpoints-repos`,
       LocalProject("integration_aws-s3"),
       LocalProject("support_redis"),
-      LocalProject("support_mailer"),
     )
 
 lazy val `endpoints-api` =

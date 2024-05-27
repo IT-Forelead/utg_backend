@@ -69,6 +69,7 @@ object UsersAlgebra {
             lastname = userInput.lastname,
             roleId = userInput.roleId,
             login = userInput.login,
+            phone = userInput.phone,
             assetId = None,
           )
           password <- randomStr[F](8)
@@ -92,6 +93,7 @@ object UsersAlgebra {
             _.copy(
               firstname = userInput.firstname,
               lastname = userInput.lastname,
+              phone = userInput.phone,
               assetId = assetId,
             )
           )

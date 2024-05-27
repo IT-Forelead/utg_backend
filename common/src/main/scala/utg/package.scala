@@ -8,8 +8,6 @@ import eu.timepit.refined.string.MatchesRegex
 
 package object utg {
   type Phone = String Refined MatchesRegex[W.`"""[+][\\d]+"""`.T]
-  type EmailAddress =
-    String Refined MatchesRegex[W.`"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.][a-zA-Z]{2,}"`.T]
   def randomStr[F[_]: Random: Monad](n: Int): F[String] =
     (0 to n)
       .toList

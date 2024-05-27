@@ -13,7 +13,6 @@ import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
-import utg.EmailAddress
 import utg.Phone
 import utg.domain.enums.Privilege
 import utg.effects.IsUUID
@@ -30,7 +29,6 @@ package object sql {
   val nes: Codec[NonEmptyString] = varchar.imap[NonEmptyString](identity(_))(_.value)
   val nonEmptyText: Codec[NonEmptyString] = text.imap[NonEmptyString](identity(_))(_.value)
   val phone: Codec[Phone] = varchar.imap[Phone](identity(_))(_.value)
-  val email: Codec[EmailAddress] = varchar.imap[EmailAddress](identity(_))(_.value)
   val privilege: Codec[Privilege] = varchar.imap[Privilege](Privilege.withName)(_.entryName)
   val zonedDateTime: Codec[ZonedDateTime] = timestamptz.imap(_.toZonedDateTime)(_.toOffsetDateTime)
 

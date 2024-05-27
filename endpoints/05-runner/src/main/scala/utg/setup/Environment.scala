@@ -12,21 +12,19 @@ import dev.profunktor.redis4cats.effect.Log.NoOp.instance
 import utg.domain.AuthedUser
 import utg.domain.auth.AccessCredentials
 import eu.timepit.refined.pureconfig._
+import eu.timepit.refined.types.string.NonEmptyString
 import org.http4s.server
 import org.typelevel.log4cats.Logger
 import pureconfig.generic.auto.exportReader
 import uz.scala.aws.s3.S3Client
 import uz.scala.flyway.Migrations
-import uz.scala.mailer.Mailer
 import uz.scala.redis.RedisClient
 import uz.scala.skunk.SkunkSession
-
 import utg.Algebras
 import utg.Repositories
 import utg.auth.impl.Auth
 import utg.auth.impl.LiveMiddleware
-import utg.http.{ Environment => ServerEnvironment }
-import utg.EmailAddress
+import utg.http.{Environment => ServerEnvironment}
 import utg.utils.ConfigLoader
 
 case class Environment[F[_]: Async: Logger: Dispatcher: Random](
@@ -34,10 +32,9 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
     repositories: Repositories[F],
     auth: Auth[F, Option[AuthedUser]],
     s3Client: S3Client[F],
-    mailer: Mailer[F],
     middleware: server.AuthMiddleware[F, Option[AuthedUser]],
   ) {
-  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client, mailer)
+  private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client)
 
   lazy val toServer: ServerEnvironment[F] =
     ServerEnvironment(
@@ -49,8 +46,8 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
 object Environment {
   private def findUser[F[_]: Monad](
       repositories: Repositories[F]
-    ): EmailAddress => F[Option[AccessCredentials[AuthedUser]]] = email =>
-    OptionT(repositories.users.find(email))
+    ): NonEmptyString => F[Option[AccessCredentials[AuthedUser]]] = login =>
+    OptionT(repositories.users.find(login))
       .map(identity[AccessCredentials[AuthedUser]])
       .value
 
@@ -67,6 +64,5 @@ object Environment {
       middleware = LiveMiddleware.make[F](config.auth, redis)
       auth = Auth.make[F](config.auth, findUser(repositories), redis)
       s3Client <- S3Client.resource(config.awsConfig)
-      mailer = Mailer.make[F](config.mailer)
-    } yield Environment[F](config, repositories, auth, s3Client, mailer, middleware)
+    } yield Environment[F](config, repositories, auth, s3Client, middleware)
 }

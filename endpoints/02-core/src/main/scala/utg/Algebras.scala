@@ -6,7 +6,6 @@ import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.aws.s3.S3Client
-import uz.scala.mailer.Mailer
 
 import utg.algebras.AssetsAlgebra
 import utg.algebras.UsersAlgebra
@@ -26,7 +25,6 @@ object Algebras {
       auth: Auth[F, Option[AuthedUser]],
       repositories: Repositories[F],
       s3Client: S3Client[F],
-      mailer: Mailer[F],
     )(implicit
       P: PasswordHasher[F, SCrypt]
     ): Algebras[F] = {

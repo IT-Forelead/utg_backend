@@ -5,6 +5,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl.TransformationOps
 import zio.query.ZQuery
 
+import utg.Phone
 import utg.algebras.AssetsAlgebra
 import utg.domain.Asset.AssetInfo
 import utg.domain.AssetId
@@ -21,35 +22,39 @@ case class User(
     lastname: NonEmptyString,
     role: Role,
     login: NonEmptyString,
+    phone: Phone,
     fullName: NonEmptyString,
     image: ConsoleQuery[Option[AssetInfo]],
   )
 
 object User {
+  private def getAssetById[F[_]](
+      id: AssetId
+    )(implicit
+      assetAlgebra: AssetsAlgebra[F],
+      interop: CatsInterop[F, GraphQLContext],
+    ): ConsoleQuery[AssetInfo] =
+    DataFetcher.fetch[F, AssetId, AssetInfo](id, assetAlgebra.findByIds)
+
   def fromDomain[F[_]](
       user: UserDomain
     )(implicit
       assetAlgebra: AssetsAlgebra[F],
       interop: CatsInterop[F, GraphQLContext],
-    ): User = {
-    def getAssetById(id: AssetId): ConsoleQuery[AssetInfo] =
-      DataFetcher.fetch[F, AssetId, AssetInfo](id, assetAlgebra.findByIds)
+    ): User =
     user
       .into[User]
-      .withFieldConst(_.image, ZQuery.foreach(user.assetId)(getAssetById))
+      .withFieldConst(_.image, ZQuery.foreach(user.assetId)(getAssetById[F]))
       .transform
-  }
+
   def fromDomain[F[_]](
       user: AuthedUser
     )(implicit
       assetAlgebra: AssetsAlgebra[F],
       interop: CatsInterop[F, GraphQLContext],
-    ): User = {
-    def getAssetById(id: AssetId): ConsoleQuery[AssetInfo] =
-      DataFetcher.fetch[F, AssetId, AssetInfo](id, assetAlgebra.findByIds)
+    ): User =
     user
       .into[User]
-      .withFieldConst(_.image, ZQuery.foreach(user.assetId)(getAssetById))
+      .withFieldConst(_.image, ZQuery.foreach(user.assetId)(getAssetById[F]))
       .transform
-  }
 }

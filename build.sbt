@@ -3,11 +3,11 @@ import Dependencies.*
 ThisBuild / version      := sys.env.getOrElse("CI_SHORT_COMMIT_ID", "latest")
 ThisBuild / scalaVersion := "2.13.13"
 
-lazy val `UzTransGaz` =
+lazy val utg_backend =
   project
     .in(file("."))
     .settings(
-      name := "UzTransGaz"
+      name := "utg_backend"
     )
     .aggregate(
       endpoints,
