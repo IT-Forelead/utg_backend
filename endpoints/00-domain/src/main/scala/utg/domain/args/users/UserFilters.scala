@@ -8,7 +8,7 @@ import utg.domain.UserId
 
 case class UserFilters(
     id: Option[UserId] = None,
-    role: Option[RoleId] = None,
+    roleId: Option[RoleId] = None,
     name: Option[NonEmptyString] = None,
     limit: Option[PosInt] = None,
     offset: Option[PosInt] = None,

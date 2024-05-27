@@ -3,8 +3,10 @@ package utg.repos.sql
 import eu.timepit.refined.types.string.NonEmptyString
 import shapeless.HNil
 import skunk._
+import skunk.codec.all.varchar
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
+
 import utg.domain.UserId
 import utg.domain.args.users.UserFilters
 import utg.domain.auth.AccessCredentials
@@ -60,7 +62,9 @@ private[repos] object UsersSql extends Sql[UserId] {
 
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =
     List(
-      filters.id.map(sql"u.id = $id")
+      filters.id.map(sql"u.id = $id"),
+      filters.roleId.map(sql"u.role_id = ${RolesSql.id}"),
+      filters.name.map(s => s"%$s%").map(sql"u.firstname + ' ' + u.lastname ILIKE $varchar"),
     )
 
   def select(filters: UserFilters): AppliedFragment = {
