@@ -4,7 +4,9 @@ import java.time.ZonedDateTime
 
 import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl._
+import uz.scala.syntax.refined._
 
+import utg.Phone
 import utg.domain
 import utg.domain.AssetId
 import utg.domain.AuthedUser
@@ -18,6 +20,7 @@ object dto {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       login: NonEmptyString,
+      phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],
     ) {
@@ -25,6 +28,7 @@ object dto {
       this
         .into[AuthedUser.User]
         .withFieldConst(_.role, role)
+        .withFieldConst(_.phone, phone)
         .transform
   }
 

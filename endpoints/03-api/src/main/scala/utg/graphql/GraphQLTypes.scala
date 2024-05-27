@@ -11,7 +11,6 @@ import eu.timepit.refined.types.all.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import uz.scala.syntax.refined._
 
-import utg.EmailAddress
 import utg.Phone
 import utg.domain.Asset
 import utg.domain.AssetId
@@ -46,8 +45,6 @@ trait GraphQLTypes extends GenericSchema[GraphQLContext] {
     ArgBuilder.string.map(identity(_))
   implicit val PhoneArgBuilder: ArgBuilder[Phone] =
     ArgBuilder.string.map(identity(_))
-  implicit val EmailAddressArgBuilder: ArgBuilder[EmailAddress] =
-    ArgBuilder.string.map(identity(_))
   implicit val PosIntArgBuilder: ArgBuilder[PosInt] =
     ArgBuilder.int.map(identity(_))
   implicit val PrivilegeArgBuilder: ArgBuilder[Privilege] = ArgBuilder.gen
@@ -75,8 +72,6 @@ trait GraphQLTypes extends GenericSchema[GraphQLContext] {
     Schema.stringSchema.contramap[NonEmptyString](identity(_))
   implicit val PhoneSchema: Schema.Typeclass[Phone] =
     Schema.stringSchema.contramap[Phone](identity(_))
-  implicit val EmailAddressSchema: Schema.Typeclass[EmailAddress] =
-    Schema.stringSchema.contramap[EmailAddress](identity(_))
   implicit val URLSchema: Schema.Typeclass[URL] =
     Schema.stringSchema.contramap[URL](_.toString)
   implicit val PrivilegeSchema: Schema.Typeclass[Privilege] = Schema.gen
@@ -87,10 +82,9 @@ trait GraphQLTypes extends GenericSchema[GraphQLContext] {
     obj("AuthedUser", Some("A user of the service"))(implicit ft =>
       List(
         field("id")(_.id),
-        field("firstname")(_.firstname),
-        field("lastname")(_.lastname),
         field("role")(_.role),
-        field("email")(_.login),
+        field("login")(_.login),
+        field("phone")(_.phone),
         field("fullName")(_.fullName),
       )
     )

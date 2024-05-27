@@ -14,7 +14,6 @@ import uz.scala.redis.RedisClient
 import uz.scala.syntax.all.circeSyntaxDecoderOps
 import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
-import utg.EmailAddress
 import utg.auth.AuthConfig
 import utg.auth.utils.AuthMiddleware
 import utg.auth.utils.JwtExpire
@@ -36,7 +35,7 @@ trait Auth[F[_], A] {
 object Auth {
   def make[F[_]: Sync](
       config: AuthConfig,
-      findUser: EmailAddress => F[Option[AccessCredentials[AuthedUser]]],
+      findUser: NonEmptyString => F[Option[AccessCredentials[AuthedUser]]],
       redis: RedisClient[F],
     ): Auth[F, Option[AuthedUser]] =
     new Auth[F, Option[AuthedUser]] {
@@ -45,13 +44,13 @@ object Auth {
       val jwtAuth: JwtSymmetricAuth = JwtAuth.hmac(config.tokenKey.secret, JwtAlgorithm.HS256)
 
       override def login(credentials: Credentials): F[AuthTokens] =
-        findUser(credentials.email).flatMap {
+        findUser(credentials.login).flatMap {
           case None =>
             NoSuchUser("User Not Found").raiseError[F, AuthTokens]
           case Some(person) if !SCrypt.checkpwUnsafe(credentials.password, person.password) =>
             PasswordDoesNotMatch("Password does not match").raiseError[F, AuthTokens]
           case Some(person) =>
-            OptionT(redis.get(credentials.email))
+            OptionT(redis.get(credentials.login))
               .cataF(
                 createNewToken(person.data),
                 json =>
@@ -62,7 +61,7 @@ object Auth {
                         .validateJwtToken[F](
                           JwtToken(tokens.accessToken),
                           jwtAuth,
-                          _ => redis.del(tokens.accessToken, tokens.refreshToken, credentials.email),
+                          _ => redis.del(tokens.accessToken, tokens.refreshToken, credentials.login),
                         )
                     ).cataF(
                       createNewToken(person.data),
