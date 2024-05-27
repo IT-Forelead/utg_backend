@@ -1,9 +1,3 @@
-CREATE TYPE PRIVILEGE AS ENUM (
-  'create_user',
-  'update_user',
-  'update_any_user',
-  'view_users'
-);
 
 CREATE TABLE IF NOT EXISTS assets(
   id UUID PRIMARY KEY NOT NULL,
