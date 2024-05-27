@@ -9,6 +9,7 @@ import utg.repos._
 case class Repositories[F[_]](
     users: UsersRepository[F],
     assets: AssetsRepository[F],
+    roles: RolesRepository[F],
   )
 object Repositories {
   def make[F[_]: Async](
@@ -18,5 +19,6 @@ object Repositories {
     Repositories(
       users = UsersRepository.make[F],
       assets = AssetsRepository.make[F],
+      roles = RolesRepository.make[F],
     )
 }

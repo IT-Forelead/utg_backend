@@ -11,20 +11,22 @@ import cats.data.EitherT
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
-import utg.domain.ResponseData
-import utg.domain.args.users.{UpdateUserRole, UserFilters, UserInput}
-import utg.domain.enums.Privilege
 
 import utg.algebras.AssetsAlgebra
 import utg.algebras.UsersAlgebra
+import utg.domain.ResponseData
 import utg.domain.UserId
+import utg.domain.args.users.UpdateUserRole
+import utg.domain.args.users.UserFilters
+import utg.domain.args.users.UserInput
+import utg.domain.enums.Privilege
+import utg.exception.AError
 import utg.graphql.GraphQLContext
 import utg.graphql.GraphQLTypes
 import utg.graphql.args.UpdateUserInput
 import utg.graphql.schema.GraphQLApi
 import utg.graphql.schema.Utils.Access
 import utg.graphql.views.User
-import utg.exception.AError
 
 class UsersApi[F[_]: MonadThrow: Lambda[M[_] => CatsInterop[M, GraphQLContext]]](
     usersAlgebra: UsersAlgebra[F]
@@ -65,7 +67,8 @@ class UsersApi[F[_]: MonadThrow: Lambda[M[_] => CatsInterop[M, GraphQLContext]]]
       .fromOption(ctx.authInfo, AError.NotAllowed("You are not authorized"))
       .map(User.fromDomain[F])
       .rethrowT,
-    users = filter => usersAlgebra.get(filter).map(u => u.copy(data = u.data.map(User.fromDomain[F]))),
+    users =
+      filter => usersAlgebra.get(filter).map(u => u.copy(data = u.data.map(User.fromDomain[F]))),
   )
 
   val api: GraphQL[GraphQLContext] = graphQL(RootResolver(queries, mutations))

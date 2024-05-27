@@ -7,7 +7,6 @@ import caliban.wrappers.DeferSupport
 import caliban.wrappers.Wrappers._
 import cats.effect.Async
 import cats.effect.std.Dispatcher
-import utg.domain.AuthedUser
 import zio.Runtime
 import zio.Unsafe
 import zio.ZEnvironment
@@ -15,10 +14,13 @@ import zio.durationInt
 
 import utg.Algebras
 import utg.algebras.AssetsAlgebra
+import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.auth.impl.Auth
+import utg.domain.AuthedUser
 import utg.graphql.schema.GraphQLApi
 import utg.graphql.schema.apis.AuthApi
+import utg.graphql.schema.apis.RolesApi
 import utg.graphql.schema.apis.UsersApi
 class GraphQLEndpoints[F[_]: Async](
     algebras: Algebras[F]
@@ -30,6 +32,7 @@ class GraphQLEndpoints[F[_]: Async](
     auth: Auth[F, Option[AuthedUser]],
     assets: AssetsAlgebra[F],
     users: UsersAlgebra[F],
+    roles: RolesAlgebra[F],
   ) = algebras
 
   implicit val runtime: Runtime[GraphQLContext] =
@@ -46,6 +49,7 @@ class GraphQLEndpoints[F[_]: Async](
     List(
       new AuthApi[F](algebras.auth),
       new UsersApi(algebras.users),
+      new RolesApi(algebras.roles),
     )
 
   def createGraphQL: GraphQL[GraphQLContext] =

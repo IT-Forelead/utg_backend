@@ -8,6 +8,7 @@ import tsec.passwordhashers.jca.SCrypt
 import uz.scala.aws.s3.S3Client
 
 import utg.algebras.AssetsAlgebra
+import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.auth.impl.Auth
 import utg.domain.AuthedUser
@@ -18,6 +19,7 @@ case class Algebras[F[_]](
     auth: Auth[F, Option[AuthedUser]],
     assets: AssetsAlgebra[F],
     users: UsersAlgebra[F],
+    roles: RolesAlgebra[F],
   )
 
 object Algebras {
@@ -28,12 +30,13 @@ object Algebras {
     )(implicit
       P: PasswordHasher[F, SCrypt]
     ): Algebras[F] = {
-    val Repositories(users, assets) = repositories
+    val Repositories(users, assets, roles) = repositories
     val assetsAlgebra = AssetsAlgebra.make[F](assets, s3Client)
     Algebras[F](
       auth = auth,
       assets = assetsAlgebra,
       users = UsersAlgebra.make[F](users, assetsAlgebra),
+      roles = RolesAlgebra.make[F](roles),
     )
   }
 }
