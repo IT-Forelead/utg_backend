@@ -7,10 +7,11 @@ import caliban.interop.cats.CatsInterop
 import caliban.interop.cats.implicits._
 import cats.MonadThrow
 import cats.implicits.toFoldableOps
-import utg.domain.AuthedUser
-import utg.domain.auth.{AuthTokens, Credentials}
 
 import utg.auth.impl.Auth
+import utg.domain.AuthedUser
+import utg.domain.auth.AuthTokens
+import utg.domain.auth.Credentials
 import utg.graphql.GraphQLContext
 import utg.graphql.GraphQLTypes
 import utg.graphql.schema.GraphQLApi

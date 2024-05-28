@@ -7,8 +7,9 @@ import cats.effect.Sync
 import cats.implicits.catsSyntaxApplicativeErrorId
 import pureconfig.ConfigReader
 import pureconfig.ConfigSource
-import utg.Mode._
+
 import utg.Mode
+import utg.Mode._
 
 object ConfigLoader {
   def load[F[_]: Sync, Conf: ConfigReader: ClassTag]: F[Conf] = {

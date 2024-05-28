@@ -13,15 +13,12 @@ import zio.ZEnvironment
 import zio.durationInt
 
 import utg.Algebras
-import utg.algebras.AssetsAlgebra
-import utg.algebras.RolesAlgebra
-import utg.algebras.UsersAlgebra
+import utg.algebras._
 import utg.auth.impl.Auth
 import utg.domain.AuthedUser
 import utg.graphql.schema.GraphQLApi
-import utg.graphql.schema.apis.AuthApi
-import utg.graphql.schema.apis.RolesApi
-import utg.graphql.schema.apis.UsersApi
+import utg.graphql.schema.apis._
+
 class GraphQLEndpoints[F[_]: Async](
     algebras: Algebras[F]
   )(implicit
@@ -33,6 +30,7 @@ class GraphQLEndpoints[F[_]: Async](
     assets: AssetsAlgebra[F],
     users: UsersAlgebra[F],
     roles: RolesAlgebra[F],
+    vehicles: VehiclesAlgebra[F],
   ) = algebras
 
   implicit val runtime: Runtime[GraphQLContext] =
@@ -50,6 +48,7 @@ class GraphQLEndpoints[F[_]: Async](
       new AuthApi[F](algebras.auth),
       new UsersApi(algebras.users),
       new RolesApi(algebras.roles),
+      new VehiclesApi(algebras.vehicles),
     )
 
   def createGraphQL: GraphQL[GraphQLContext] =

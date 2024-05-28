@@ -57,7 +57,6 @@ private[repos] object UsersSql extends Sql[UserId] {
       .contramap {
         case user: dto.User =>
           user.firstname *: user.lastname *: user.phone *: user.roleId *: user.assetId *: user.id *: EmptyTuple
-
       }
 
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =

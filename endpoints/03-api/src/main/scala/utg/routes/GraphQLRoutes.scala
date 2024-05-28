@@ -21,7 +21,6 @@ import cats.effect.std.Dispatcher
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import cats.implicits.toTraverseOps
-import utg.domain.AuthedUser
 import org.http4s.AuthedRoutes
 import org.http4s._
 import org.http4s.circe.JsonDecoder
@@ -34,10 +33,11 @@ import uz.scala.syntax.all.circeSyntaxDecoderOps
 import zio._
 
 import utg.Algebras
-import utg.graphql.GraphQLContext
-import utg.graphql.GraphQLEndpoints
+import utg.domain.AuthedUser
 import utg.effects.GenUUID
 import utg.exception.AError
+import utg.graphql.GraphQLContext
+import utg.graphql.GraphQLEndpoints
 
 final class GraphQLRoutes[F[_]: JsonDecoder: Async: Dispatcher](algebras: Algebras[F])
     extends Routes[F, Option[AuthedUser]] {

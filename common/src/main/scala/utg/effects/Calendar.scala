@@ -1,9 +1,9 @@
 package utg.effects
 
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Duration
 import java.time.ZonedDateTime
 
 import cats.effect._
@@ -36,7 +36,7 @@ object Calendar {
 
       override def remainingDays(dueDate: LocalDate): F[Long] =
         F.map(currentDate) { current =>
-            Duration.between(current.atStartOfDay(), dueDate.atStartOfDay()).toDays
+          Duration.between(current.atStartOfDay(), dueDate.atStartOfDay()).toDays
         }
     }
 }

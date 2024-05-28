@@ -9,8 +9,6 @@ import cats.effect.std.Dispatcher
 import cats.effect.std.Random
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.NoOp.instance
-import utg.domain.AuthedUser
-import utg.domain.auth.AccessCredentials
 import eu.timepit.refined.pureconfig._
 import eu.timepit.refined.types.string.NonEmptyString
 import org.http4s.server
@@ -20,11 +18,14 @@ import uz.scala.aws.s3.S3Client
 import uz.scala.flyway.Migrations
 import uz.scala.redis.RedisClient
 import uz.scala.skunk.SkunkSession
+
 import utg.Algebras
 import utg.Repositories
 import utg.auth.impl.Auth
 import utg.auth.impl.LiveMiddleware
-import utg.http.{Environment => ServerEnvironment}
+import utg.domain.AuthedUser
+import utg.domain.auth.AccessCredentials
+import utg.http.{ Environment => ServerEnvironment }
 import utg.utils.ConfigLoader
 
 case class Environment[F[_]: Async: Logger: Dispatcher: Random](
@@ -43,6 +44,7 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
       algebras = algebras,
     )
 }
+
 object Environment {
   private def findUser[F[_]: Monad](
       repositories: Repositories[F]

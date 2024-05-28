@@ -1,12 +1,13 @@
 package utg.graphql
 
 import caliban.uploads.Uploads
-import utg.domain.AuthedUser
 import zio.ULayer
+
+import utg.domain.AuthedUser
 
 case class GraphQLContext(
     authInfo: Option[AuthedUser],
-    uploads: ULayer[Uploads]
+    uploads: ULayer[Uploads],
   )
 
 object GraphQLContext {

@@ -19,7 +19,6 @@ import org.http4s.server.middleware._
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.ci.CIStringSyntax
 import org.typelevel.log4cats.Logger
-
 import uz.scala.http4s.HealthHttpRoutes
 import uz.scala.http4s.HttpServerConfig
 import uz.scala.http4s.LiveHttpErrorHandler

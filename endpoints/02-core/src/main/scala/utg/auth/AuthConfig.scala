@@ -1,6 +1,7 @@
 package utg.auth
 
-import utg.domain.{JwtAccessTokenKey, TokenExpiration }
+import utg.domain.JwtAccessTokenKey
+import utg.domain.TokenExpiration
 
 case class AuthConfig(
     tokenKey: JwtAccessTokenKey,

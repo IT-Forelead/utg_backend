@@ -2,7 +2,9 @@ package utg.utils
 
 import cats.Functor
 import cats.implicits.toFunctorOps
-import utg.effects.{GenUUID, IsUUID}
+
+import utg.effects.GenUUID
+import utg.effects.IsUUID
 
 object ID {
   def make[F[_]: Functor: GenUUID, A: IsUUID]: F[A] =

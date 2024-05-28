@@ -4,12 +4,13 @@ import cats.data.NonEmptyList
 import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits.toFunctorOps
-import utg.domain.Asset
 import skunk._
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
+
+import utg.domain.Asset
+import utg.domain.AssetId
 import utg.repos.sql.AssetsSql
-import utg.domain.{AssetId}
 
 trait AssetsRepository[F[_]] {
   def create(asset: Asset): F[Unit]
