@@ -67,15 +67,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: "Building image 🏗"
+        id: set-image-tag
+        run: |
+          export CI_SHORT_COMMIT_ID=$(echo "$GITHUB_SHA" | cut -c1-8)
+          echo "::set-output name=tag::$CI_SHORT_COMMIT_ID"
       - name: Install SSH key of timeweb
         uses: appleboy/ssh-action@master
+        env:
+          IMAGE_TAG: ${{ steps.set-image-tag.outputs.tag }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            export IMAGE_TAG=$(echo "$GITHUB_SHA" | cut -c1-8)
             cd utg
             aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ECR_REPOSITORY }}
+            export IMAGE_TAG=${{ env.IMAGE_TAG }}
             bash run
             docker restart nginx
