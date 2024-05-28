@@ -3,6 +3,7 @@ package utg.graphql.schema
 import caliban.Value.StringValue
 import caliban.parsing.adt.Directive
 import caliban.schema.Annotations.GQLDirective
+
 import utg.domain.enums.Privilege
 object Utils {
   val directiveName = "requiredPrivilege"

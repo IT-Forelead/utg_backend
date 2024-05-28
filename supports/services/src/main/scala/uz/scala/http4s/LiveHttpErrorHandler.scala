@@ -7,11 +7,12 @@ import org.http4s.MalformedMessageBodyFailure
 import org.http4s.Response
 import org.http4s.dsl.Http4sDsl
 import org.typelevel.log4cats.Logger
-import uz.scala.http4s.utils.HttpErrorHandler
-import utg.exception.AError.AuthError
-import utg.exception.AError
 import uz.scala.MultipartDecodeError
+import uz.scala.http4s.utils.HttpErrorHandler
 import uz.scala.syntax.all.genericSyntaxGenericTypeOps
+
+import utg.exception.AError
+import utg.exception.AError.AuthError
 class LiveHttpErrorHandler[F[_]: MonadThrow](
     implicit
     logger: Logger[F]

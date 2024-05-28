@@ -4,6 +4,7 @@ import java.time.ZonedDateTime
 
 import enumeratum.Enum
 import enumeratum.EnumEntry
+import eu.timepit.refined.types.numeric.NonNegDouble
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk.Codec
 import skunk.codec.all._
@@ -14,7 +15,9 @@ import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.Phone
+import utg.RegisteredNumber
 import utg.domain.enums.Privilege
+import utg.domain.enums.VehicleType
 import utg.effects.IsUUID
 
 package object sql {
@@ -29,8 +32,13 @@ package object sql {
   val nes: Codec[NonEmptyString] = varchar.imap[NonEmptyString](identity(_))(_.value)
   val nonEmptyText: Codec[NonEmptyString] = text.imap[NonEmptyString](identity(_))(_.value)
   val phone: Codec[Phone] = varchar.imap[Phone](identity(_))(_.value)
+  val registeredNumber: Codec[RegisteredNumber] =
+    varchar.imap[RegisteredNumber](identity(_))(_.value)
   val privilege: Codec[Privilege] = varchar.imap[Privilege](Privilege.withName)(_.entryName)
   val zonedDateTime: Codec[ZonedDateTime] = timestamptz.imap(_.toZonedDateTime)(_.toOffsetDateTime)
+  val nonNegDouble: Codec[NonNegDouble] =
+    float8.imap[NonNegDouble](double => NonNegDouble.unsafeFrom(double))(_.value)
+  val vehicleType: Codec[VehicleType] = `enum`[VehicleType](VehicleType, Type("vehicle_type"))
 
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)

@@ -7,13 +7,14 @@ import cats.effect.kernel.Resource
 import cats.effect.std.Dispatcher
 import cats.implicits.toFunctorOps
 import cats.implicits.toSemigroupKOps
-import utg.domain.AuthedUser
 import org.http4s.HttpRoutes
 import org.http4s.circe.JsonDecoder
 import org.http4s.server.Router
 import org.typelevel.log4cats.Logger
 import uz.scala.http4s.HttpServer
 import uz.scala.http4s.utils.Routes
+
+import utg.domain.AuthedUser
 import utg.http.Environment
 import utg.routes._
 

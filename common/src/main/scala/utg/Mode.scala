@@ -1,8 +1,8 @@
 package utg
 
-import enumeratum._
-
 import scala.collection.immutable
+
+import enumeratum._
 
 sealed trait Mode extends EnumEntry
 

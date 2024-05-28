@@ -1,8 +1,10 @@
 package utg.utils
 
 import scala.annotation.implicitNotFound
+
 import derevo.Derivation
 import derevo.NewTypeDerivation
+
 import utg.effects.IsUUID
 
 object uuid extends Derivation[IsUUID] with NewTypeDerivation[IsUUID] {

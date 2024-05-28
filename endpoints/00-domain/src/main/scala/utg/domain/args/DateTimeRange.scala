@@ -1,6 +1,7 @@
 package utg.domain.args
 
 import java.time.ZonedDateTime
+
 import io.circe.generic.JsonCodec
 
 @JsonCodec

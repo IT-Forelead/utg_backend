@@ -10,6 +10,7 @@ case class Repositories[F[_]](
     users: UsersRepository[F],
     assets: AssetsRepository[F],
     roles: RolesRepository[F],
+    vehicles: VehiclesRepository[F],
   )
 object Repositories {
   def make[F[_]: Async](
@@ -20,5 +21,6 @@ object Repositories {
       users = UsersRepository.make[F],
       assets = AssetsRepository.make[F],
       roles = RolesRepository.make[F],
+      vehicles = VehiclesRepository.make[F],
     )
 }

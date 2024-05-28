@@ -1,3 +1,8 @@
+CREATE TYPE VEHICLE_TYPE AS ENUM (
+  'bus',
+  'truck',
+  'car'
+);
 
 CREATE TABLE IF NOT EXISTS assets(
   id UUID PRIMARY KEY NOT NULL,
@@ -119,3 +124,12 @@ VALUES
     ('update_user', 'USER'),
     ('update_any_user', 'USER'),
     ('view_users', 'USER');
+
+CREATE TABLE IF NOT EXISTS vehicles (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  name VARCHAR NOT NULL,
+  registered_number VARCHAR NOT NULL UNIQUE,
+  vehicle_type VEHICLE_TYPE NOT NULL,
+  fuel_tank_volume DOUBLE PRECISION NOT NULL
+);

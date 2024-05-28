@@ -2,6 +2,7 @@ package utg.domain
 
 import java.net.URL
 import java.time.ZonedDateTime
+
 import eu.timepit.refined.types.string.NonEmptyString
 
 case class Asset(

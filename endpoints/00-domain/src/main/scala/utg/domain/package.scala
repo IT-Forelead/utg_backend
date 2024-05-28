@@ -30,6 +30,8 @@ package object domain {
   @newtype case class UserId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class AssetId(value: UUID)
+  @derive(eqv, show, uuid)
+  @newtype case class VehicleId(value: UUID)
   @newtype case class JwtAccessTokenKey(secret: NonEmptyString)
 
   object JwtAccessTokenKey {

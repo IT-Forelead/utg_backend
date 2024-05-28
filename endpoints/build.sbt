@@ -31,6 +31,7 @@ lazy val `endpoints-core` =
     .dependsOn(
       `endpoints-repos`,
       LocalProject("integration_aws-s3"),
+      LocalProject("integration_sms"),
       LocalProject("support_redis"),
     )
 

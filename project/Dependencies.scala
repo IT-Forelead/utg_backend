@@ -99,7 +99,7 @@ object Dependencies {
 
   object io {
     object scalaland {
-       lazy val chimney: ModuleID =  "io.scalaland" %% "chimney" % Versions.chimney
+      lazy val chimney: ModuleID = "io.scalaland" %% "chimney" % Versions.chimney
     }
     object circe extends LibGroup {
       private def circe(artifact: String): ModuleID =

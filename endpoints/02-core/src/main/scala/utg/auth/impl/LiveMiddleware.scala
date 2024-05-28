@@ -5,7 +5,6 @@ import cats.effect.Sync
 import cats.implicits._
 import dev.profunktor.auth.jwt.JwtAuth
 import dev.profunktor.auth.jwt.JwtToken
-import utg.domain.AuthedUser
 import org.http4s.server
 import pdi.jwt.JwtAlgorithm
 import uz.scala.redis.RedisClient
@@ -14,6 +13,7 @@ import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
 import utg.auth.AuthConfig
 import utg.auth.utils.AuthMiddleware
+import utg.domain.AuthedUser
 object LiveMiddleware {
   def make[F[_]: Sync](
       jwtConfig: AuthConfig,

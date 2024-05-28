@@ -5,7 +5,6 @@ import cats.implicits._
 import dev.profunktor.auth.jwt.JwtSecretKey
 import dev.profunktor.auth.jwt.JwtToken
 import dev.profunktor.auth.jwt.jwtEncode
-import utg.domain.auth.AuthTokens
 import io.circe.Encoder
 import pdi.jwt.JwtAlgorithm
 import pdi.jwt.JwtClaim
@@ -13,6 +12,7 @@ import uz.scala.syntax.all.genericSyntaxGenericTypeOps
 import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
 
 import utg.auth.AuthConfig
+import utg.domain.auth.AuthTokens
 import utg.effects.GenUUID
 
 trait Tokens[F[_]] {

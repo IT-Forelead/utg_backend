@@ -3,6 +3,7 @@ package utg.setup
 import uz.scala.aws.s3.AWSConfig
 import uz.scala.flyway.MigrationsConfig
 import uz.scala.http4s.HttpServerConfig
+import uz.scala.integration.sms.OperSmsConfig
 import uz.scala.redis.RedisConfig
 import uz.scala.skunk.DataBaseConfig
 
@@ -14,6 +15,7 @@ case class Config(
     auth: AuthConfig,
     redis: RedisConfig,
     awsConfig: AWSConfig,
+    opersms: OperSmsConfig,
   ) {
   lazy val migrations: MigrationsConfig = MigrationsConfig(
     hostname = database.host.value,
