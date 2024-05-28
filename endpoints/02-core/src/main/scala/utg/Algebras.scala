@@ -12,6 +12,7 @@ import utg.auth.impl.Auth
 import utg.domain.AuthedUser
 import utg.effects.Calendar
 import utg.effects.GenUUID
+import uz.scala.integration.sms.OperSmsClient
 
 case class Algebras[F[_]](
     auth: Auth[F, Option[AuthedUser]],
@@ -26,6 +27,7 @@ object Algebras {
       auth: Auth[F, Option[AuthedUser]],
       repositories: Repositories[F],
       s3Client: S3Client[F],
+      opersms: OperSmsClient[F],
     )(implicit
       P: PasswordHasher[F, SCrypt]
     ): Algebras[F] = {
@@ -34,7 +36,7 @@ object Algebras {
     Algebras[F](
       auth = auth,
       assets = assetsAlgebra,
-      users = UsersAlgebra.make[F](users, assetsAlgebra),
+      users = UsersAlgebra.make[F](users, assetsAlgebra, opersms),
       roles = RolesAlgebra.make[F](roles),
       vehicles = VehiclesAlgebra.make[F](vehicles),
     )
