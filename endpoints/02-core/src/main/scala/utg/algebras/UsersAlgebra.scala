@@ -1,6 +1,7 @@
 package utg.algebras
 
 import caliban.uploads.FileMeta
+import cats.Applicative
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.effect.std.Random
@@ -11,6 +12,8 @@ import cats.implicits.toTraverseOps
 import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
+import uz.scala.integration.sms.OperSmsClient
+import uz.scala.syntax.refined._
 
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
@@ -43,6 +46,7 @@ object UsersAlgebra {
   def make[F[_]: MonadThrow: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
       assets: AssetsAlgebra[F],
+      opersms: OperSmsClient[F],
     )(implicit
       P: PasswordHasher[F, SCrypt],
       logger: Logger[F],
@@ -80,6 +84,7 @@ object UsersAlgebra {
           _ <- usersRepository.create(accessCredentials)
           smsText =
             s"\n\nLogin: ${user.login}\nPassword: $password"
+          _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
         } yield id
 
       override def update(
