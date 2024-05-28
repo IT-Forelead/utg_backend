@@ -11,13 +11,18 @@ import eu.timepit.refined.types.string.NonEmptyString
 import org.typelevel.log4cats.Logger
 import sttp.capabilities.fs2.Fs2Streams
 import sttp.client3.SttpBackend
+import uz.scala.integration.sms.domain.DeliveryStatus
+import uz.scala.integration.sms.domain.RequestId
+import uz.scala.integration.sms.domain.SMS
+import uz.scala.integration.sms.domain.SmsResponse
+import uz.scala.integration.sms.requests.CheckStatus
+import uz.scala.integration.sms.requests.SendSms
 import uz.scala.sttp.CirceJsonResponse
 import uz.scala.sttp.SttpClient
 import uz.scala.sttp.SttpClientAuth
 import uz.scala.syntax.all.genericSyntaxStringOps
+
 import utg.Phone
-import uz.scala.integration.sms.domain.{DeliveryStatus, RequestId, SMS, SmsResponse}
-import uz.scala.integration.sms.requests.{CheckStatus, SendSms}
 
 trait OperSmsClient[F[_]] {
   def send(

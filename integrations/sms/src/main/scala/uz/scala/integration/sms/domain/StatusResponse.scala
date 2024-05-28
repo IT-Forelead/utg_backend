@@ -1,10 +1,9 @@
 package uz.scala.integration.sms.domain
 
+import StatusResponse.SmsStatus
 import io.circe.generic.JsonCodec
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.ConfiguredJsonCodec
-
-import StatusResponse.SmsStatus
 
 @JsonCodec
 case class StatusResponse(

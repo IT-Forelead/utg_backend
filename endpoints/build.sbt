@@ -68,5 +68,3 @@ aggregateProjects(
   `endpoints-server`,
   `endpoints-runner`,
 )
-
-

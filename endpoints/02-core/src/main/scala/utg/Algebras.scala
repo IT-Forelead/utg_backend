@@ -6,13 +6,13 @@ import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.aws.s3.S3Client
+import uz.scala.integration.sms.OperSmsClient
 
 import utg.algebras._
 import utg.auth.impl.Auth
 import utg.domain.AuthedUser
 import utg.effects.Calendar
 import utg.effects.GenUUID
-import uz.scala.integration.sms.OperSmsClient
 
 case class Algebras[F[_]](
     auth: Auth[F, Option[AuthedUser]],

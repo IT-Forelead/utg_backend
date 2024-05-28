@@ -3,7 +3,8 @@ package uz.scala.integration.sms.requests
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.string.NonEmptyString
 import sttp.model.Method
-import uz.scala.integration.sms.domain.{SMS, SmsResponse}
+import uz.scala.integration.sms.domain.SMS
+import uz.scala.integration.sms.domain.SmsResponse
 import uz.scala.sttp.SttpRequest
 import uz.scala.syntax.all.genericSyntaxGenericTypeOps
 import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
