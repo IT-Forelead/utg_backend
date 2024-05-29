@@ -18,7 +18,7 @@ object LiveMiddleware {
   def make[F[_]: Sync](
       jwtConfig: AuthConfig,
       redis: RedisClient[F],
-    ): server.AuthMiddleware[F, Option[AuthedUser]] = {
+    ): server.AuthMiddleware[F, AuthedUser] = {
     val userJwtAuth = JwtAuth.hmac(jwtConfig.tokenKey.secret, JwtAlgorithm.HS256)
     def findUser(token: String): F[Option[AuthedUser]] =
       OptionT(redis.get(token))
@@ -33,7 +33,7 @@ object LiveMiddleware {
         .value
         .void
 
-    AuthMiddleware(
+    AuthMiddleware[F, AuthedUser](
       userJwtAuth,
       findUser,
       destroySession,

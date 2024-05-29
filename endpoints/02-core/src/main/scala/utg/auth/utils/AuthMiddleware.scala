@@ -1,5 +1,6 @@
 package utg.auth.utils
 
+import cats.data.EitherT
 import cats.data.Kleisli
 import cats.data.OptionT
 import cats.effect.Sync
@@ -7,16 +8,14 @@ import cats.syntax.all._
 import dev.profunktor.auth.jwt._
 import org.http4s.Credentials.Token
 import org.http4s._
+import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Authorization
-import org.http4s.server
 import pdi.jwt._
-
-import utg.exception.AError
 
 object AuthMiddleware {
   val ACCESS_TOKEN_PREFIX = "ACCESS_"
   val REFRESH_TOKEN_PREFIX = "REFRESH_"
-  private def getBearerToken[F[_]: Sync]: Kleisli[F, Request[F], Option[JwtToken]] =
+  def getBearerToken[F[_]: Sync]: Kleisli[F, Request[F], Option[JwtToken]] =
     Kleisli { request =>
       Sync[F].delay(
         request
@@ -35,7 +34,7 @@ object AuthMiddleware {
       token: JwtToken,
       jwtAuth: JwtSymmetricAuth,
       removeToken: JwtToken => F[Unit],
-    ): F[Option[JwtToken]] =
+    ): F[Either[String, JwtToken]] =
     Jwt
       .decode(
         token.value,
@@ -43,39 +42,49 @@ object AuthMiddleware {
         jwtAuth.jwtAlgorithms,
       )
       .liftTo
-      .map(_ => token.some)
-      .handleErrorWith { error =>
-        removeToken(token).flatMap { _ =>
-          AError.AuthError.InvalidToken(error.getMessage).raiseError[F, Option[JwtToken]]
+      .map(_ => token.asRight[String])
+      .handleErrorWith { _ =>
+        removeToken(token).as {
+          "Invalid token".asLeft[JwtToken]
         }
       }
 
   def getAndValidateJwtToken[F[_]: Sync](
       jwtAuth: JwtSymmetricAuth,
       removeToken: JwtToken => F[Unit],
-    ): Kleisli[F, Request[F], Option[JwtToken]] =
+    ): Kleisli[F, Request[F], Either[String, JwtToken]] =
     Kleisli { request =>
-      OptionT(getBearerToken[F].apply(request)).flatMapF { token =>
-        validateJwtToken(token, jwtAuth, removeToken)
-      }.value
+      EitherT
+        .fromOptionF(getBearerToken[F].apply(request), "Bearer token not found")
+        .flatMapF { token =>
+          validateJwtToken(token, jwtAuth, removeToken)
+        }
+        .value
     }
 
   def apply[F[_]: Sync, A](
       jwtAuth: JwtSymmetricAuth,
       authenticate: String => F[Option[A]],
       removeToken: JwtToken => F[Unit],
-    ): server.AuthMiddleware[F, Option[A]] = { routes: AuthedRoutes[Option[A], F] =>
+    ): server.AuthMiddleware[F, A] = { routes: AuthedRoutes[A, F] =>
+    val dsl = new Http4sDsl[F] {}; import dsl._
+
+    val onFailure: AuthedRoutes[String, F] =
+      Kleisli(req => OptionT.liftF(Forbidden(req.context)))
+
     def getUser(
         token: JwtToken
-      ): F[Option[A]] =
-      authenticate(ACCESS_TOKEN_PREFIX + token.value)
+      ): EitherT[F, String, A] =
+      EitherT.fromOptionF(authenticate(ACCESS_TOKEN_PREFIX + token.value), "Access token expired")
 
     Kleisli { (req: Request[F]) =>
       OptionT {
-        OptionT(getAndValidateJwtToken[F](jwtAuth, removeToken).run(req))
-          .flatMapF(getUser)
-          .value
-          .flatMap(user => routes(AuthedRequest(user, req)).value)
+        EitherT(getAndValidateJwtToken[F](jwtAuth, removeToken).apply(req))
+          .flatMap(getUser)
+          .foldF(
+            err => onFailure(AuthedRequest(err, req)).value,
+            user => routes(AuthedRequest(user, req)).value,
+          )
       }
     }
   }

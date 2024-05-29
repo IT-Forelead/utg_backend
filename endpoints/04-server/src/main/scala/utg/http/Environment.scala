@@ -8,6 +8,6 @@ import utg.Algebras
 import utg.domain.AuthedUser
 case class Environment[F[_]: Async](
     config: HttpServerConfig,
-    middleware: server.AuthMiddleware[F, Option[AuthedUser]],
+    middleware: server.AuthMiddleware[F, AuthedUser],
     algebras: Algebras[F],
   )

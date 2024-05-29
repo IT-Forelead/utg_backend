@@ -1,7 +1,8 @@
 package utg.routes
 
 import cats.MonadThrow
-import cats.implicits._
+import cats.implicits.catsSyntaxApplyOps
+import cats.implicits.toFlatMapOps
 import org.http4s.AuthedRoutes
 import org.http4s.HttpRoutes
 import org.http4s.circe.JsonDecoder
@@ -15,8 +16,8 @@ import utg.domain.AuthedUser
 import utg.domain.auth.Credentials
 
 final case class AuthRoutes[F[_]: Logger: JsonDecoder: MonadThrow](
-    auth: Auth[F, Option[AuthedUser]]
-  ) extends Routes[F, Option[AuthedUser]] {
+    auth: Auth[F, AuthedUser]
+  ) extends Routes[F, AuthedUser] {
   override val path = "/auth"
 
   override val public: HttpRoutes[F] =
@@ -30,8 +31,8 @@ final case class AuthRoutes[F[_]: Logger: JsonDecoder: MonadThrow](
         auth.refresh(req).flatMap(Ok(_))
     }
 
-  override val `private`: AuthedRoutes[Option[AuthedUser], F] = AuthedRoutes.of {
-    case GET -> Root / "logout" as user =>
-      user.traverse_(u => auth.destroySession(u.login)) *> NoContent()
+  override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
+    case ar @ GET -> Root / "logout" as user =>
+      auth.destroySession(ar.req, user.login) *> NoContent()
   }
 }

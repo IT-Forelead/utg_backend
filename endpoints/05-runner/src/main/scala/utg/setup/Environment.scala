@@ -33,10 +33,10 @@ import utg.utils.ConfigLoader
 case class Environment[F[_]: Async: Logger: Dispatcher: Random](
     config: Config,
     repositories: Repositories[F],
-    auth: Auth[F, Option[AuthedUser]],
+    auth: Auth[F, AuthedUser],
     s3Client: S3Client[F],
     operSmsClient: OperSmsClient[F],
-    middleware: server.AuthMiddleware[F, Option[AuthedUser]],
+    middleware: server.AuthMiddleware[F, AuthedUser],
   ) {
   private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client, operSmsClient)
 
