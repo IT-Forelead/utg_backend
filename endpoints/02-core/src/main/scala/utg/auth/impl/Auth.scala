@@ -4,11 +4,13 @@ import cats.data.EitherT
 import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
+import dev.profunktor.auth.AuthHeaders
 import dev.profunktor.auth.jwt.JwtAuth
 import dev.profunktor.auth.jwt.JwtSymmetricAuth
 import dev.profunktor.auth.jwt.JwtToken
 import eu.timepit.refined.types.string.NonEmptyString
 import org.http4s.Request
+import org.typelevel.log4cats.Logger
 import pdi.jwt.JwtAlgorithm
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.redis.RedisClient
@@ -29,8 +31,7 @@ import utg.exception.AError.AuthError.PasswordDoesNotMatch
 
 trait Auth[F[_], A] {
   def login(credentials: Credentials): F[AuthTokens]
-  def destroySession(login: NonEmptyString): F[Unit]
-  def refresh(token: String): F[AuthTokens]
+  def destroySession(request: Request[F], login: NonEmptyString): F[Unit]
   def refresh(request: Request[F]): F[AuthTokens]
 }
 
@@ -39,8 +40,10 @@ object Auth {
       config: AuthConfig,
       findUser: NonEmptyString => F[Option[AccessCredentials[AuthedUser]]],
       redis: RedisClient[F],
-    ): Auth[F, Option[AuthedUser]] =
-    new Auth[F, Option[AuthedUser]] {
+    )(implicit
+      logger: Logger[F]
+    ): Auth[F, AuthedUser] =
+    new Auth[F, AuthedUser] {
       val tokens: Tokens[F] =
         Tokens.make[F](JwtExpire[F], config)
       val jwtAuth: JwtSymmetricAuth = JwtAuth.hmac(config.tokenKey.secret, JwtAlgorithm.HS256)
@@ -58,54 +61,26 @@ object Auth {
                 json =>
                   for {
                     tokens <- json.decodeAsF[F, AuthTokens]
-                    validTokens <- OptionT(
+                    validTokens <- EitherT(
                       AuthMiddleware
                         .validateJwtToken[F](
                           JwtToken(tokens.accessToken),
                           jwtAuth,
                           _ => redis.del(tokens.accessToken, tokens.refreshToken, credentials.login),
                         )
-                    ).cataF(
-                      createNewToken(person.data),
+                    ).foldF(
+                      error =>
+                        logger.info(s"Tokens recreated reason of that: $error") *>
+                          createNewToken(person.data),
                       _ => tokens.pure[F],
                     )
                   } yield validTokens,
               )
         }
 
-      override def refresh(token: String): F[AuthTokens] = {
-        val task = for {
-          refreshToken <- EitherT.fromOptionF(
-            AuthMiddleware
-              .validateJwtToken[F](
-                JwtToken(token),
-                jwtAuth,
-                jwtToken =>
-                  for {
-                    _ <- OptionT(redis.get(AuthMiddleware.REFRESH_TOKEN_PREFIX + jwtToken.value))
-                      .semiflatMap(_.decodeAsF[F, AuthedUser])
-                      .semiflatMap(person => redis.del(person.login))
-                      .value
-                    _ <- redis.del(AuthMiddleware.REFRESH_TOKEN_PREFIX + jwtToken.value)
-                  } yield {},
-              ),
-            "Invalid Token",
-          )
-          person <- EitherT
-            .fromOptionF(
-              redis.get(AuthMiddleware.REFRESH_TOKEN_PREFIX + refreshToken.value),
-              "Refresh token expired",
-            )
-            .semiflatMap(_.decodeAsF[F, AuthedUser])
-          _ <- EitherT.right[String](clearOldTokens(person.login))
-          tokens <- EitherT.right[String](createNewToken(person))
-        } yield tokens
-        task.leftMap(AuthError.InvalidToken.apply).rethrowT
-      }
-
       override def refresh(request: Request[F]): F[AuthTokens] = {
         val task = for {
-          refreshToken <- EitherT.fromOptionF(
+          refreshToken <- EitherT(
             AuthMiddleware
               .getAndValidateJwtToken[F](
                 jwtAuth,
@@ -118,8 +93,7 @@ object Auth {
                     _ <- redis.del(AuthMiddleware.REFRESH_TOKEN_PREFIX + token.value)
                   } yield {},
               )
-              .apply(request),
-            "Refresh token expired",
+              .apply(request)
           )
           user <- EitherT
             .fromOptionF(
@@ -133,10 +107,12 @@ object Auth {
         task.leftMap(AuthError.InvalidToken.apply).rethrowT
       }
 
-      override def destroySession(login: NonEmptyString): F[Unit] =
+      override def destroySession(request: Request[F], login: NonEmptyString): F[Unit] =
         for {
           _ <- clearOldTokens(login)
-          _ <- redis.del(login)
+          _ <- AuthHeaders
+            .getBearerToken(request)
+            .traverse_(token => redis.del(AuthMiddleware.ACCESS_TOKEN_PREFIX + token.value, login))
         } yield {}
 
       private def createNewToken(person: AuthedUser): F[AuthTokens] =

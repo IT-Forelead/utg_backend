@@ -15,7 +15,7 @@ import utg.effects.Calendar
 import utg.effects.GenUUID
 
 case class Algebras[F[_]](
-    auth: Auth[F, Option[AuthedUser]],
+    auth: Auth[F, AuthedUser],
     assets: AssetsAlgebra[F],
     users: UsersAlgebra[F],
     roles: RolesAlgebra[F],
@@ -24,7 +24,7 @@ case class Algebras[F[_]](
 
 object Algebras {
   def make[F[_]: MonadThrow: Calendar: GenUUID: Logger: Random: Lambda[M[_] => fs2.Compiler[M, M]]](
-      auth: Auth[F, Option[AuthedUser]],
+      auth: Auth[F, AuthedUser],
       repositories: Repositories[F],
       s3Client: S3Client[F],
       opersms: OperSmsClient[F],
