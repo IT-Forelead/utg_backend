@@ -24,7 +24,8 @@ object HttpModule {
     ): NonEmptyList[HttpRoutes[F]] =
     NonEmptyList
       .of[Routes[F, Option[AuthedUser]]](
-        new GraphQLRoutes[F](env.algebras)
+        new GraphQLRoutes[F](env.algebras),
+        new AuthRoutes[F](env.algebras.auth),
       )
       .map { r =>
         Router(

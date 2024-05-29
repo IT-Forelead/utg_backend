@@ -8,6 +8,7 @@ import dev.profunktor.auth.jwt.JwtAuth
 import dev.profunktor.auth.jwt.JwtSymmetricAuth
 import dev.profunktor.auth.jwt.JwtToken
 import eu.timepit.refined.types.string.NonEmptyString
+import org.http4s.Request
 import pdi.jwt.JwtAlgorithm
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.redis.RedisClient
@@ -30,6 +31,7 @@ trait Auth[F[_], A] {
   def login(credentials: Credentials): F[AuthTokens]
   def destroySession(login: NonEmptyString): F[Unit]
   def refresh(token: String): F[AuthTokens]
+  def refresh(request: Request[F]): F[AuthTokens]
 }
 
 object Auth {
@@ -97,6 +99,36 @@ object Auth {
             .semiflatMap(_.decodeAsF[F, AuthedUser])
           _ <- EitherT.right[String](clearOldTokens(person.login))
           tokens <- EitherT.right[String](createNewToken(person))
+        } yield tokens
+        task.leftMap(AuthError.InvalidToken.apply).rethrowT
+      }
+
+      override def refresh(request: Request[F]): F[AuthTokens] = {
+        val task = for {
+          refreshToken <- EitherT.fromOptionF(
+            AuthMiddleware
+              .getAndValidateJwtToken[F](
+                jwtAuth,
+                token =>
+                  for {
+                    _ <- OptionT(redis.get(AuthMiddleware.REFRESH_TOKEN_PREFIX + token))
+                      .semiflatMap(_.decodeAsF[F, AuthedUser])
+                      .semiflatMap(user => redis.del(user.login))
+                      .value
+                    _ <- redis.del(AuthMiddleware.REFRESH_TOKEN_PREFIX + token.value)
+                  } yield {},
+              )
+              .apply(request),
+            "Refresh token expired",
+          )
+          user <- EitherT
+            .fromOptionF(
+              redis.get(AuthMiddleware.REFRESH_TOKEN_PREFIX + refreshToken.value),
+              "Refresh token expired",
+            )
+            .semiflatMap(_.decodeAsF[F, AuthedUser])
+          _ <- EitherT.right[String](clearOldTokens(user.login))
+          tokens <- EitherT.right[String](createNewToken(user))
         } yield tokens
         task.leftMap(AuthError.InvalidToken.apply).rethrowT
       }
