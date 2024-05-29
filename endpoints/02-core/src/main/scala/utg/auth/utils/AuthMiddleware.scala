@@ -50,7 +50,7 @@ object AuthMiddleware {
         }
       }
 
-  private def getAndValidateJwtToken[F[_]: Sync](
+  def getAndValidateJwtToken[F[_]: Sync](
       jwtAuth: JwtSymmetricAuth,
       removeToken: JwtToken => F[Unit],
     ): Kleisli[F, Request[F], Option[JwtToken]] =
