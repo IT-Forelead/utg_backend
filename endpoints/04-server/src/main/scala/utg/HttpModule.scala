@@ -26,6 +26,7 @@ object HttpModule {
       .of[Routes[F, AuthedUser]](
         new AuthRoutes[F](env.algebras.auth),
         new UsersRoutes[F](env.algebras.users),
+        new VehiclesRoutes[F](env.algebras.vehicles),
       )
       .map { r =>
         Router(

@@ -2,36 +2,32 @@ package utg.routes
 
 import cats.MonadThrow
 import cats.implicits.toFlatMapOps
-import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.circe.JsonDecoder
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
 
-import utg.algebras.UsersAlgebra
+import utg.algebras.VehiclesAlgebra
 import utg.domain.AuthedUser
-import utg.domain.UserId
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
+import utg.domain.args.vehicles.VehicleFilters
+import utg.domain.args.vehicles.VehicleInput
 import utg.domain.enums.Privilege
 
-final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow](
-    users: UsersAlgebra[F]
+final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow](
+    vehiclesAlgebra: VehiclesAlgebra[F]
   ) extends Routes[F, AuthedUser] {
-  override val path = "/users"
+  override val path = "/vehicles"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "create" as user if user.access(Privilege.CreateUser) =>
-      ar.req.decodeR[UserInput] { create =>
-        users.create(create).flatMap(Created(_))
+      ar.req.decodeR[VehicleInput] { create =>
+        vehiclesAlgebra.create(create).flatMap(Created(_))
       }
-    case GET -> Root / UUIDVar(userId) as user if user.access(Privilege.ViewUsers) =>
-      users.findById(userId.coerce[UserId]).flatMap(Ok(_))
 
     case ar @ POST -> Root as user if user.access(Privilege.ViewUsers) =>
-      ar.req.decodeR[UserFilters] { create =>
-        users.get(create).flatMap(Ok(_))
+      ar.req.decodeR[VehicleFilters] { create =>
+        vehiclesAlgebra.get(create).flatMap(Ok(_))
       }
   }
 }

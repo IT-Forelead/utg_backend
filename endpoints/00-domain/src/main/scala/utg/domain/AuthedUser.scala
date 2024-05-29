@@ -8,6 +8,7 @@ import io.circe.refined._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.Phone
+import utg.domain.enums.Privilege
 
 @JsonCodec
 sealed trait AuthedUser {
@@ -19,6 +20,7 @@ sealed trait AuthedUser {
   val phone: Phone
   val fullName: NonEmptyString
   val assetId: Option[AssetId]
+  def access(privilege: Privilege): Boolean
 }
 object AuthedUser {
   @JsonCodec
@@ -33,5 +35,6 @@ object AuthedUser {
       assetId: Option[AssetId],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
+    def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)
   }
 }
