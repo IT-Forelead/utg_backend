@@ -40,15 +40,17 @@ object UsersRepository {
       implicit
       session: Resource[F, Session[F]]
     ): UsersRepository[F] = new UsersRepository[F] {
-    private def makeUser(userDto: dto.User): F[User] =
+    private def makeUser(userDto: dto.User): F[Option[User]] =
       RolesSql.getById.queryList(userDto.roleId).map { privileges =>
-        userDto.toDomain(
-          Role(
-            id = userDto.roleId,
-            name = privileges.head.head,
-            privileges = privileges.map(_.tail.head),
+        privileges.headOption.map { role =>
+          userDto.toDomain(
+            Role(
+              id = userDto.roleId,
+              name = role.head,
+              privileges = privileges.map(_.tail.head),
+            )
           )
-        )
+        }
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
@@ -58,25 +60,28 @@ object UsersRepository {
         .queryList(roleIds)
         .map(_.groupMap(_.head)(_.tail))
         .map(roles =>
-          dtos.map(userDto =>
-            userDto.toDomain(
-              Role(
-                id = userDto.roleId,
-                name = roles(userDto.roleId).head.head,
-                privileges = roles(userDto.roleId).map(_.tail.head),
+          dtos.flatMap { userDto =>
+            val roleList = roles.getOrElse(userDto.roleId, Nil)
+            roleList.headOption.map { role =>
+              userDto.toDomain(
+                Role(
+                  id = userDto.roleId,
+                  name = role.head,
+                  privileges = roleList.map(_.tail.head),
+                )
               )
-            )
-          )
+            }
+          }
         )
     }
 
     override def find(login: NonEmptyString): F[Option[AccessCredentials[User]]] =
-      OptionT(UsersSql.findByLogin.queryOption(login)).semiflatMap { userData =>
-        makeUser(userData.data).map(user => userData.copy(data = user))
+      OptionT(UsersSql.findByLogin.queryOption(login)).flatMap { userData =>
+        OptionT(makeUser(userData.data)).map(user => userData.copy(data = user))
       }.value
 
     override def findById(id: UserId): F[Option[User]] =
-      OptionT(UsersSql.findById.queryOption(id)).semiflatMap(makeUser).value
+      OptionT(UsersSql.findById.queryOption(id)).flatMapF(makeUser).value
 
     override def create(userAndHash: AccessCredentials[dto.User]): F[Unit] =
       UsersSql.insert.execute(userAndHash)
