@@ -13,18 +13,17 @@ private[repos] object RolesSql extends Sql[RoleId] {
   val getById: Query[RoleId, NonEmptyString *: Option[Privilege] *: EmptyTuple] =
     sql"""SELECT r.name, rp.privilege FROM roles r
           LEFT JOIN role_privileges rp on r.id = rp.role_id
-          WHERE role_id = $id""".query(nes *: privilege.opt)
+          WHERE r.id = $id""".query(nes *: privilege.opt)
 
   def getByIds(
       ids: List[RoleId]
     ): Query[ids.type, RoleId *: NonEmptyString *: Option[Privilege] *: EmptyTuple] =
     sql"""SELECT r.id, r.name, rp.privilege FROM roles r
           LEFT JOIN role_privileges rp on r.id = rp.role_id
-          WHERE role_id IN (${id.values.list(ids)})""".query(id *: nes *: privilege.opt)
+          WHERE r.id IN (${id.values.list(ids)})""".query(id *: nes *: privilege.opt)
 
   val getAll: Query[Void, dto.Role] =
-    sql"""
-      SELECT * FROM roles""".query(codec)
+    sql""" SELECT * FROM roles""".query(codec)
 
   val getAllPrivileges: Query[Void, RoleId *: Privilege *: EmptyTuple] =
     sql"""SELECT * FROM role_privileges""".query(id *: privilege)
