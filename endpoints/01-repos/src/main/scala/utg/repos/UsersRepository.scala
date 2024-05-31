@@ -47,7 +47,7 @@ object UsersRepository {
             Role(
               id = userDto.roleId,
               name = role.head,
-              privileges = privileges.map(_.tail.head),
+              privileges = privileges.flatMap(_.tail.head),
             )
           )
         }
@@ -67,7 +67,7 @@ object UsersRepository {
                 Role(
                   id = userDto.roleId,
                   name = role.head,
-                  privileges = roleList.map(_.tail.head),
+                  privileges = roleList.flatMap(_.tail.head),
                 )
               )
             }
