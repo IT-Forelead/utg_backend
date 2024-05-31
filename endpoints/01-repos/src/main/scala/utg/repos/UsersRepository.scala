@@ -4,7 +4,10 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
-import cats.implicits.{catsSyntaxApplicativeErrorId, catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps}
+import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.int8
@@ -12,6 +15,7 @@ import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.Role
@@ -55,11 +59,8 @@ object UsersRepository {
       RolesSql
         .getByIds(roleIds)
         .queryList(roleIds)
-        .flatTap(roles => println(s"Roles: $roles").pure[F])
         .map(_.groupMap(_.head)(_.tail))
         .map { roles =>
-          println(roleIds)
-          println(roles)
           dtos.flatMap { userDto =>
             val roleList = roles.getOrElse(userDto.roleId, Nil)
             roleList.headOption.map { role =>
