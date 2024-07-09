@@ -5,15 +5,15 @@ import shapeless.HNil
 import skunk._
 import skunk.codec.all.varchar
 import skunk.implicits._
+import utg.Phone
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-
 import utg.domain.UserId
 import utg.domain.args.users.UserFilters
 import utg.domain.auth.AccessCredentials
 
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: nes *: nes *: phone *: RolesSql.id *: AssetsSql.id.opt)
+    (id *: zonedDateTime *: nes *: nes *: phone *: RolesSql.id *: AssetsSql.id.opt)
       .to[dto.User]
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
     (codec *: passwordHash).map {
@@ -24,23 +24,23 @@ private[repos] object UsersSql extends Sql[UserId] {
         )
     }
 
-  val findByLogin: Query[NonEmptyString, AccessCredentials[dto.User]] =
-    sql"""SELECT id, created_at, firstname, lastname, login, phone, role_id, asset_id, password FROM users
-          WHERE login = $nes LIMIT 1""".query(accessCredentialsDecoder)
+  val findByPhone: Query[Phone, AccessCredentials[dto.User]] =
+    sql"""SELECT id, created_at, firstname, lastname, phone, role_id, asset_id, password FROM users
+          WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
   val findById: Query[UserId, dto.User] =
-    sql"""SELECT id, created_at, firstname, lastname, login, phone, role_id, asset_id FROM users
+    sql"""SELECT id, created_at, firstname, lastname, phone, role_id, asset_id FROM users
           WHERE id = $id LIMIT 1""".query(codec)
 
   def findByIds(ids: List[UserId]): Query[ids.type, dto.User] =
-    sql"""SELECT id, created_at, firstname, lastname, login, phone, role_id, asset_id FROM users
+    sql"""SELECT id, created_at, firstname, lastname, phone, role_id, asset_id FROM users
           WHERE id IN (${id.values.list(ids)})""".query(codec)
 
   val insert: Command[AccessCredentials[dto.User]] =
-    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $nes, $phone, ${RolesSql.id}, ${AssetsSql.id.opt}, $passwordHash)"""
+    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $phone, ${RolesSql.id}, ${AssetsSql.id.opt}, $passwordHash)"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
-        u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.login *:
+        u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *:
           u.data.phone *: u.data.roleId *: u.data.assetId *: u.password *: EmptyTuple
       }
 
@@ -73,7 +73,6 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.created_at AS created_at,
               u.firstname AS firstname,
               u.lastname  AS lastname,
-              u.login AS login,
               u.phone AS phone,
               u.role_id AS role_id,
               u.asset_id AS asset_id,

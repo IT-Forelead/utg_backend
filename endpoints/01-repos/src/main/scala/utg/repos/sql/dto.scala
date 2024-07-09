@@ -19,7 +19,6 @@ object dto {
       createdAt: ZonedDateTime,
       firstname: NonEmptyString,
       lastname: NonEmptyString,
-      login: NonEmptyString,
       phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],

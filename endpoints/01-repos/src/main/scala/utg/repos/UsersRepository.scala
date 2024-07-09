@@ -11,11 +11,11 @@ import cats.implicits.toFunctorOps
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.int8
+import utg.Phone
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.Role
@@ -28,7 +28,7 @@ import utg.repos.sql.UsersSql
 import utg.repos.sql.dto
 
 trait UsersRepository[F[_]] {
-  def find(login: NonEmptyString): F[Option[AccessCredentials[User]]]
+  def find(phone: Phone): F[Option[AccessCredentials[User]]]
   def findById(id: UserId): F[Option[User]]
   def create(userAndHash: AccessCredentials[dto.User]): F[Unit]
   def update(id: UserId)(update: dto.User => dto.User): F[Unit]
@@ -76,8 +76,8 @@ object UsersRepository {
         }
     }
 
-    override def find(login: NonEmptyString): F[Option[AccessCredentials[User]]] =
-      OptionT(UsersSql.findByLogin.queryOption(login)).flatMap { userData =>
+    override def find(phone: Phone): F[Option[AccessCredentials[User]]] =
+      OptionT(UsersSql.findByPhone.queryOption(phone)).flatMap { userData =>
         OptionT(makeUser(userData.data)).map(user => userData.copy(data = user))
       }.value
 
