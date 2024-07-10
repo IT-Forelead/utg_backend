@@ -32,6 +32,7 @@ trait UsersRepository[F[_]] {
   def findById(id: UserId): F[Option[User]]
   def create(userAndHash: AccessCredentials[dto.User]): F[Unit]
   def update(id: UserId)(update: dto.User => dto.User): F[Unit]
+  def delete(id: UserId): F[Unit]
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
 }
@@ -112,5 +113,8 @@ object UsersRepository {
         AError.Internal(s"User not found by id [$id]").raiseError[F, Unit],
         user => UsersSql.update.execute(update(user)),
       )
+
+    override def delete(id: UserId): F[Unit] =
+      UsersSql.delete.execute(id)
   }
 }

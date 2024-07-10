@@ -115,9 +115,7 @@ object UsersAlgebra {
         )
 
       override def delete(id: UserId): F[Unit] =
-        for {
-          _ <- usersRepository.delete(id)
-        } yield {}
+        usersRepository.delete(id)
 
     }
 }
