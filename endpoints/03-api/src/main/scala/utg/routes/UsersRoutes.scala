@@ -39,5 +39,8 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow](
 
     case GET -> Root / "roles" as user if user.access(Privilege.ViewUsers) =>
       roles.getAll.flatMap(Ok(_))
+
+    case DELETE -> Root / UUIDVar(userId) as user if user.access(Privilege.ViewUsers) =>
+      users.delete(userId.coerce[UserId]).flatMap(Ok(_))
   }
 }

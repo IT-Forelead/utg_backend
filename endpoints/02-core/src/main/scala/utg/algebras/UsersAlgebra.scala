@@ -40,6 +40,9 @@ trait UsersAlgebra[F[_]] {
       userInput: UpdateUserInput,
       fileMeta: Option[FileMeta],
     ): F[Unit]
+  def delete(
+      id: UserId,
+    ): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
 }
 object UsersAlgebra {
@@ -110,5 +113,11 @@ object UsersAlgebra {
             roleId = userRole.roleId
           )
         )
+
+      override def delete(id: UserId): F[Unit] =
+        for {
+          _ <- usersRepository.delete(id)
+        } yield {}
+
     }
 }

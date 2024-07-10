@@ -6,10 +6,11 @@ import skunk._
 import skunk.codec.all.varchar
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-
 import utg.domain.UserId
 import utg.domain.args.users.UserFilters
 import utg.domain.auth.AccessCredentials
+
+import java.util.UUID
 
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
@@ -81,4 +82,7 @@ private[repos] object UsersSql extends Sql[UserId] {
             FROM users u"""
     baseQuery(Void).whereAndOpt(searchFilter(filters))
   }
+
+  def delete: Command[UserId] =
+    sql"""DELETE FROM users u WHERE u.id = $id""".command
 }
