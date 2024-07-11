@@ -7,7 +7,7 @@ import skunk.codec.all.varchar
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import utg.domain.UserId
-import utg.domain.args.users.UserFilters
+import utg.domain.args.users.{UserFilters, UserSorting}
 import utg.domain.auth.AccessCredentials
 
 import java.util.UUID
@@ -67,6 +67,16 @@ private[repos] object UsersSql extends Sql[UserId] {
       filters.name.map(s => s"%$s%").map(sql"u.firstname + ' ' + u.lastname ILIKE $varchar"),
     )
 
+  private def orderBy(filters: UserFilters): Fragment[Void] = {
+    val sorting: String = filters.sortBy.fold("u.created_at") {
+      case UserSorting.CreatedAt => "u.created_at"
+      case UserSorting.FirstName => "u.firstname"
+      case UserSorting.LastName => "u.lastname"
+      case UserSorting.Role => "u.role_id"
+    }
+    sql""" ORDER BY #$sorting #${filters.sortOrder.fold("")(_.value)}"""
+  }
+
   def select(filters: UserFilters): AppliedFragment = {
     val baseQuery: Fragment[Void] =
       sql"""SELECT 
@@ -80,7 +90,7 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.asset_id AS asset_id,
               COUNT(*) OVER() AS total
             FROM users u"""
-    baseQuery(Void).whereAndOpt(searchFilter(filters))
+    baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)
   }
 
   def delete: Command[UserId] =
