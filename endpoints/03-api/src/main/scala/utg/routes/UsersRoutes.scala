@@ -8,13 +8,11 @@ import org.http4s.circe.JsonDecoder
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
-
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
+import utg.domain.args.users.{UpdateUserInput, UserFilters, UserInput}
 import utg.domain.enums.Privilege
 
 final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow](
@@ -40,7 +38,12 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow](
     case GET -> Root / "roles" as user if user.access(Privilege.ViewUsers) =>
       roles.getAll.flatMap(Ok(_))
 
-    case DELETE -> Root / UUIDVar(userId) as user if user.access(Privilege.ViewUsers) =>
+    case DELETE -> Root / UUIDVar(userId) as user if user.access(Privilege.CreateUser) =>
       users.delete(userId.coerce[UserId]).flatMap(Ok(_))
+
+    case ar @ POST -> Root / UUIDVar(userId) as user if user.access(Privilege.UpdateUser) =>
+      ar.req.decodeR[UpdateUserInput] { update =>
+        users.update(userId.coerce[UserId], update).flatMap(Ok(_))
+      }
   }
 }

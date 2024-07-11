@@ -38,7 +38,7 @@ trait UsersAlgebra[F[_]] {
   def update(
       id: UserId,
       userInput: UpdateUserInput,
-      fileMeta: Option[FileMeta],
+      fileMeta: Option[FileMeta] = None,
     ): F[Unit]
   def delete(
       id: UserId,
