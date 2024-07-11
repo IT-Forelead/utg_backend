@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
-  login VARCHAR NOT NULL UNIQUE,
   phone VARCHAR NOT NULL,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -79,7 +78,6 @@ INSERT INTO
     "created_at",
     "firstname",
     "lastname",
-    "login",
     "phone",
     "role_id",
     "password"
@@ -90,7 +88,6 @@ VALUES
     '2022-11-07T06:43:01.089Z',
     'Admin',
     'Super Manager',
-    'super_manager',
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
     '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY='

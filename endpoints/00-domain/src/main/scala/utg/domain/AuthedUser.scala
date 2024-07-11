@@ -16,7 +16,6 @@ sealed trait AuthedUser {
   val role: Role
   val firstname: NonEmptyString
   val lastname: NonEmptyString
-  val login: NonEmptyString
   val phone: Phone
   val fullName: NonEmptyString
   val assetId: Option[AssetId]
@@ -30,7 +29,6 @@ object AuthedUser {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       role: Role,
-      login: NonEmptyString,
       phone: Phone,
       assetId: Option[AssetId],
     ) extends AuthedUser {

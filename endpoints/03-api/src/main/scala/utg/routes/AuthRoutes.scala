@@ -33,6 +33,6 @@ final case class AuthRoutes[F[_]: Logger: JsonDecoder: MonadThrow](
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ GET -> Root / "logout" as user =>
-      auth.destroySession(ar.req, user.login) *> NoContent()
+      auth.destroySession(ar.req, user.phone) *> NoContent()
   }
 }

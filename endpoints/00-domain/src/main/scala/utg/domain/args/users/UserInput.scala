@@ -12,6 +12,5 @@ case class UserInput(
     roleId: RoleId,
     firstname: NonEmptyString,
     lastname: NonEmptyString,
-    login: NonEmptyString,
     phone: Phone,
   )
