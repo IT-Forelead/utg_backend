@@ -1,17 +1,22 @@
 package utg.repos.sql
 
-import java.time.ZonedDateTime
+import cats.effect.{Concurrent, Sync}
+import com.github.tototoshi.csv.CSVWriter
 
+import java.time.ZonedDateTime
 import eu.timepit.refined.types.string.NonEmptyString
+import fs2.text.utf8
 import io.scalaland.chimney.dsl._
 import uz.scala.syntax.refined._
-
 import utg.Phone
 import utg.domain
 import utg.domain.AssetId
 import utg.domain.AuthedUser
 import utg.domain.RoleId
 import utg.domain.UserId
+
+import java.io.StringWriter
+import java.time.format.DateTimeFormatter
 
 object dto {
   case class User(
@@ -30,6 +35,17 @@ object dto {
         .withFieldConst(_.role, role)
         .withFieldConst(_.phone, phone)
         .transform
+
+    def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
+      date.format(DateTimeFormatter.ofPattern(format))
+
+    private def toCSVField: List[String] =
+      List[String](
+        ldtToString(createdAt),
+        firstname.value,
+        lastname.value,
+        phone.value,
+      )
   }
 
   object User {
@@ -38,6 +54,29 @@ object dto {
         .into[User]
         .withFieldConst(_.roleId, user.role.id)
         .transform
+
+    private val CsvHeaders: List[String] =
+      List(
+        "Created Date",
+        "First Name",
+        "Last Name",
+        "Phone",
+      )
+
+    def makeCsv[F[_]: Concurrent: Sync]: fs2.Pipe[F, dto.User, Byte] =
+      report =>
+        fs2
+          .Stream
+          .fromIterator[F](List(CsvHeaders).map(writeAsCsv).iterator, 128)
+          .merge(report.map(_.toCSVField).map(writeAsCsv))
+          .through(utf8.encode)
+
+    def writeAsCsv(rows: List[String]): String = {
+      val writer = new StringWriter()
+      val csvWriter = CSVWriter.open(writer)
+      csvWriter.writeRow(rows)
+      writer.toString
+    }
   }
 
   case class Role(id: RoleId, name: NonEmptyString)

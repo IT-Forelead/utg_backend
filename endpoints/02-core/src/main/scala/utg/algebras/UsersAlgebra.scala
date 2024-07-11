@@ -14,14 +14,10 @@ import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.syntax.refined._
-
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
-import utg.domain.args.users.UpdateUserInput
-import utg.domain.args.users.UpdateUserRole
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
+import utg.domain.args.users.{UpdateUserInput, UpdateUserRole, UserFilters, UserInput}
 import utg.domain.auth.AccessCredentials
 import utg.effects.Calendar
 import utg.effects.GenUUID
@@ -32,6 +28,7 @@ import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
   def get(filters: UserFilters): F[ResponseData[User]]
+  def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]]
   def findById(id: UserId): F[Option[User]]
   def findByIds(ids: List[UserId]): F[Map[UserId, User]]
   def create(userInput: UserInput): F[UserId]
@@ -46,11 +43,12 @@ trait UsersAlgebra[F[_]] {
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
 }
 object UsersAlgebra {
-  def make[F[_]: MonadThrow: Calendar: GenUUID: Random](
+  def make[F[_]: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
       assets: AssetsAlgebra[F],
       opersms: OperSmsClient[F],
     )(implicit
+      F: MonadThrow[F],
       P: PasswordHasher[F, SCrypt],
       logger: Logger[F],
     ): UsersAlgebra[F] =
@@ -116,6 +114,11 @@ object UsersAlgebra {
 
       override def delete(id: UserId): F[Unit] =
         usersRepository.delete(id)
+
+      override def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]] =
+        F.pure {
+          usersRepository.getAsStream(filters)
+        }
 
     }
 }

@@ -35,6 +35,7 @@ trait UsersRepository[F[_]] {
   def delete(id: UserId): F[Unit]
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
+  def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User]
 }
 
 object UsersRepository {
@@ -116,5 +117,10 @@ object UsersRepository {
 
     override def delete(id: UserId): F[Unit] =
       UsersSql.delete.execute(id)
+
+    override def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User] = {
+      val af = UsersSql.select(filters).paginateOpt(filters.limit.map(_.value), filters.offset.map(_.value))
+      af.fragment.query(UsersSql.codec *: int8).queryStream(af.argument).map(_._1)
+    }
   }
 }
