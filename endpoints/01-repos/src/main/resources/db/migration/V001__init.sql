@@ -28,6 +28,49 @@ CREATE TABLE IF NOT EXISTS role_privileges (
   UNIQUE (role_id, privilege)
 );
 
+CREATE TABLE IF NOT EXISTS regions
+(
+    id      UUID PRIMARY KEY,
+    name    VARCHAR NOT NULL,
+    deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+INSERT INTO "regions" ("id", "name")
+VALUES ('4fcb3bc7-8459-45dc-a380-10f995e15ad8', 'Андижон вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('122a0d83-fb8e-4dbf-a65d-3ee6a0688037', 'Бухоро вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('d51b9830-7cb6-4420-a07e-c8df78d90447', 'Фарғона вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('a4ec39b1-dfad-45e1-a12c-7986ffa4e4bf', 'Жиззах вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('2d27b575-f952-4c93-8f9e-02c89758cbc7', 'Наманган вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('51b00d57-1b99-47c5-b89c-8d1fab5825f6', 'Навоий вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('f4bbb8aa-680f-4220-9079-b460e9f2e573', 'Қашқадарё вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('425ff71e-57dd-459f-a831-cf57b30a7345', 'Самарқанд вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('3acfc29c-3e14-4beb-96f6-20f025e431ab', 'Сирдарё вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('54b834ee-0df9-465e-ad34-be1834b491d0', 'Сурхондарё вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('3b316182-e55c-4e03-8811-052fcd888236', 'Тошкент вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('ad514b71-3096-4be5-a455-d87abbb081b2', 'Хоразм вилояти');
+INSERT INTO "regions" ("id", "name")
+VALUES ('8b88eb6c-24e1-4ecd-b944-8605d28da975', 'Қорақалпоғистон Республикаси');
+INSERT INTO "regions" ("id", "name")
+VALUES ('dac35ec3-a904-42d7-af20-5d7e853fe1f6', 'Тошкент шаҳри');
+
+CREATE TABLE IF NOT EXISTS branches (
+  id UUID PRIMARY KEY NOT NULL,
+  name VARCHAR NOT NULL,
+  code VARCHAR NOT NULL UNIQUE,
+  region_id UUID NOT NULL CONSTRAINT fk_region_id REFERENCES regions (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY NOT NULL,

@@ -19,6 +19,8 @@ case class Algebras[F[_]](
     assets: AssetsAlgebra[F],
     users: UsersAlgebra[F],
     roles: RolesAlgebra[F],
+    regions: RegionsAlgebra[F],
+    branches: BranchesAlgebra[F],
     vehicles: VehiclesAlgebra[F],
   )
 
@@ -31,13 +33,15 @@ object Algebras {
     )(implicit
       P: PasswordHasher[F, SCrypt]
     ): Algebras[F] = {
-    val Repositories(users, assets, roles, vehicles) = repositories
+    val Repositories(users, assets, roles, regions, branches, vehicles) = repositories
     val assetsAlgebra = AssetsAlgebra.make[F](assets, s3Client)
     Algebras[F](
       auth = auth,
       assets = assetsAlgebra,
       users = UsersAlgebra.make[F](users, assetsAlgebra, opersms),
       roles = RolesAlgebra.make[F](roles),
+      regions = RegionsAlgebra.make[F](regions),
+      branches = BranchesAlgebra.make[F](branches, regions),
       vehicles = VehiclesAlgebra.make[F](vehicles),
     )
   }
