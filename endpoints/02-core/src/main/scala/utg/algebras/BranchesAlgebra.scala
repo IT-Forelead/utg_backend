@@ -3,11 +3,10 @@ package utg.algebras
 import cats.MonadThrow
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
-import shapeless.syntax.std.tuple.productTupleOps
 
 import utg.domain.Branch
 import utg.domain.BranchId
-import utg.domain.args.branches.BranchInput
+import utg.domain.args.branches._
 import utg.effects.GenUUID
 import utg.repos.BranchesRepository
 import utg.repos.RegionsRepository
@@ -17,6 +16,7 @@ import utg.utils.ID
 trait BranchesAlgebra[F[_]] {
   def create(input: BranchInput): F[BranchId]
   def getBranches: F[List[Branch]]
+  def update(input: UpdateBranchInput): F[Unit]
 }
 
 object BranchesAlgebra {
@@ -50,5 +50,14 @@ object BranchesAlgebra {
             )
           }
         } yield roles
+
+      override def update(input: UpdateBranchInput): F[Unit] =
+        branchesRepository.update(input.id)(
+          _.copy(
+            name = input.name,
+            code = input.code,
+            regionId = input.regionId,
+          )
+        )
     }
 }
