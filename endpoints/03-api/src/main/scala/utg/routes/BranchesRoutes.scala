@@ -10,7 +10,7 @@ import uz.scala.http4s.utils.Routes
 
 import utg.algebras.BranchesAlgebra
 import utg.domain.AuthedUser
-import utg.domain.args.branches.BranchInput
+import utg.domain.args.branches._
 import utg.domain.enums.Privilege
 
 final case class BranchesRoutes[F[_]: JsonDecoder: MonadThrow](
@@ -26,5 +26,10 @@ final case class BranchesRoutes[F[_]: JsonDecoder: MonadThrow](
 
     case GET -> Root as user if user.access(Privilege.ViewUsers) =>
       branchesAlgebra.getBranches.flatMap(Ok(_))
+
+    case ar @ PUT -> Root as user if user.access(Privilege.CreateUser) =>
+      ar.req.decodeR[UpdateBranchInput] { update =>
+        branchesAlgebra.update(update).flatMap(Accepted(_))
+      }
   }
 }
