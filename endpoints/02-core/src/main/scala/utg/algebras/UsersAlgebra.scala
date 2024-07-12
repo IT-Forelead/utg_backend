@@ -72,7 +72,6 @@ object UsersAlgebra {
             firstname = userInput.firstname,
             lastname = userInput.lastname,
             roleId = userInput.roleId,
-            login = userInput.login,
             phone = userInput.phone,
             assetId = None,
           )
@@ -83,7 +82,7 @@ object UsersAlgebra {
           accessCredentials = AccessCredentials(user, hash)
           _ <- usersRepository.create(accessCredentials)
           smsText =
-            s"\n\nLogin: ${user.login}\nPassword: $password"
+            s"\n\nPhone: ${user.phone}\nPassword: $password"
           _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
         } yield id
 

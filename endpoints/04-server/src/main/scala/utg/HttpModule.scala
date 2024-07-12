@@ -27,6 +27,8 @@ object HttpModule {
         new AuthRoutes[F](env.algebras.auth),
         new UsersRoutes[F](env.algebras.users, env.algebras.roles),
         new VehiclesRoutes[F](env.algebras.vehicles),
+        new RegionsRoutes[F](env.algebras.regions),
+        new BranchesRoutes[F](env.algebras.branches),
       )
       .map { r =>
         Router(
