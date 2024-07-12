@@ -5,9 +5,11 @@ import shapeless.HNil
 import skunk._
 import skunk.codec.all.varchar
 import skunk.implicits._
+import tsec.passwordhashers.PasswordHash
+import tsec.passwordhashers.jca.SCrypt
 import utg.Phone
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-import utg.domain.UserId
+import utg.domain.{UserId, auth}
 import utg.domain.args.users.UserFilters
 import utg.domain.auth.AccessCredentials
 
@@ -57,6 +59,16 @@ private[repos] object UsersSql extends Sql[UserId] {
       .contramap {
         case user: dto.User =>
           user.firstname *: user.lastname *: user.phone *: user.roleId *: user.assetId *: user.id *: EmptyTuple
+      }
+
+  val changePassword: Command[AccessCredentials[dto.User]] =
+    sql"""UPDATE users
+       SET password = $passwordHash,
+       WHERE phone = $phone
+     """
+      .command
+      .contramap { (u: AccessCredentials[dto.User]) =>
+        u.password *: u.data.phone *: EmptyTuple
       }
 
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =

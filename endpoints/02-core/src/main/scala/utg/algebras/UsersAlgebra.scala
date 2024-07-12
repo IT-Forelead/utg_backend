@@ -14,20 +14,16 @@ import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.syntax.refined._
-
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
-import utg.domain.args.users.UpdateUserInput
-import utg.domain.args.users.UpdateUserRole
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
-import utg.domain.auth.AccessCredentials
+import utg.domain.args.users.{UpdateUserInput, UpdateUserRole, UserFilters, UserInput}
+import utg.domain.auth.{AccessCredentials, Credentials}
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
 import utg.repos.UsersRepository
-import utg.repos.sql.dto
+import utg.repos.sql.{dto, passwordHash}
 import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
@@ -41,6 +37,7 @@ trait UsersAlgebra[F[_]] {
       fileMeta: Option[FileMeta],
     ): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
+  def changePassword(changePassword: Credentials): F[Unit]
 }
 object UsersAlgebra {
   def make[F[_]: MonadThrow: Calendar: GenUUID: Random](
@@ -109,5 +106,15 @@ object UsersAlgebra {
             roleId = userRole.roleId
           )
         )
+
+      override def changePassword(changePassword: Credentials): F[Unit] =
+        for {
+          hash <- SCrypt.hashpw[F](changePassword.password)
+          _ <- usersRepository.changePassword(changePassword.phone)(
+            _.copy(
+              password = hash
+            )
+          )
+        } yield {}
     }
 }
