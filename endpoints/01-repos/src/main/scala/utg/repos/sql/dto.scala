@@ -28,6 +28,7 @@ object dto {
       createdAt: ZonedDateTime,
       firstname: NonEmptyString,
       lastname: NonEmptyString,
+      middleName: Option[NonEmptyString],
       phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],

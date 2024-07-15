@@ -12,6 +12,7 @@ case class UserInput(
     roleId: RoleId,
     firstname: NonEmptyString,
     lastname: NonEmptyString,
+    middleName: Option[NonEmptyString],
     phone: Phone,
     branchCode: NonEmptyString,
   )

@@ -28,6 +28,7 @@ object AuthedUser {
       createdAt: ZonedDateTime,
       firstname: NonEmptyString,
       lastname: NonEmptyString,
+      middleName: Option[NonEmptyString],
       role: Role,
       phone: Phone,
       assetId: Option[AssetId],
