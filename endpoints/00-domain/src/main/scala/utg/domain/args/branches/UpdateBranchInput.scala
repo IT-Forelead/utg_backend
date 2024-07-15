@@ -11,6 +11,5 @@ import utg.domain.RegionId
 case class UpdateBranchInput(
     id: BranchId,
     name: NonEmptyString,
-    code: NonEmptyString,
     regionId: RegionId,
   )

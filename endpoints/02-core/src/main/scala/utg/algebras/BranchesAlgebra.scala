@@ -57,7 +57,6 @@ object BranchesAlgebra {
         branchesRepository.update(input.id)(
           _.copy(
             name = input.name,
-            code = input.code,
             regionId = input.regionId,
           )
         )
