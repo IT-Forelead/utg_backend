@@ -19,7 +19,7 @@ import java.util.UUID
 
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: nes *: phone *: RolesSql.id *: AssetsSql.id.opt)
+    (id *: zonedDateTime *: nes *: nes *: phone *: RolesSql.id *: AssetsSql.id.opt *: nes.opt)
       .to[dto.User]
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
     (codec *: passwordHash).map {
@@ -43,11 +43,11 @@ private[repos] object UsersSql extends Sql[UserId] {
           WHERE id IN (${id.values.list(ids)})""".query(codec)
 
   val insert: Command[AccessCredentials[dto.User]] =
-    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $phone, ${RolesSql.id}, ${AssetsSql.id.opt}, $passwordHash)"""
+    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, $phone, ${RolesSql.id}, ${AssetsSql.id.opt}, $passwordHash, ${nes.opt})"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *:
-          u.data.phone *: u.data.roleId *: u.data.assetId *: u.password *: EmptyTuple
+          u.data.phone *: u.data.roleId *: u.data.assetId *: u.password *: u.data.branchCode *: EmptyTuple
       }
 
   val update: Command[dto.User] =
@@ -102,6 +102,7 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.phone AS phone,
               u.role_id AS role_id,
               u.asset_id AS asset_id,
+              u.branch_code AS branch_code,
               COUNT(*) OVER() AS total
             FROM users u"""
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)

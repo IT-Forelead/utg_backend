@@ -31,6 +31,7 @@ object AuthedUser {
       role: Role,
       phone: Phone,
       assetId: Option[AssetId],
+      branchCode: Option[NonEmptyString],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)

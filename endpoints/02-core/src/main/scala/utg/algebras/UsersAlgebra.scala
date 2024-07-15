@@ -76,6 +76,7 @@ object UsersAlgebra {
             roleId = userInput.roleId,
             phone = userInput.phone,
             assetId = None,
+            branchCode = Option(userInput.branchCode),
           )
           password <- randomStr[F](8)
 

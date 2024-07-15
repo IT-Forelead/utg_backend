@@ -13,4 +13,5 @@ case class UserInput(
     firstname: NonEmptyString,
     lastname: NonEmptyString,
     phone: Phone,
+    branchCode: NonEmptyString,
   )
