@@ -74,6 +74,9 @@ object Dependencies {
       object cb372 {
         lazy val retry: ModuleID = "com.github.cb372" %% "cats-retry" % Versions.`cats-retry`
       }
+      object tototoshi {
+        lazy val scalaCsv: ModuleID = "com.github.tototoshi" % "scala-csv_2.13" % "1.3.10"
+      }
     }
     object beachape {
       object enumeratum extends LibGroup {

@@ -32,6 +32,7 @@ lazy val common =
             org.typelevel.cats.core,
             org.typelevel.cats.effect,
             com.github.cb372.retry,
+            com.github.tototoshi.scalaCsv,
             org.typelevel.log4cats,
             ch.qos.logback,
             dev.optics.monocle,
