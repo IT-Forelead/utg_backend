@@ -1,12 +1,20 @@
 package utg.repos.sql
 
 import java.time.ZonedDateTime
+
 import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl._
 import uz.scala.syntax.refined._
+
 import utg.Phone
 import utg.domain
-import utg.domain.{AssetId, AuthedUser, BranchId, RegionId, RoleId, UserId}
+import utg.domain.AssetId
+import utg.domain.AuthedUser
+import utg.domain.BranchId
+import utg.domain.RegionId
+import utg.domain.RoleId
+import utg.domain.UserId
+import utg.domain.VehicleCategoryId
 
 object dto {
   case class User(
@@ -45,6 +53,11 @@ object dto {
       name: NonEmptyString,
       code: NonEmptyString,
       regionId: RegionId,
+      deleted: Boolean = false,
+    )
+  case class VehicleCategory(
+      id: VehicleCategoryId,
+      name: NonEmptyString,
       deleted: Boolean = false,
     )
 }
