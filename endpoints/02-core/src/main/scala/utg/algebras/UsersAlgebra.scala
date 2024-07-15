@@ -14,40 +14,42 @@ import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.syntax.refined._
-
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
-import utg.domain.args.users.UpdateUserInput
-import utg.domain.args.users.UpdateUserRole
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
-import utg.domain.auth.AccessCredentials
+import utg.domain.args.users.{UpdateUserInput, UpdateUserRole, UserFilters, UserInput}
+import utg.domain.auth.{AccessCredentials, Credentials}
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
 import utg.repos.UsersRepository
-import utg.repos.sql.dto
+import utg.repos.sql.{dto, passwordHash}
 import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
   def get(filters: UserFilters): F[ResponseData[User]]
+  def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]]
   def findById(id: UserId): F[Option[User]]
   def findByIds(ids: List[UserId]): F[Map[UserId, User]]
   def create(userInput: UserInput): F[UserId]
   def update(
       id: UserId,
       userInput: UpdateUserInput,
-      fileMeta: Option[FileMeta],
+      fileMeta: Option[FileMeta] = None,
+    ): F[Unit]
+  def delete(
+      id: UserId,
     ): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
+  def changePassword(changePassword: Credentials): F[Unit]
 }
 object UsersAlgebra {
-  def make[F[_]: MonadThrow: Calendar: GenUUID: Random](
+  def make[F[_]: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
       assets: AssetsAlgebra[F],
       opersms: OperSmsClient[F],
     )(implicit
+      F: MonadThrow[F],
       P: PasswordHasher[F, SCrypt],
       logger: Logger[F],
     ): UsersAlgebra[F] =
@@ -109,5 +111,24 @@ object UsersAlgebra {
             roleId = userRole.roleId
           )
         )
+
+      override def changePassword(changePassword: Credentials): F[Unit] =
+        for {
+          hash <- SCrypt.hashpw[F](changePassword.password)
+          _ <- usersRepository.changePassword(changePassword.phone)(
+            _.copy(
+              password = hash
+            )
+          )
+        } yield {}
+
+      override def delete(id: UserId): F[Unit] =
+        usersRepository.delete(id)
+
+      override def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]] =
+        F.pure {
+          usersRepository.getAsStream(filters)
+        }
+
     }
 }

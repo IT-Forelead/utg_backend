@@ -17,9 +17,7 @@ import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 import utg.domain.AuthedUser.User
-import utg.domain.ResponseData
-import utg.domain.Role
-import utg.domain.UserId
+import utg.domain.{ResponseData, Role, UserId, auth}
 import utg.domain.args.users.UserFilters
 import utg.domain.auth.AccessCredentials
 import utg.exception.AError
@@ -32,8 +30,11 @@ trait UsersRepository[F[_]] {
   def findById(id: UserId): F[Option[User]]
   def create(userAndHash: AccessCredentials[dto.User]): F[Unit]
   def update(id: UserId)(update: dto.User => dto.User): F[Unit]
+  def changePassword(phone: Phone)(update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]): F[Unit]
+  def delete(id: UserId): F[Unit]
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
+  def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User]
 }
 
 object UsersRepository {
@@ -112,5 +113,19 @@ object UsersRepository {
         AError.Internal(s"User not found by id [$id]").raiseError[F, Unit],
         user => UsersSql.update.execute(update(user)),
       )
+
+    override def changePassword(phone: Phone)(update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]): F[Unit] =
+      OptionT(UsersSql.findByPhone.queryOption(phone)).cataF(
+        AError.Internal(s"User not found by phone [$phone]").raiseError[F, Unit],
+        user => UsersSql.changePassword.execute(update(user)),
+      )
+
+    override def delete(id: UserId): F[Unit] =
+      UsersSql.delete.execute(id)
+
+    override def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User] = {
+      val af = UsersSql.select(filters).paginateOpt(filters.limit.map(_.value), filters.offset.map(_.value))
+      af.fragment.query(UsersSql.codec *: int8).queryStream(af.argument).map(_._1)
+    }
   }
 }
