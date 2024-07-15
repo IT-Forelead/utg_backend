@@ -20,14 +20,12 @@ import uz.scala.flyway.Migrations
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.redis.RedisClient
 import uz.scala.skunk.SkunkSession
-
-import utg.Algebras
-import utg.Repositories
+import utg.{Algebras, Phone, Repositories}
 import utg.auth.impl.Auth
 import utg.auth.impl.LiveMiddleware
 import utg.domain.AuthedUser
 import utg.domain.auth.AccessCredentials
-import utg.http.{ Environment => ServerEnvironment }
+import utg.http.{Environment => ServerEnvironment}
 import utg.utils.ConfigLoader
 
 case class Environment[F[_]: Async: Logger: Dispatcher: Random](
@@ -51,8 +49,8 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
 object Environment {
   private def findUser[F[_]: Monad](
       repositories: Repositories[F]
-    ): NonEmptyString => F[Option[AccessCredentials[AuthedUser]]] = login =>
-    OptionT(repositories.users.find(login))
+    ): Phone => F[Option[AccessCredentials[AuthedUser]]] = phone =>
+    OptionT(repositories.users.find(phone))
       .map(identity[AccessCredentials[AuthedUser]])
       .value
 

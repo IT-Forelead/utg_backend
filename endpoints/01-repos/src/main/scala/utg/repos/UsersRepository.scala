@@ -11,15 +11,13 @@ import cats.implicits.toFunctorOps
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.int8
+import utg.Phone
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg.domain.AuthedUser.User
-import utg.domain.ResponseData
-import utg.domain.Role
-import utg.domain.UserId
+import utg.domain.{ResponseData, Role, UserId, auth}
 import utg.domain.args.users.UserFilters
 import utg.domain.auth.AccessCredentials
 import utg.exception.AError
@@ -28,10 +26,11 @@ import utg.repos.sql.UsersSql
 import utg.repos.sql.dto
 
 trait UsersRepository[F[_]] {
-  def find(login: NonEmptyString): F[Option[AccessCredentials[User]]]
+  def find(phone: Phone): F[Option[AccessCredentials[User]]]
   def findById(id: UserId): F[Option[User]]
   def create(userAndHash: AccessCredentials[dto.User]): F[Unit]
   def update(id: UserId)(update: dto.User => dto.User): F[Unit]
+  def changePassword(phone: Phone)(update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]): F[Unit]
   def delete(id: UserId): F[Unit]
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
@@ -78,8 +77,8 @@ object UsersRepository {
         }
     }
 
-    override def find(login: NonEmptyString): F[Option[AccessCredentials[User]]] =
-      OptionT(UsersSql.findByLogin.queryOption(login)).flatMap { userData =>
+    override def find(phone: Phone): F[Option[AccessCredentials[User]]] =
+      OptionT(UsersSql.findByPhone.queryOption(phone)).flatMap { userData =>
         OptionT(makeUser(userData.data)).map(user => userData.copy(data = user))
       }.value
 
@@ -113,6 +112,12 @@ object UsersRepository {
       OptionT(UsersSql.findById.queryOption(id)).cataF(
         AError.Internal(s"User not found by id [$id]").raiseError[F, Unit],
         user => UsersSql.update.execute(update(user)),
+      )
+
+    override def changePassword(phone: Phone)(update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]): F[Unit] =
+      OptionT(UsersSql.findByPhone.queryOption(phone)).cataF(
+        AError.Internal(s"User not found by phone [$phone]").raiseError[F, Unit],
+        user => UsersSql.changePassword.execute(update(user)),
       )
 
     override def delete(id: UserId): F[Unit] =

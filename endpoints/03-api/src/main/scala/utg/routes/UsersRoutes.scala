@@ -3,6 +3,7 @@ package utg.routes
 import cats.MonadThrow
 import cats.implicits.{toFlatMapOps, toFunctorOps}
 import io.estatico.newtype.ops.toCoercibleIdOps
+import org.http4s.{AuthedRoutes, HttpRoutes}
 import org.http4s.{AuthedRoutes, Charset, Headers, MediaType, Response}
 import org.http4s.circe.JsonDecoder
 import org.http4s.headers.{`Content-Disposition`, `Content-Type`}
@@ -14,6 +15,9 @@ import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
 import utg.domain.args.users.{UpdateUserInput, UserFilters, UserInput}
+import utg.domain.args.users.UserFilters
+import utg.domain.args.users.UserInput
+import utg.domain.auth.Credentials
 import utg.domain.enums.Privilege
 import org.typelevel.ci.CIStringSyntax
 import utg.repos.sql.dto.User
@@ -41,6 +45,14 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
         `Content-Type`(MediaType.text.csv, Charset.`UTF-8`),
       ),
     )
+
+  override val public: HttpRoutes[F] =
+    HttpRoutes.of[F] {
+      case req @ POST -> Root / "change-password" =>
+        req.decodeR[Credentials] { credentials =>
+          users.changePassword(credentials).flatMap(Ok(_))
+        }
+    }
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "create" as user if user.access(Privilege.CreateUser) =>

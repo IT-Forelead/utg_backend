@@ -18,12 +18,12 @@ import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
 import utg.domain.args.users.{UpdateUserInput, UpdateUserRole, UserFilters, UserInput}
-import utg.domain.auth.AccessCredentials
+import utg.domain.auth.{AccessCredentials, Credentials}
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
 import utg.repos.UsersRepository
-import utg.repos.sql.dto
+import utg.repos.sql.{dto, passwordHash}
 import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
@@ -41,6 +41,7 @@ trait UsersAlgebra[F[_]] {
       id: UserId,
     ): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
+  def changePassword(changePassword: Credentials): F[Unit]
 }
 object UsersAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
@@ -73,7 +74,6 @@ object UsersAlgebra {
             firstname = userInput.firstname,
             lastname = userInput.lastname,
             roleId = userInput.roleId,
-            login = userInput.login,
             phone = userInput.phone,
             assetId = None,
           )
@@ -84,7 +84,7 @@ object UsersAlgebra {
           accessCredentials = AccessCredentials(user, hash)
           _ <- usersRepository.create(accessCredentials)
           smsText =
-            s"\n\nLogin: ${user.login}\nPassword: $password"
+            s"\n\nPhone: ${user.phone}\nPassword: $password"
           _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
         } yield id
 
@@ -111,6 +111,16 @@ object UsersAlgebra {
             roleId = userRole.roleId
           )
         )
+
+      override def changePassword(changePassword: Credentials): F[Unit] =
+        for {
+          hash <- SCrypt.hashpw[F](changePassword.password)
+          _ <- usersRepository.changePassword(changePassword.phone)(
+            _.copy(
+              password = hash
+            )
+          )
+        } yield {}
 
       override def delete(id: UserId): F[Unit] =
         usersRepository.delete(id)
