@@ -26,6 +26,7 @@ object HttpModule {
       .of[Routes[F, AuthedUser]](
         new AuthRoutes[F](env.algebras.auth),
         new UsersRoutes[F](env.algebras.users, env.algebras.roles),
+        new VehicleCategoriesRoutes[F](env.algebras.vehicleCategories),
         new VehiclesRoutes[F](env.algebras.vehicles),
         new RegionsRoutes[F](env.algebras.regions),
         new BranchesRoutes[F](env.algebras.branches),

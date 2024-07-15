@@ -165,6 +165,12 @@ VALUES
     ('update_any_user', 'USER'),
     ('view_users', 'USER');
 
+CREATE TABLE IF NOT EXISTS vehicle_categories (
+  id UUID PRIMARY KEY NOT NULL,
+  name VARCHAR NOT NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
 CREATE TABLE IF NOT EXISTS vehicles (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
