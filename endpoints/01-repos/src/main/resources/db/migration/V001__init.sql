@@ -1,7 +1,23 @@
-CREATE TYPE VEHICLE_TYPE AS ENUM (
-  'bus',
-  'truck',
-  'car'
+CREATE TYPE CONDITION_TYPE AS ENUM (
+  'valid',
+  'invalid',
+  'write_off'
+);
+
+CREATE TYPE FUEL_TYPE AS ENUM (
+  'petrol',
+  'diesel',
+  'methane',
+  'propane',
+  'hybrid',
+  'electric'
+);
+
+CREATE TYPE GPS_TRACKER_TYPE AS ENUM (
+  'not_installed',
+  'installed',
+  'enabled',
+  'disabled'
 );
 
 CREATE TABLE IF NOT EXISTS assets(
@@ -174,8 +190,22 @@ CREATE TABLE IF NOT EXISTS vehicle_categories (
 CREATE TABLE IF NOT EXISTS vehicles (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  name VARCHAR NOT NULL,
-  registered_number VARCHAR NOT NULL UNIQUE,
-  vehicle_type VEHICLE_TYPE NOT NULL,
-  fuel_tank_volume DOUBLE PRECISION NOT NULL
+  branch_id UUID NOT NULL
+    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_category_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_category REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  brand VARCHAR NOT NULL,
+  registered_number VARCHAR NULL UNIQUE,
+  invoice_number VARCHAR NOT NULL UNIQUE,
+  year_of_release INT NOT NULL,
+  body_number VARCHAR NULL,
+  chassis_number VARCHAR NULL,
+  engine_number VARCHAR NULL,
+  condition CONDITION_TYPE NOT NULL,
+  fuel_type FUEL_TYPE NULL,
+  description VARCHAR NULL,
+  gps_tracker GPS_TRACKER_TYPE NULL,
+  fuel_level_sensor DOUBLE PRECISION NULL,
+  fuel_tank_volume DOUBLE PRECISION NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
 );

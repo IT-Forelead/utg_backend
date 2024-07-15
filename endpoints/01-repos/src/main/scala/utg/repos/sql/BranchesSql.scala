@@ -19,6 +19,9 @@ private[repos] object BranchesSql extends Sql[BranchId] {
   val findById: Query[BranchId, dto.Branch] =
     sql"""SELECT * FROM branches WHERE id = $id AND deleted = false LIMIT 1""".query(codec)
 
+  def findByIds(ids: List[BranchId]): Query[ids.type, dto.Branch] =
+    sql"""SELECT * FROM branches WHERE id IN (${id.values.list(ids)})""".query(codec)
+
   val update: Command[dto.Branch] =
     sql"""UPDATE branches
        SET name = $nes,

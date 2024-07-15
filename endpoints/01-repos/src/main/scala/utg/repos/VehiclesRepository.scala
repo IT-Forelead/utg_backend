@@ -12,10 +12,11 @@ import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.args.vehicles.VehicleFilters
 import utg.repos.sql.VehiclesSql
+import utg.repos.sql.dto
 
 trait VehiclesRepository[F[_]] {
-  def create(vehicle: Vehicle): F[Unit]
-  def get(filters: VehicleFilters): F[ResponseData[Vehicle]]
+  def create(vehicle: dto.Vehicle): F[Unit]
+  def get(filters: VehicleFilters): F[ResponseData[dto.Vehicle]]
 }
 
 object VehiclesRepository {
@@ -23,16 +24,19 @@ object VehiclesRepository {
       implicit
       session: Resource[F, Session[F]]
     ): VehiclesRepository[F] = new VehiclesRepository[F] {
-    override def create(vehicle: Vehicle): F[Unit] =
+    override def create(vehicle: dto.Vehicle): F[Unit] =
       VehiclesSql.insert.execute(vehicle)
 
-    override def get(filters: VehicleFilters): F[ResponseData[Vehicle]] = {
-      val af = VehiclesSql
-        .select(filters)
-        .paginateOpt(filters.limit.map(_.value), filters.offset.map(_.value))
-      af.fragment.query(VehiclesSql.codec *: int8).queryList(af.argument).flatMap { vehiclesDto =>
-        ResponseData(vehiclesDto.map(_.head), vehiclesDto.headOption.fold(0L)(_.tail.head)).pure[F]
-      }
+    override def get(filters: VehicleFilters): F[ResponseData[dto.Vehicle]] = {
+      val af = VehiclesSql.get(filters).paginateOpt(filters.limit, filters.offset)
+      af.fragment
+        .query(VehiclesSql.codec *: int8)
+        .queryList(af.argument)
+        .map { data =>
+          val list = data.map(_.head)
+          val count = data.headOption.fold(0L)(_.tail.head)
+          ResponseData(list, count)
+        }
     }
   }
 }

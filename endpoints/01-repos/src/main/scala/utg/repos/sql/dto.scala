@@ -2,19 +2,16 @@ package utg.repos.sql
 
 import java.time.ZonedDateTime
 
+import eu.timepit.refined.types.all.NonNegDouble
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl._
 import uz.scala.syntax.refined._
 
-import utg.Phone
+import utg._
 import utg.domain
-import utg.domain.AssetId
-import utg.domain.AuthedUser
-import utg.domain.BranchId
-import utg.domain.RegionId
-import utg.domain.RoleId
-import utg.domain.UserId
-import utg.domain.VehicleCategoryId
+import utg.domain._
+import utg.domain.enums._
 
 object dto {
   case class User(
@@ -43,11 +40,13 @@ object dto {
   }
 
   case class Role(id: RoleId, name: NonEmptyString)
+
   case class Region(
       id: RegionId,
       name: NonEmptyString,
       deleted: Boolean = false,
     )
+
   case class Branch(
       id: BranchId,
       name: NonEmptyString,
@@ -55,9 +54,31 @@ object dto {
       regionId: RegionId,
       deleted: Boolean = false,
     )
+
   case class VehicleCategory(
       id: VehicleCategoryId,
       name: NonEmptyString,
+      deleted: Boolean = false,
+    )
+
+  case class Vehicle(
+      id: VehicleId,
+      createdAt: ZonedDateTime,
+      branchId: BranchId,
+      vehicleCategoryId: VehicleCategoryId,
+      brand: NonEmptyString,
+      registeredNumber: Option[RegisteredNumber],
+      invoiceNumber: InvoiceNumber,
+      yearOfRelease: NonNegInt,
+      bodyNumber: Option[NonEmptyString],
+      chassisNumber: Option[NonEmptyString],
+      engineNumber: Option[NonEmptyString],
+      conditionType: ConditionType,
+      fuelType: Option[FuelType],
+      description: Option[NonEmptyString],
+      gpsTracker: Option[GpsTrackerType],
+      fuelLevelSensor: Option[NonNegDouble],
+      fuelTankVolume: Option[NonNegDouble],
       deleted: Boolean = false,
     )
 }

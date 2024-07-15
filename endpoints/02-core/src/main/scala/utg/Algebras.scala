@@ -45,7 +45,7 @@ object Algebras {
       regions = RegionsAlgebra.make[F](regions),
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
-      vehicles = VehiclesAlgebra.make[F](vehicles),
+      vehicles = VehiclesAlgebra.make[F](vehicles, branches, vehicleCategories),
     )
   }
 }

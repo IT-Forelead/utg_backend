@@ -20,6 +20,9 @@ private[repos] object VehicleCategoriesSql extends Sql[VehicleCategoryId] {
     sql"""SELECT * FROM vehicle_categories WHERE id = $id AND deleted = false LIMIT 1"""
       .query(codec)
 
+  def findByIds(ids: List[VehicleCategoryId]): Query[ids.type, dto.VehicleCategory] =
+    sql"""SELECT * FROM vehicle_categories WHERE id IN (${id.values.list(ids)})""".query(codec)
+
   val update: Command[dto.VehicleCategory] =
     sql"""UPDATE vehicle_categories SET name = $nes WHERE id = $id"""
       .command
