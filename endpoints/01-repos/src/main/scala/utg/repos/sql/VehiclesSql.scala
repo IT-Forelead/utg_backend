@@ -11,7 +11,7 @@ import utg.domain.args.vehicles.VehicleFilters
 
 private[repos] object VehiclesSql extends Sql[VehicleId] {
   private[repos] val codec: Codec[dto.Vehicle] =
-    (id *: zonedDateTime *: BranchesSql.id *: VehicleCategoriesSql.id *: nes *: registeredNumber.opt *: invoiceNumber
+    (id *: zonedDateTime *: BranchesSql.id *: VehicleCategoriesSql.id *: nes *: registeredNumber.opt *: inventoryNumber
       *: nonNegInt *: nes.opt *: nes.opt *: nes.opt *: conditionType *: fuelType.opt *: nes.opt *: gpsTrackerType.opt
       *: nonNegDouble.opt *: nonNegDouble.opt *: bool).to[dto.Vehicle]
 
@@ -33,7 +33,7 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
         v.vehicle_category_id AS vehicle_category_id,
         v.brand AS brand,
         v.registered_number AS registered_number,
-        v.invoice_number AS invoice_number,
+        v.inventory_number AS inventory_number,
         v.year_of_release AS year_of_release,
         v.body_number AS body_number,
         v.chassis_number AS chassis_number,

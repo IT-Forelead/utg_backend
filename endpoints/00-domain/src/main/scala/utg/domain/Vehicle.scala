@@ -8,7 +8,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
-import utg.InvoiceNumber
+import utg.InventoryNumber
 import utg.RegisteredNumber
 import utg.domain.enums.ConditionType
 import utg.domain.enums.FuelType
@@ -22,7 +22,7 @@ case class Vehicle(
     vehicleCategory: Option[VehicleCategory],
     brand: NonEmptyString,
     registeredNumber: Option[RegisteredNumber],
-    invoiceNumber: InvoiceNumber,
+    inventoryNumber: InventoryNumber,
     yearOfRelease: NonNegInt,
     bodyNumber: Option[NonEmptyString],
     chassisNumber: Option[NonEmptyString],

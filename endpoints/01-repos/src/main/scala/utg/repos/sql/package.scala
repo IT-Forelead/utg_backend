@@ -32,8 +32,8 @@ package object sql {
   val phone: Codec[Phone] = varchar.imap[Phone](identity(_))(_.value)
   val registeredNumber: Codec[RegisteredNumber] =
     varchar.imap[RegisteredNumber](identity(_))(_.value)
-  val invoiceNumber: Codec[InvoiceNumber] =
-    varchar.imap[InvoiceNumber](identity(_))(_.value)
+  val inventoryNumber: Codec[InventoryNumber] =
+    varchar.imap[InventoryNumber](identity(_))(_.value)
   val privilege: Codec[Privilege] = varchar.imap[Privilege](Privilege.withName)(_.entryName)
   val zonedDateTime: Codec[ZonedDateTime] = timestamptz.imap(_.toZonedDateTime)(_.toOffsetDateTime)
   val nonNegDouble: Codec[NonNegDouble] =

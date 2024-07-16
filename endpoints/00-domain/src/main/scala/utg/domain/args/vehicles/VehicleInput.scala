@@ -6,7 +6,7 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
-import utg.InvoiceNumber
+import utg.InventoryNumber
 import utg.RegisteredNumber
 import utg.domain.BranchId
 import utg.domain.VehicleCategoryId
@@ -20,7 +20,7 @@ case class VehicleInput(
     vehicleCategoryId: VehicleCategoryId,
     brand: NonEmptyString,
     registeredNumber: Option[RegisteredNumber],
-    invoiceNumber: InvoiceNumber,
+    inventoryNumber: InventoryNumber,
     yearOfRelease: NonNegInt,
     bodyNumber: Option[NonEmptyString],
     chassisNumber: Option[NonEmptyString],

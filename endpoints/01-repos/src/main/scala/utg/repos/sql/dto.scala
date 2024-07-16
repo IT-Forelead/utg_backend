@@ -109,7 +109,7 @@ object dto {
       vehicleCategoryId: VehicleCategoryId,
       brand: NonEmptyString,
       registeredNumber: Option[RegisteredNumber],
-      invoiceNumber: InvoiceNumber,
+      inventoryNumber: InventoryNumber,
       yearOfRelease: NonNegInt,
       bodyNumber: Option[NonEmptyString],
       chassisNumber: Option[NonEmptyString],

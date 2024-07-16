@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     CONSTRAINT fk_vehicle_category REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
   brand VARCHAR NOT NULL,
   registered_number VARCHAR NULL UNIQUE,
-  invoice_number VARCHAR NOT NULL UNIQUE,
+  inventory_number VARCHAR NOT NULL UNIQUE,
   year_of_release INT NOT NULL,
   body_number VARCHAR NULL,
   chassis_number VARCHAR NULL,
