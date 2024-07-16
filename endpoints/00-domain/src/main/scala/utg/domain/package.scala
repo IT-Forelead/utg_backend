@@ -20,6 +20,8 @@ import pureconfig.error.FailureReason
 import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+import java.security.MessageDigest
+import java.math.BigInteger
 
 import utg.utils.uuid
 
@@ -64,4 +66,12 @@ package object domain {
 
   implicit def coercibleEncoder[A: Coercible[B, *], B: Encoder]: Encoder[A] =
     Encoder[B].contramap(_.asInstanceOf[B])
+
+  def generateShortHash(input: String): String = {
+    val md = MessageDigest.getInstance("SHA-256")
+    val hashBytes = md.digest(input.getBytes("UTF-8"))
+    val hashString = new BigInteger(1, hashBytes).toString(36)  // Using base-36 encoding
+    hashString.take(6)
+  }
+
 }

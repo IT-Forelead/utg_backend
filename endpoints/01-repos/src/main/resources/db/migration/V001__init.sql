@@ -93,9 +93,11 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
+  middle_name VARCHAR NULL,
   phone VARCHAR NOT NULL,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  branch_code VARCHAR NULL,
   password VARCHAR NOT NULL
 );
 
@@ -139,7 +141,8 @@ INSERT INTO
     "lastname",
     "phone",
     "role_id",
-    "password"
+    "password",
+    "branch_code"
   )
 VALUES
   (
@@ -149,7 +152,8 @@ VALUES
     'Super Manager',
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
-    '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY='
+    '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY=',
+    null
   );
 
   -- Create the trigger function

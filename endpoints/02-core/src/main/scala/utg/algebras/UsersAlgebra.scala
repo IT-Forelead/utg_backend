@@ -73,9 +73,11 @@ object UsersAlgebra {
             createdAt = now,
             firstname = userInput.firstname,
             lastname = userInput.lastname,
+            middleName = userInput.middleName,
             roleId = userInput.roleId,
             phone = userInput.phone,
             assetId = None,
+            branchCode = Option(userInput.branchCode),
           )
           password <- randomStr[F](8)
 
