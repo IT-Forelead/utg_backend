@@ -1,5 +1,6 @@
 package utg.repos.sql
 
+import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.bool
 import skunk.implicits._
@@ -18,6 +19,13 @@ private[repos] object BranchesSql extends Sql[BranchId] {
 
   val findById: Query[BranchId, dto.Branch] =
     sql"""SELECT * FROM branches WHERE id = $id AND deleted = false LIMIT 1""".query(codec)
+
+  val findByCode: Query[NonEmptyString, dto.Branch] =
+    sql"""SELECT * FROM branches WHERE code = $nes AND deleted = false LIMIT 1""".query(codec)
+
+  def findByCodes(codes: List[NonEmptyString]): Query[codes.type, dto.Branch] =
+    sql"""SELECT * FROM branches WHERE code in (${nes.values.list(codes)}) AND deleted = false LIMIT 1"""
+      .query(codec)
 
   val update: Command[dto.Branch] =
     sql"""UPDATE branches

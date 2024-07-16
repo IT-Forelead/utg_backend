@@ -34,11 +34,12 @@ object dto {
       assetId: Option[AssetId],
       branchCode: Option[NonEmptyString],
     ) {
-    def toDomain(role: domain.Role): AuthedUser.User =
+    def toDomain(role: domain.Role, branch: Option[utg.domain.Branch]): AuthedUser.User =
       this
         .into[AuthedUser.User]
         .withFieldConst(_.role, role)
         .withFieldConst(_.phone, phone)
+        .withFieldConst(_.branch, branch)
         .transform
 
     def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
@@ -58,6 +59,7 @@ object dto {
       user
         .into[User]
         .withFieldConst(_.roleId, user.role.id)
+        .withFieldConst(_.branchCode, user.branch.map(_.code))
         .transform
 
     private val CsvHeaders: List[String] =
@@ -89,14 +91,23 @@ object dto {
       id: RegionId,
       name: NonEmptyString,
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain: domain.Region =
+      this.transformInto[domain.Region]
+  }
   case class Branch(
       id: BranchId,
       name: NonEmptyString,
       code: NonEmptyString,
       regionId: RegionId,
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain(region: Option[domain.Region]): domain.Branch =
+      this
+        .into[domain.Branch]
+        .withFieldConst(_.region, region)
+        .transform
+  }
   case class VehicleCategory(
       id: VehicleCategoryId,
       name: NonEmptyString,

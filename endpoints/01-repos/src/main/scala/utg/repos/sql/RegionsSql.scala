@@ -15,4 +15,7 @@ private[repos] object RegionsSql extends Sql[RegionId] {
 
   def findByIds(ids: List[RegionId]): Query[ids.type, dto.Region] =
     sql"""SELECT * FROM regions WHERE id IN (${id.values.list(ids)})""".query(codec)
+
+  val findById: Query[RegionId, dto.Region] =
+    sql"""SELECT * FROM regions WHERE id=$id""".query(codec)
 }
