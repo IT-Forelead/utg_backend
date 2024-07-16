@@ -9,6 +9,5 @@ import utg.domain.RegionId
 @JsonCodec
 case class BranchInput(
     name: NonEmptyString,
-    code: NonEmptyString,
     regionId: RegionId,
   )

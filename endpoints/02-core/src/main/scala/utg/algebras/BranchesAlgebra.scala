@@ -3,10 +3,12 @@ package utg.algebras
 import cats.MonadThrow
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
+import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.domain.Branch
 import utg.domain.BranchId
 import utg.domain.args.branches._
+import utg.domain.generateShortHash
 import utg.effects.GenUUID
 import utg.repos.BranchesRepository
 import utg.repos.RegionsRepository
@@ -31,7 +33,7 @@ object BranchesAlgebra {
           dtoBranch = dto.Branch(
             id = id,
             name = input.name,
-            code = input.code,
+            code = generateShortHash(input.name.value),
             regionId = input.regionId,
           )
           _ <- branchesRepository.create(dtoBranch)
@@ -55,7 +57,6 @@ object BranchesAlgebra {
         branchesRepository.update(input.id)(
           _.copy(
             name = input.name,
-            code = input.code,
             regionId = input.regionId,
           )
         )

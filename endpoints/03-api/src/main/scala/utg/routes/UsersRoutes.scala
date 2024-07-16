@@ -1,32 +1,34 @@
 package utg.routes
 
 import cats.MonadThrow
-import cats.implicits.{toFlatMapOps, toFunctorOps}
+import cats.effect.Async
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
 import io.estatico.newtype.ops.toCoercibleIdOps
-import org.http4s.{AuthedRoutes, HttpRoutes}
-import org.http4s.{AuthedRoutes, Charset, Headers, MediaType, Response}
+import org.http4s.AuthedRoutes
+import org.http4s.Charset
+import org.http4s.Headers
+import org.http4s.HttpRoutes
+import org.http4s.MediaType
+import org.http4s.Response
 import org.http4s.circe.JsonDecoder
-import org.http4s.headers.{`Content-Disposition`, `Content-Type`}
+import org.http4s.headers.`Content-Disposition`
+import org.http4s.headers.`Content-Type`
+import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
-import utg.domain.args.users.{UpdateUserInput, UserFilters, UserInput}
+import utg.domain.args.users.UpdateUserInput
 import utg.domain.args.users.UserFilters
 import utg.domain.args.users.UserInput
 import utg.domain.auth.Credentials
 import utg.domain.enums.Privilege
-import org.typelevel.ci.CIStringSyntax
 import utg.repos.sql.dto.User
-import cats.effect.Async
-
-import scala.concurrent.Future
-
-
-
 
 final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     users: UsersAlgebra[F],

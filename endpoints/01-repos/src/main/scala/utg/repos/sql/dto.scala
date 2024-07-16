@@ -1,10 +1,12 @@
 package utg.repos.sql
 
-import cats.effect.{Concurrent, Sync}
-import com.github.tototoshi.csv.CSVWriter
-
+import java.io.StringWriter
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
+import cats.effect.Concurrent
+import cats.effect.Sync
+import com.github.tototoshi.csv.CSVWriter
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
@@ -17,18 +19,17 @@ import utg.domain
 import utg.domain._
 import utg.domain.enums._
 
-import java.io.StringWriter
-import java.time.format.DateTimeFormatter
-
 object dto {
   case class User(
       id: UserId,
       createdAt: ZonedDateTime,
       firstname: NonEmptyString,
       lastname: NonEmptyString,
+      middleName: Option[NonEmptyString],
       phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],
+      branchCode: Option[NonEmptyString],
     ) {
     def toDomain(role: domain.Role): AuthedUser.User =
       this
