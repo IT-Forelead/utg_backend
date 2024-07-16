@@ -10,13 +10,14 @@ import uz.scala.skunk.syntax.all._
 
 import utg.domain.VehicleCategory
 import utg.domain.VehicleCategoryId
+import utg.domain.args.vehicleCategories.VehicleCategoryFilters
 import utg.exception.AError
 import utg.repos.sql.VehicleCategoriesSql
 import utg.repos.sql.dto
 
 trait VehicleCategoriesRepository[F[_]] {
   def create(branch: dto.VehicleCategory): F[Unit]
-  def get: F[List[dto.VehicleCategory]]
+  def get(filters: VehicleCategoryFilters): F[List[dto.VehicleCategory]]
   def update(id: VehicleCategoryId)(update: dto.VehicleCategory => dto.VehicleCategory): F[Unit]
   def findByIds(ids: List[VehicleCategoryId]): F[Map[VehicleCategoryId, VehicleCategory]]
 }
@@ -29,8 +30,12 @@ object VehicleCategoriesRepository {
     override def create(vehicleCategory: dto.VehicleCategory): F[Unit] =
       VehicleCategoriesSql.insert.execute(vehicleCategory)
 
-    override def get: F[List[dto.VehicleCategory]] =
-      VehicleCategoriesSql.select.queryList(Void)
+    override def get(filters: VehicleCategoryFilters): F[List[dto.VehicleCategory]] = {
+      val af = VehicleCategoriesSql.get(filters)
+      af.fragment
+        .query(VehicleCategoriesSql.codec)
+        .queryList(af.argument)
+    }
 
     override def update(
         id: VehicleCategoryId
