@@ -7,7 +7,7 @@ import skunk.implicits._
 import utg.domain.VehicleCategoryId
 
 private[repos] object VehicleCategoriesSql extends Sql[VehicleCategoryId] {
-  private[repos] val codec = (id *: nes *: bool).to[dto.VehicleCategory]
+  private[repos] val codec = (id *: nes *:vehicleType *: bool).to[dto.VehicleCategory]
 
   val insert: Command[dto.VehicleCategory] =
     sql"""INSERT INTO vehicle_categories VALUES ($codec)""".command

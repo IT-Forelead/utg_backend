@@ -11,9 +11,9 @@ import utg.domain.args.vehicles.VehicleFilters
 
 private[repos] object VehiclesSql extends Sql[VehicleId] {
   private[repos] val codec: Codec[dto.Vehicle] =
-    (id *: zonedDateTime *: BranchesSql.id *: VehicleCategoriesSql.id *: nes *: registeredNumber.opt *: invoiceNumber
-      *: nonNegInt *: nes.opt *: nes.opt *: nes.opt *: conditionType *: fuelType.opt *: nes.opt *: gpsTrackerType.opt
-      *: nonNegDouble.opt *: nonNegDouble.opt *: bool).to[dto.Vehicle]
+    (id *: zonedDateTime *: BranchesSql.id *: VehicleCategoriesSql.id *: vehicleType *: nes *: registeredNumber.opt
+      *: inventoryNumber *: nonNegInt *: nes.opt *: nes.opt *: nes.opt *: conditionType *: fuelType.opt *: nes.opt
+      *: gpsTrackingType.opt *: nonNegDouble.opt *: nonNegDouble.opt *: bool).to[dto.Vehicle]
 
   val insert: Command[dto.Vehicle] =
     sql"""INSERT INTO vehicles VALUES ($codec)""".command
@@ -31,9 +31,10 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
         v.created_at AS created_at,
         v.branch_id AS branch_id,
         v.vehicle_category_id AS vehicle_category_id,
+        v.vehicle_type AS vehicle_type,
         v.brand AS brand,
         v.registered_number AS registered_number,
-        v.invoice_number AS invoice_number,
+        v.inventory_number AS inventory_number,
         v.year_of_release AS year_of_release,
         v.body_number AS body_number,
         v.chassis_number AS chassis_number,
@@ -41,7 +42,7 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
         v.condition AS condition,
         v.fuel_type AS fuel_type,
         v.description AS description,
-        v.gps_tracker AS gps_tracker,
+        v.gps_tracking AS gps_tracking,
         v.fuel_level_sensor AS fuel_level_sensor,
         v.fuel_tank_volume AS fuel_tank_volume,
         v.deleted AS deleted,

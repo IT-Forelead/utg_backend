@@ -53,6 +53,7 @@ object VehicleCategoriesRepository {
               dtoVehicleCategory.id -> VehicleCategory(
                 dtoVehicleCategory.id,
                 dtoVehicleCategory.name,
+                dtoVehicleCategory.vehicleType,
               )
             }.toMap
           }

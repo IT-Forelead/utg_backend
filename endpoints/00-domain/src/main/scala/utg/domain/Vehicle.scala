@@ -8,21 +8,20 @@ import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
-import utg.InvoiceNumber
+import utg.InventoryNumber
 import utg.RegisteredNumber
-import utg.domain.enums.ConditionType
-import utg.domain.enums.FuelType
-import utg.domain.enums.GpsTrackerType
+import utg.domain.enums._
 
 @JsonCodec
 case class Vehicle(
     id: VehicleId,
     createdAt: ZonedDateTime,
+    vehicleType: VehicleType,
     branch: Option[Branch],
     vehicleCategory: Option[VehicleCategory],
     brand: NonEmptyString,
     registeredNumber: Option[RegisteredNumber],
-    invoiceNumber: InvoiceNumber,
+    inventoryNumber: InventoryNumber,
     yearOfRelease: NonNegInt,
     bodyNumber: Option[NonEmptyString],
     chassisNumber: Option[NonEmptyString],
@@ -30,7 +29,7 @@ case class Vehicle(
     conditionType: ConditionType,
     fuelType: Option[FuelType],
     description: Option[NonEmptyString],
-    gpsTracker: Option[GpsTrackerType],
+    gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
     fuelTankVolume: Option[NonNegDouble],
   )
