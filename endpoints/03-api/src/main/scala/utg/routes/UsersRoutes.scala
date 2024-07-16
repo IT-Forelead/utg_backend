@@ -88,9 +88,9 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     case DELETE -> Root / UUIDVar(userId) as user if user.access(Privilege.CreateUser) =>
       users.delete(userId.coerce[UserId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root / UUIDVar(userId) as user if user.access(Privilege.UpdateUser) =>
+    case ar @ POST -> Root as user if user.access(Privilege.UpdateUser) =>
       ar.req.decodeR[UpdateUserInput] { update =>
-        users.update(userId.coerce[UserId], update).flatMap(Ok(_))
+        users.update(update.userId, update).flatMap(Ok(_))
       }
   }
 }

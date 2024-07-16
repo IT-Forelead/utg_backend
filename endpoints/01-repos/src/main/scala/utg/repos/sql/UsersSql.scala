@@ -56,13 +56,14 @@ private[repos] object UsersSql extends Sql[UserId] {
        middle_name = ${nes.opt},
        phone = $phone,
        role_id = ${RolesSql.id},
-       asset_id = ${AssetsSql.id.opt}
+       asset_id = ${AssetsSql.id.opt},
+       branch_code = ${nes.opt}
        WHERE id = $id
      """
       .command
       .contramap {
         case user: dto.User =>
-          user.firstname *: user.lastname *: user.middleName *: user.phone *: user.roleId *: user.assetId *: user.id *: EmptyTuple
+          user.firstname *: user.lastname *: user.middleName *: user.phone *: user.roleId *: user.assetId *: user.branchCode *: user.id *: EmptyTuple
       }
 
   val changePassword: Command[AccessCredentials[dto.User]] =

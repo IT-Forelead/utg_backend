@@ -23,7 +23,7 @@ import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
 import utg.repos.UsersRepository
-import utg.repos.sql.{dto, passwordHash}
+import utg.repos.sql.dto
 import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
@@ -101,7 +101,10 @@ object UsersAlgebra {
             _.copy(
               firstname = userInput.firstname,
               lastname = userInput.lastname,
+              middleName = userInput.middleName,
               phone = userInput.phone,
+              branchCode = userInput.branchCode,
+              roleId = userInput.roleId,
               assetId = assetId,
             )
           )
