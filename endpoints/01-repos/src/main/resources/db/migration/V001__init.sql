@@ -149,8 +149,8 @@ INSERT INTO
     "lastname",
     "phone",
     "role_id",
-    "password",
-    "branch_code"
+    "branch_code",
+    "password"
   )
 VALUES
   (
@@ -160,8 +160,8 @@ VALUES
     'Super Manager',
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
+    null,
     '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY=',
-    null
   );
 
   -- Create the trigger function
