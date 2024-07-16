@@ -40,13 +40,13 @@ private[repos] object UsersSql extends Sql[UserId] {
   val insert: Command[AccessCredentials[dto.User]] =
     sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, ${nes.opt}, $phone, ${RolesSql.id}, ${AssetsSql
         .id
-        .opt}, $passwordHash, ${nes.opt})"""
+        .opt}, ${nes.opt}, $passwordHash)"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
           u.data.phone *: u
             .data
-            .roleId *: u.data.assetId *: u.password *: u.data.branchCode *: EmptyTuple
+            .roleId *: u.data.assetId *: u.data.branchCode *: u.password  *: EmptyTuple
       }
 
   val update: Command[dto.User] =
