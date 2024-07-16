@@ -18,14 +18,11 @@ import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
-
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
-import utg.domain.args.users.UpdateUserInput
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
+import utg.domain.args.users.{CreateRoleInput, UpdateUserInput, UserFilters, UserInput}
 import utg.domain.auth.Credentials
 import utg.domain.enums.Privilege
 import utg.repos.sql.dto.User
@@ -88,9 +85,14 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     case DELETE -> Root / UUIDVar(userId) as user if user.access(Privilege.CreateUser) =>
       users.delete(userId.coerce[UserId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root / UUIDVar(userId) as user if user.access(Privilege.UpdateUser) =>
+    case ar @ POST -> Root as user if user.access(Privilege.UpdateUser) =>
       ar.req.decodeR[UpdateUserInput] { update =>
-        users.update(userId.coerce[UserId], update).flatMap(Ok(_))
+        users.update(update.userId, update).flatMap(Ok(_))
+      }
+
+    case ar @ POST -> Root / "roles" as user if user.access(Privilege.UpdateUser) =>
+      ar.req.decodeR[CreateRoleInput] { value =>
+        roles.createRole(value.name).flatMap(Ok(_))
       }
   }
 }

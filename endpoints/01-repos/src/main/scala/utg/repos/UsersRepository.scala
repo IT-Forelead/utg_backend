@@ -5,8 +5,12 @@ import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.catsSyntaxOptionId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
+import cats.implicits.toTraverseOps
+import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
@@ -16,6 +20,7 @@ import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.Phone
 import utg.domain.AuthedUser.User
+import utg.domain.RegionId
 import utg.domain.ResponseData
 import utg.domain.Role
 import utg.domain.UserId
@@ -23,6 +28,8 @@ import utg.domain.args.users.UserFilters
 import utg.domain.auth
 import utg.domain.auth.AccessCredentials
 import utg.exception.AError
+import utg.repos.sql.BranchesSql
+import utg.repos.sql.RegionsSql
 import utg.repos.sql.RolesSql
 import utg.repos.sql.UsersSql
 import utg.repos.sql.dto
@@ -49,38 +56,66 @@ object UsersRepository {
       session: Resource[F, Session[F]]
     ): UsersRepository[F] = new UsersRepository[F] {
     private def makeUser(userDto: dto.User): F[Option[User]] =
-      RolesSql.getById.queryList(userDto.roleId).map { privileges =>
-        privileges.headOption.map { role =>
-          userDto.toDomain(
+      for {
+        optRole <- RolesSql.getById.queryList(userDto.roleId).map { privileges =>
+          privileges.headOption.map { role =>
             Role(
               id = userDto.roleId,
               name = role.head,
               privileges = privileges.flatMap(_.tail.head),
             )
-          )
+          }
         }
+        branch <- userDto.branchCode.flatTraverse { branchCode =>
+          (for {
+            branch <- OptionT(BranchesSql.findByCode.queryOption(branchCode))
+            region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
+          } yield branch.toDomain(region.toDomain.some)).value
+        }
+      } yield optRole.map { role =>
+        userDto.toDomain(role, branch)
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
       val roleIds = dtos.map(_.roleId)
-      RolesSql
-        .getByIds(roleIds)
-        .queryList(roleIds)
-        .map(_.groupMap(_.head)(_.tail))
-        .map { roles =>
-          dtos.flatMap { userDto =>
-            val roleList = roles.getOrElse(userDto.roleId, Nil)
-            roleList.headOption.map { role =>
-              userDto.toDomain(
-                Role(
-                  id = userDto.roleId,
-                  name = role.head,
-                  privileges = roleList.flatMap(_.tail.head),
-                )
-              )
-            }
-          }
+      for {
+        roles <- RolesSql
+          .getByIds(roleIds)
+          .queryList(roleIds)
+          .map(_.groupMap(_.head)(_.tail))
+        codes = NonEmptyList.fromList(dtos.flatMap(_.branchCode))
+        branchByCode <- codes.fold(Map.empty[NonEmptyString, dto.Branch].pure[F]) { branches =>
+          val branchesList = branches.toList
+          BranchesSql
+            .findByCodes(branchesList)
+            .queryList(branchesList)
+            .map(_.map(b => b.code -> b).toMap)
         }
+        maybeRegionIds = NonEmptyList.fromList(branchByCode.values.toList.map(_.regionId))
+        regionById <- maybeRegionIds.fold(Map.empty[RegionId, dto.Region].pure[F]) { regionIds =>
+          val regionIdList = regionIds.toList
+          RegionsSql
+            .findByIds(regionIdList)
+            .queryList(regionIdList)
+            .map(_.map(r => r.id -> r).toMap)
+        }
+      } yield dtos.flatMap { userDto =>
+        val roleList = roles.getOrElse(userDto.roleId, Nil)
+        roleList.headOption.map { role =>
+          val maybeBranch = userDto
+            .branchCode
+            .flatMap(branchByCode.get)
+            .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
+          userDto.toDomain(
+            Role(
+              id = userDto.roleId,
+              name = role.head,
+              privileges = roleList.flatMap(_.tail.head),
+            ),
+            maybeBranch,
+          )
+        }
+      }
     }
 
     override def find(phone: Phone): F[Option[AccessCredentials[User]]] =
