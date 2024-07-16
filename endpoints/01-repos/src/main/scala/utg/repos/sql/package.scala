@@ -40,11 +40,13 @@ package object sql {
     float8.imap[NonNegDouble](double => NonNegDouble.unsafeFrom(double))(_.value)
   val nonNegInt: Codec[NonNegInt] =
     int4.imap[NonNegInt](int => NonNegInt.unsafeFrom(int))(_.value)
+  val vehicleType: Codec[VehicleType] =
+    `enum`[VehicleType](VehicleType, Type("vehicle_type"))
   val conditionType: Codec[ConditionType] =
     `enum`[ConditionType](ConditionType, Type("condition_type"))
   val fuelType: Codec[FuelType] = `enum`[FuelType](FuelType, Type("fuel_type"))
-  val gpsTrackerType: Codec[GpsTrackerType] =
-    `enum`[GpsTrackerType](GpsTrackerType, Type("gps_tracker_type"))
+  val gpsTrackingType: Codec[GpsTrackingType] =
+    `enum`[GpsTrackingType](GpsTrackingType, Type("gps_tracking_type"))
 
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)

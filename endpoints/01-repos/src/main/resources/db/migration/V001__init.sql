@@ -1,3 +1,11 @@
+CREATE TYPE VEHICLE_TYPE AS ENUM (
+  'auto',
+  'special_road_vehicles',
+  'trailer',
+  'welding_equipment',
+  'other_mechanism'
+);
+
 CREATE TYPE CONDITION_TYPE AS ENUM (
   'valid',
   'invalid',
@@ -13,7 +21,7 @@ CREATE TYPE FUEL_TYPE AS ENUM (
   'electric'
 );
 
-CREATE TYPE GPS_TRACKER_TYPE AS ENUM (
+CREATE TYPE GPS_TRACKING_TYPE AS ENUM (
   'not_installed',
   'installed',
   'enabled',
@@ -188,6 +196,7 @@ VALUES
 CREATE TABLE IF NOT EXISTS vehicle_categories (
   id UUID PRIMARY KEY NOT NULL,
   name VARCHAR NOT NULL,
+  vehicle_type VEHICLE_TYPE NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
@@ -198,6 +207,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
   vehicle_category_id UUID NOT NULL
     CONSTRAINT fk_vehicle_category REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_type VEHICLE_TYPE NOT NULL,
   brand VARCHAR NOT NULL,
   registered_number VARCHAR NULL UNIQUE,
   inventory_number VARCHAR NOT NULL UNIQUE,
@@ -208,7 +218,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   condition CONDITION_TYPE NOT NULL,
   fuel_type FUEL_TYPE NULL,
   description VARCHAR NULL,
-  gps_tracker GPS_TRACKER_TYPE NULL,
+  gps_tracking GPS_TRACKING_TYPE NULL,
   fuel_level_sensor DOUBLE PRECISION NULL,
   fuel_tank_volume DOUBLE PRECISION NULL,
   deleted BOOLEAN NOT NULL DEFAULT false

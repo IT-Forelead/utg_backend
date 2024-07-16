@@ -9,10 +9,10 @@ import org.http4s.circe.JsonDecoder
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
-
 import utg.algebras.VehicleCategoriesAlgebra
 import utg.domain.AuthedUser
 import utg.domain.VehicleCategory
+import utg.domain.args.vehicleCategories.VehicleCategoryInput
 import utg.domain.enums.Privilege
 
 final case class VehicleCategoriesRoutes[F[_]: JsonDecoder: MonadThrow](
@@ -22,8 +22,8 @@ final case class VehicleCategoriesRoutes[F[_]: JsonDecoder: MonadThrow](
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root as user if user.access(Privilege.CreateUser) =>
-      ar.req.decodeR[NonEmptyString] { name =>
-        vehicleCategoriesAlgebra.create(name).flatMap(Created(_))
+      ar.req.decodeR[VehicleCategoryInput] { input =>
+        vehicleCategoriesAlgebra.create(input).flatMap(Created(_))
       }
 
     case GET -> Root as user if user.access(Privilege.ViewUsers) =>

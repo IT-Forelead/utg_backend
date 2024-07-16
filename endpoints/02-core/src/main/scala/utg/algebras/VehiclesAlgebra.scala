@@ -2,7 +2,6 @@ package utg.algebras
 
 import cats.MonadThrow
 import cats.implicits._
-
 import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleId
@@ -13,7 +12,7 @@ import utg.effects.GenUUID
 import utg.repos.BranchesRepository
 import utg.repos.VehicleCategoriesRepository
 import utg.repos.VehiclesRepository
-import utg.repos.sql.dto
+import utg.repos.sql.{dto, vehicleType}
 import utg.utils.ID
 
 trait VehiclesAlgebra[F[_]] {
@@ -37,6 +36,7 @@ object VehiclesAlgebra {
             createdAt = now,
             branchId = vehicleInput.branchId,
             vehicleCategoryId = vehicleInput.vehicleCategoryId,
+            vehicleType = vehicleInput.vehicleType,
             brand = vehicleInput.brand,
             registeredNumber = vehicleInput.registeredNumber,
             inventoryNumber = vehicleInput.inventoryNumber,
@@ -47,7 +47,7 @@ object VehiclesAlgebra {
             conditionType = vehicleInput.conditionType,
             fuelType = vehicleInput.fuelType,
             description = vehicleInput.description,
-            gpsTracker = vehicleInput.gpsTracker,
+            gpsTracking = vehicleInput.gpsTracking,
             fuelLevelSensor = vehicleInput.fuelLevelSensor,
             fuelTankVolume = vehicleInput.fuelTankVolume,
           )
@@ -67,6 +67,7 @@ object VehiclesAlgebra {
               createdAt = v.createdAt,
               branch = branches.get(v.branchId),
               vehicleCategory = vehicleCategories.get(v.vehicleCategoryId),
+              vehicleType = v.vehicleType,
               brand = v.brand,
               registeredNumber = v.registeredNumber,
               inventoryNumber = v.inventoryNumber,
@@ -77,7 +78,7 @@ object VehiclesAlgebra {
               conditionType = v.conditionType,
               fuelType = v.fuelType,
               description = v.description,
-              gpsTracker = v.gpsTracker,
+              gpsTracking = v.gpsTracking,
               fuelLevelSensor = v.fuelLevelSensor,
               fuelTankVolume = v.fuelTankVolume,
             )

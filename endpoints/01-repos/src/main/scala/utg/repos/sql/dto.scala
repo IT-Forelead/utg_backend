@@ -100,6 +100,7 @@ object dto {
   case class VehicleCategory(
       id: VehicleCategoryId,
       name: NonEmptyString,
+      vehicleType: VehicleType,
       deleted: Boolean = false,
     )
 
@@ -108,6 +109,7 @@ object dto {
       createdAt: ZonedDateTime,
       branchId: BranchId,
       vehicleCategoryId: VehicleCategoryId,
+      vehicleType: VehicleType,
       brand: NonEmptyString,
       registeredNumber: Option[RegisteredNumber],
       inventoryNumber: InventoryNumber,
@@ -118,7 +120,7 @@ object dto {
       conditionType: ConditionType,
       fuelType: Option[FuelType],
       description: Option[NonEmptyString],
-      gpsTracker: Option[GpsTrackerType],
+      gpsTracking: Option[GpsTrackingType],
       fuelLevelSensor: Option[NonNegDouble],
       fuelTankVolume: Option[NonNegDouble],
       deleted: Boolean = false,
