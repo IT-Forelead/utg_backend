@@ -26,7 +26,7 @@ private[repos] object UsersSql extends Sql[UserId] {
     }
 
   val findByPhone: Query[Phone, AccessCredentials[dto.User]] =
-    sql"""SELECT id, created_at, firstname, lastname, middle_name, phone, role_id, asset_id, password, branch_code FROM users
+    sql"""SELECT id, created_at, firstname, lastname, middle_name, phone, role_id, asset_id, branch_code, password  FROM users
           WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
   val findById: Query[UserId, dto.User] =
