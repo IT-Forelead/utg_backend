@@ -1,16 +1,11 @@
 package utg.repos.sql
 
-import java.io.StringWriter
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-import cats.effect.Concurrent
-import cats.effect.Sync
-import com.github.tototoshi.csv.CSVWriter
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
-import fs2.text.utf8
 import io.scalaland.chimney.dsl._
 import uz.scala.syntax.refined._
 
@@ -59,28 +54,6 @@ object dto {
         .withFieldConst(_.branchCode, user.branch.map(_.code))
         .transform
 
-    private val CsvHeaders: List[String] =
-      List(
-        "Created Date",
-        "First Name",
-        "Last Name",
-        "Phone",
-      )
-
-    def makeCsv[F[_]: Concurrent: Sync]: fs2.Pipe[F, dto.User, Byte] =
-      report =>
-        fs2
-          .Stream
-          .fromIterator[F](List(CsvHeaders).map(writeAsCsv).iterator, 128)
-          .merge(report.map(_.toCSVField).map(writeAsCsv))
-          .through(utf8.encode)
-
-    def writeAsCsv(rows: List[String]): String = {
-      val writer = new StringWriter()
-      val csvWriter = CSVWriter.open(writer)
-      csvWriter.writeRow(rows)
-      writer.toString
-    }
   }
 
   case class Role(id: RoleId, name: NonEmptyString)

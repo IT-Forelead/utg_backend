@@ -48,6 +48,7 @@ trait UsersRepository[F[_]] {
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
   def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User]
+  def makeUser(userDto: dto.User): F[User]
 }
 
 object UsersRepository {
@@ -55,24 +56,22 @@ object UsersRepository {
       implicit
       session: Resource[F, Session[F]]
     ): UsersRepository[F] = new UsersRepository[F] {
-    private def makeUser(userDto: dto.User): F[Option[User]] =
+    def makeUser(userDto: dto.User): F[User] =
       for {
-        optRole <- RolesSql.getById.queryList(userDto.roleId).map { privileges =>
-          privileges.headOption.map { role =>
+        role <- RolesSql.getById.queryList(userDto.roleId).map { roleWithPrivileges =>
             Role(
               id = userDto.roleId,
-              name = role.head,
-              privileges = privileges.flatMap(_.tail.head),
+              name = roleWithPrivileges.head.head,
+              privileges = roleWithPrivileges.flatMap(_.tail.head),
             )
           }
-        }
         branch <- userDto.branchCode.flatTraverse { branchCode =>
           (for {
             branch <- OptionT(BranchesSql.findByCode.queryOption(branchCode))
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
         }
-      } yield optRole.map { role =>
+      } yield {
         userDto.toDomain(role, branch)
       }
 
@@ -119,12 +118,19 @@ object UsersRepository {
     }
 
     override def find(phone: Phone): F[Option[AccessCredentials[User]]] =
-      OptionT(UsersSql.findByPhone.queryOption(phone)).flatMap { userData =>
-        OptionT(makeUser(userData.data)).map(user => userData.copy(data = user))
-      }.value
+      (for {
+        userData <- OptionT(UsersSql.findByPhone.queryOption(phone))
+        user <- OptionT.liftF(makeUser(userData.data))
+      } yield userData.copy(data = user))
+        .value
 
-    override def findById(id: UserId): F[Option[User]] =
-      OptionT(UsersSql.findById.queryOption(id)).flatMapF(makeUser).value
+    override def findById(id: UserId): F[Option[User]] = {
+      (for {
+        dtoUser <- OptionT(UsersSql.findById.queryOption(id))
+        user <- OptionT.liftF(makeUser(dtoUser))
+      } yield user)
+        .value
+    }
 
     override def create(userAndHash: AccessCredentials[dto.User]): F[Unit] =
       UsersSql.insert.execute(userAndHash)

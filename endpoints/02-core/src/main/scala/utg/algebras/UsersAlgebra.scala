@@ -3,7 +3,7 @@ package utg.algebras
 import caliban.uploads.FileMeta
 import cats.Applicative
 import cats.MonadThrow
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, OptionT}
 import cats.effect.std.Random
 import cats.implicits.catsSyntaxApplicativeId
 import cats.implicits.toFlatMapOps
@@ -28,7 +28,7 @@ import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
   def get(filters: UserFilters): F[ResponseData[User]]
-  def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]]
+  def getAsStream(filters: UserFilters): F[fs2.Stream[F, User]]
   def findById(id: UserId): F[Option[User]]
   def findByIds(ids: List[UserId]): F[Map[UserId, User]]
   def create(userInput: UserInput): F[UserId]
@@ -130,10 +130,14 @@ object UsersAlgebra {
       override def delete(id: UserId): F[Unit] =
         usersRepository.delete(id)
 
-      override def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]] =
-        F.pure {
-          usersRepository.getAsStream(filters)
+      override def getAsStream(filters: UserFilters): F[fs2.Stream[F, User]] = {
+        val a = F.pure {
+          usersRepository.getAsStream(filters).evalMap { user =>
+            usersRepository.makeUser(user)
+          }
         }
+        a
+      }
 
     }
 }

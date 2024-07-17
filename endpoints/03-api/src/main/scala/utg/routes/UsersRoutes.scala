@@ -21,6 +21,7 @@ import uz.scala.http4s.utils.Routes
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
+import utg.domain.UserCsvGenerator._
 import utg.domain.UserId
 import utg.domain.args.users.{CreateRoleInput, UpdateUserInput, UserFilters, UserInput}
 import utg.domain.auth.Credentials
@@ -71,11 +72,12 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
       ar.req.decodeR[UserFilters] { filter =>
         users
           .getAsStream(filter)
-          .map { report =>
+          .map { reportOpt =>
             csvResponse(
-              report.through(User.makeCsv[F]),
+              reportOpt.through(makeCsv[F]),
               "Users_Report.csv",
             )
+
           }
       }
 
