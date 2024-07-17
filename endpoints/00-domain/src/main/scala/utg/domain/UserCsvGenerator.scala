@@ -25,7 +25,7 @@ object UserCsvGenerator {
     csvWriter.writeRow(rows)
     writer.toString
   }
-  def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
+  def ldtToString(date: ZonedDateTime, format: String = "dd-MM-yyyy HH:mm"): String =
     date.format(DateTimeFormatter.ofPattern(format))
 
   private def toCSVField(user: AuthedUser.User): List[String] = {
