@@ -223,3 +223,21 @@ CREATE TABLE IF NOT EXISTS vehicles (
   fuel_tank_volume DOUBLE PRECISION NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE TYPE VEHICLE_INDICATOR_TYPE AS ENUM (
+  'enter',
+  'exit'
+)
+
+CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  indicator_type VEHICLE_INDICATOR_TYPE NOT NULL,
+  registered_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  paid_distance VARCHAR NULL,
+  odometer_indicator VARCHAR NOT NULL,
+  current_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);

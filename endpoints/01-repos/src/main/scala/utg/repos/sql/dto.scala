@@ -134,4 +134,17 @@ object dto {
       fuelTankVolume: Option[NonNegDouble],
       deleted: Boolean = false,
     )
+
+  case class TripVehicleIndicator(
+      id: TripVehicleIndicatorId,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      createdAt: ZonedDateTime,
+      indicator_type: VehicleIndicatorType,
+      registeredAt: ZonedDateTime,
+      paidDistance: Option[NonEmptyString],
+      odometerIndicator: NonEmptyString,
+      currentDateTime: ZonedDateTime,
+      deleted: Boolean = false,
+    )
 }

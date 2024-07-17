@@ -41,6 +41,10 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class VehicleCategoryId(value: UUID)
   @newtype case class JwtAccessTokenKey(secret: NonEmptyString)
+  @derive(eqv, show, uuid)
+  @newtype case class TripVehicleIndicatorId(value: UUID)
+  @derive(eqv, show, uuid)
+  @newtype case class TripId(value: UUID)
 
   object JwtAccessTokenKey {
     implicit val reader: ConfigReader[JwtAccessTokenKey] =
