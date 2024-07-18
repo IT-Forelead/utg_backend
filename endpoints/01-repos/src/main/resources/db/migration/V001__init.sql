@@ -28,6 +28,12 @@ CREATE TYPE GPS_TRACKING_TYPE AS ENUM (
   'disabled'
 );
 
+CREATE TYPE WORKING_MODE_TYPE AS ENUM (
+  'daily',
+  'business_trip',
+  'mixed'
+);
+
 CREATE TABLE IF NOT EXISTS assets(
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -222,4 +228,34 @@ CREATE TABLE IF NOT EXISTS vehicles (
   fuel_level_sensor DOUBLE PRECISION NULL,
   fuel_tank_volume DOUBLE PRECISION NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trips (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NULL,
+  serial_number VARCHAR NOT NULL,
+  first_tab VARCHAR NULL,
+  second_tab VARCHAR NULL,
+  third_tab VARCHAR NULL,
+  work_order WORKING_MODE_TYPE NOT NULL,
+  summation VARCHAR NULL,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL
+    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  trailer_id UUID NULL
+    CONSTRAINT fk_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  semi_trailer_id UUID NULL
+    CONSTRAINT fk_semi_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_accompanying_persons (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  user_id UUID NOT NULL CONSTRAINT fk_user_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false,
+  UNIQUE (trip_id, user_id)
 );

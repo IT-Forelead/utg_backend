@@ -45,7 +45,7 @@ trait UsersRepository[F[_]] {
       update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]
     ): F[Unit]
   def delete(id: UserId): F[Unit]
-  def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
+  def findByIds(ids: List[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
   def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User]
 }
@@ -129,14 +129,12 @@ object UsersRepository {
     override def create(userAndHash: AccessCredentials[dto.User]): F[Unit] =
       UsersSql.insert.execute(userAndHash)
 
-    override def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]] = {
-      val userIds = ids.toList
+    override def findByIds(ids: List[UserId]): F[Map[UserId, User]] =
       UsersSql
-        .findByIds(userIds)
-        .queryList(userIds)
+        .findByIds(ids)
+        .queryList(ids)
         .flatMap(makeUsers)
         .map(_.map(user => user.id -> user).toMap)
-    }
 
     override def get(filters: UserFilters): F[ResponseData[User]] = {
       val af = UsersSql
