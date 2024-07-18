@@ -3,9 +3,12 @@ package utg.repos.sql
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk._
 import skunk.codec.all.bool
+import skunk.codec.all.varchar
 import skunk.implicits._
+import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import utg.domain.BranchId
+import utg.domain.args.branches.BranchFilters
 
 private[repos] object BranchesSql extends Sql[BranchId] {
   private[repos] val codec = (id *: nes *: nes *: RegionsSql.id *: bool).to[dto.Branch]
@@ -16,6 +19,17 @@ private[repos] object BranchesSql extends Sql[BranchId] {
   val selectBranches: Query[Void, dto.Branch] =
     sql"""SELECT * FROM branches WHERE deleted = false ORDER BY name ASC"""
       .query(codec)
+
+  def getBranches(filters: BranchFilters): AppliedFragment = {
+    val searchFilters = List(
+      filters.name.map(s => s"%$s%").map(sql"name ILIKE $varchar"),
+      filters.code.map(s => s"%$s%").map(sql"code ILIKE $varchar"),
+    )
+
+    val baseQuery: AppliedFragment =
+      sql"""SELECT * FROM branches WHERE deleted = false ORDER BY name ASC""".apply(Void)
+    baseQuery.andOpt(searchFilters)
+  }
 
   val findById: Query[BranchId, dto.Branch] =
     sql"""SELECT * FROM branches WHERE id = $id AND deleted = false LIMIT 1""".query(codec)

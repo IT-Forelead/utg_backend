@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import cats.effect.Concurrent
 import cats.effect.Sync
+import cats.implicits.catsSyntaxOptionId
 import com.github.tototoshi.csv.CSVWriter
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
@@ -133,5 +134,12 @@ object dto {
       fuelLevelSensor: Option[NonNegDouble],
       fuelTankVolume: Option[NonNegDouble],
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain(branch: Option[domain.Branch], vehicleCategory: domain.VehicleCategory): domain.Vehicle =
+      this
+        .into[domain.Vehicle]
+        .withFieldConst(_.branch, branch)
+        .withFieldConst(_.vehicleCategory, vehicleCategory.some)
+        .transform
+  }
 }
