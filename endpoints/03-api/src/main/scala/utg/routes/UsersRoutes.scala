@@ -18,11 +18,15 @@ import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
-import utg.domain.args.users.{CreateRoleInput, UpdateUserInput, UserFilters, UserInput}
+import utg.domain.args.users.CreateRoleInput
+import utg.domain.args.users.UpdateUserInput
+import utg.domain.args.users.UserFilters
+import utg.domain.args.users.UserInput
 import utg.domain.auth.Credentials
 import utg.domain.enums.Privilege
 import utg.repos.sql.dto.User
@@ -67,17 +71,22 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
         users.get(create).flatMap(Ok(_))
       }
 
-    case ar @ POST -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
-      ar.req.decodeR[UserFilters] { filter =>
-        users
-          .getAsStream(filter)
-          .map { report =>
-            csvResponse(
-              report.through(User.makeCsv[F]),
-              "Users_Report.csv",
-            )
-          }
-      }
+    case GET -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
+      users
+        .getAsStream(UserFilters())
+        .map { report =>
+          csvResponse(
+            report.through(User.makeCsv[F]),
+            "Users_Report.csv",
+          )
+        }
+//      for {
+//        report <- users.getAsStream(UserFilters())
+//        res <- Ok(report.through(User.makeCsv[F]))
+//      } yield res
+//        .withContentType(`Content-Type`(MediaType.text.csv, Charset.`UTF-8`))
+//        .putHeaders(`Content-Disposition`("attachment", Map(ci"filename" -> "Users_Report.csv")))
+
 
     case GET -> Root / "roles" as user if user.access(Privilege.ViewUsers) =>
       roles.getAll.flatMap(Ok(_))
