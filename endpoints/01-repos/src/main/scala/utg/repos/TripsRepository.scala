@@ -1,5 +1,6 @@
 package utg.repos
 
+import cats.data.NonEmptyList
 import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits._
@@ -8,6 +9,7 @@ import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all._
 
 import utg.domain.ResponseData
+import utg.domain.TripId
 import utg.domain.args.trips.TripFilters
 import utg.repos.sql.AccompanyingPersonsSql
 import utg.repos.sql.TripsSql
@@ -17,6 +19,9 @@ trait TripsRepository[F[_]] {
   def create(trip: dto.Trip): F[Unit]
   def createAccompanyingPersons(inputList: List[dto.AccompanyingPerson]): F[Unit]
   def get(filters: TripFilters): F[ResponseData[dto.Trip]]
+  def findAccompanyingPersonByIds(
+      ids: List[TripId]
+    ): F[Map[TripId, List[dto.AccompanyingPerson]]]
 }
 
 object TripsRepository {
@@ -42,5 +47,17 @@ object TripsRepository {
           ResponseData(list, count)
         }
     }
+
+    override def findAccompanyingPersonByIds(
+        ids: List[TripId]
+      ): F[Map[TripId, List[dto.AccompanyingPerson]]] =
+      NonEmptyList
+        .fromList(ids)
+        .fold(Map.empty[TripId, List[dto.AccompanyingPerson]].pure[F]) { tIds =>
+          val tripIds = tIds.toList
+          AccompanyingPersonsSql.findByTripIds(tripIds).queryList(tripIds).map {
+            _.groupBy(_.tripId)
+          }
+        }
   }
 }

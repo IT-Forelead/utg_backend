@@ -26,4 +26,5 @@ case class Trip(
     driver: Option[User],
     trailer: Option[Vehicle],
     semiTrailer: Option[Vehicle],
+    accompanyingPersons: Option[List[User]],
   )

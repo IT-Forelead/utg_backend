@@ -77,11 +77,21 @@ object TripsAlgebra {
       override def get(filters: TripFilters): F[ResponseData[Trip]] =
         for {
           dtoTrips <- tripsRepository.get(filters)
+          accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(
+            dtoTrips.data.map(_.id)
+          )
+          usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
+          userById <- usersRepository.findByIds(usersIds)
           vehicles <- vehicleRepository.findByIds(dtoTrips.data.map(_.vehicleId))
           drivers <- usersRepository.findByIds(dtoTrips.data.map(_.driverId))
           trailers <- vehicleRepository.findByIds(dtoTrips.data.flatMap(_.trailerId))
           semiTrailers <- vehicleRepository.findByIds(dtoTrips.data.flatMap(_.semiTrailerId))
           trip = dtoTrips.data.map { t =>
+            val accompanyingUsers = accompanyingByTripId
+              .get(t.id)
+              .map(_.flatMap { ap =>
+                userById.get(ap.userId)
+              })
             Trip(
               id = t.id,
               createdAt = t.createdAt,
@@ -97,6 +107,7 @@ object TripsAlgebra {
               driver = drivers.get(t.driverId),
               trailer = t.trailerId.flatMap(trailers.get),
               semiTrailer = t.semiTrailerId.flatMap(semiTrailers.get),
+              accompanyingPersons = accompanyingUsers,
             )
           }
         } yield dtoTrips.copy(data = trip)

@@ -6,15 +6,9 @@ import caliban.uploads.FileMeta
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.data.OptionT
-import cats.implicits.catsSyntaxApplicativeErrorId
-import cats.implicits.catsSyntaxApplicativeId
-import cats.implicits.catsSyntaxOptionId
-import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
-import cats.implicits.toTraverseOps
+import cats.implicits._
 import uz.scala.aws.s3.S3Client
-import uz.scala.syntax.refined.commonSyntaxAutoRefineOptV
-import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+import uz.scala.syntax.refined._
 
 import utg.domain.Asset
 import utg.domain.Asset.AssetInfo
