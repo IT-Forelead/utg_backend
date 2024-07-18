@@ -12,20 +12,23 @@ import utg.effects.GenUUID
 import utg.repos.BranchesRepository
 import utg.repos.VehicleCategoriesRepository
 import utg.repos.VehiclesRepository
-import utg.repos.sql.{dto, vehicleType}
+import utg.repos.sql.dto
 import utg.utils.ID
 
 trait VehiclesAlgebra[F[_]] {
   def create(vehicleInput: VehicleInput): F[VehicleId]
   def get(filters: VehicleFilters): F[ResponseData[Vehicle]]
+  def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]]
 }
 
 object VehiclesAlgebra {
-  def make[F[_]: MonadThrow: Calendar: GenUUID](
+  def make[F[_]: Calendar: GenUUID](
       vehiclesRepository: VehiclesRepository[F],
       branchesRepository: BranchesRepository[F],
       vehicleCategoriesRepository: VehicleCategoriesRepository[F],
-    ): VehiclesAlgebra[F] =
+    )(implicit
+      F: MonadThrow[F],
+     ): VehiclesAlgebra[F] =
     new VehiclesAlgebra[F] {
       override def create(vehicleInput: VehicleInput): F[VehicleId] =
         for {
@@ -55,34 +58,13 @@ object VehiclesAlgebra {
         } yield id
 
       override def get(filters: VehicleFilters): F[ResponseData[Vehicle]] =
-        for {
-          dtoVehicles <- vehiclesRepository.get(filters)
-          branches <- branchesRepository.findByIds(dtoVehicles.data.map(_.branchId))
-          vehicleCategories <- vehicleCategoriesRepository.findByIds(
-            dtoVehicles.data.map(_.vehicleCategoryId)
-          )
-          vehicles = dtoVehicles.data.map { v =>
-            Vehicle(
-              id = v.id,
-              createdAt = v.createdAt,
-              branch = branches.get(v.branchId),
-              vehicleCategory = vehicleCategories.get(v.vehicleCategoryId),
-              vehicleType = v.vehicleType,
-              brand = v.brand,
-              registeredNumber = v.registeredNumber,
-              inventoryNumber = v.inventoryNumber,
-              yearOfRelease = v.yearOfRelease,
-              bodyNumber = v.bodyNumber,
-              chassisNumber = v.chassisNumber,
-              engineNumber = v.engineNumber,
-              conditionType = v.conditionType,
-              fuelType = v.fuelType,
-              description = v.description,
-              gpsTracking = v.gpsTracking,
-              fuelLevelSensor = v.fuelLevelSensor,
-              fuelTankVolume = v.fuelTankVolume,
-            )
+        vehiclesRepository.get(filters)
+
+      override def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]] =
+        F.pure {
+          vehiclesRepository.getAsStream(filters).evalMap { vehicle =>
+            vehiclesRepository.makeVehicle(vehicle)
           }
-        } yield dtoVehicles.copy(data = vehicles)
+        }
     }
 }
