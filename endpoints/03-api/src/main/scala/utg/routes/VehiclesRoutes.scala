@@ -45,16 +45,14 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
         vehiclesAlgebra.get(create).flatMap(Ok(_))
       }
 
-    case ar @ POST -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
-      ar.req.decodeR[VehicleFilters] { filter =>
-        vehiclesAlgebra
-          .getAsStream(filter)
-          .map { report =>
-            csvResponse(
-              report.through(makeCsv[F]),
-              "Vehicles_Report.csv",
-            )
-          }
-      }
+    case GET -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
+      vehiclesAlgebra
+        .getAsStream(VehicleFilters())
+        .map { report =>
+          csvResponse(
+            report.through(makeCsv[F]),
+            "Vehicles_Report.csv",
+          )
+        }
   }
 }

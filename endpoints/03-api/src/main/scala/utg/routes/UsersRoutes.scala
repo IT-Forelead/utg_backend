@@ -80,13 +80,6 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
             "Users_Report.csv",
           )
         }
-//      for {
-//        report <- users.getAsStream(UserFilters())
-//        res <- Ok(report.through(User.makeCsv[F]))
-//      } yield res
-//        .withContentType(`Content-Type`(MediaType.text.csv, Charset.`UTF-8`))
-//        .putHeaders(`Content-Disposition`("attachment", Map(ci"filename" -> "Users_Report.csv")))
-
 
     case GET -> Root / "roles" as user if user.access(Privilege.ViewUsers) =>
       roles.getAll.flatMap(Ok(_))
