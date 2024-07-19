@@ -2,14 +2,21 @@ package utg.routes
 
 import cats.MonadThrow
 import cats.effect.Async
-import cats.implicits.{toFlatMapOps, toFunctorOps}
-import org.http4s.{AuthedRoutes, Charset, Headers, MediaType, Response}
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
+import org.http4s.AuthedRoutes
+import org.http4s.Charset
+import org.http4s.Headers
+import org.http4s.MediaType
+import org.http4s.Response
 import org.http4s.circe.JsonDecoder
-import org.http4s.headers.{`Content-Disposition`, `Content-Type`}
+import org.http4s.headers.`Content-Disposition`
+import org.http4s.headers.`Content-Type`
 import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
 import utg.algebras.BranchesAlgebra
 import utg.domain.AuthedUser
 import utg.domain.BranchCsvGenerator.makeCsv

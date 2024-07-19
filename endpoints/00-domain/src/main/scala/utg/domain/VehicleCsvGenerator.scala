@@ -1,12 +1,13 @@
 package utg.domain
 
-import cats.effect.{Concurrent, Sync}
-import com.github.tototoshi.csv.CSVWriter
-import fs2.text.utf8
-
 import java.io.StringWriter
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
+import cats.effect.Concurrent
+import cats.effect.Sync
+import com.github.tototoshi.csv.CSVWriter
+import fs2.text.utf8
 
 object VehicleCsvGenerator {
   def writeAsCsv(rows: List[String]): String = {
@@ -38,7 +39,7 @@ object VehicleCsvGenerator {
       "Fuel Level Sensor",
       "Fuel Tank Volume",
     )
-  private def toCSVField(vehicle: Vehicle): List[String] = {
+  private def toCSVField(vehicle: Vehicle): List[String] =
     List[String](
       ldtToString(vehicle.createdAt),
       vehicle.vehicleType.entryName,
@@ -58,7 +59,6 @@ object VehicleCsvGenerator {
       vehicle.fuelLevelSensor.map(_.value).getOrElse(0.0).toString,
       vehicle.fuelTankVolume.map(_.value).getOrElse(0.0).toString,
     )
-  }
 
   def makeCsv[F[_]: Concurrent: Sync]: fs2.Pipe[F, Vehicle, Byte] =
     report =>

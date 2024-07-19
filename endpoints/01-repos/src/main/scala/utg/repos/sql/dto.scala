@@ -136,7 +136,10 @@ object dto {
       fuelTankVolume: Option[NonNegDouble],
       deleted: Boolean = false,
     ) {
-    def toDomain(branch: Option[domain.Branch], vehicleCategory: domain.VehicleCategory): domain.Vehicle =
+    def toDomain(
+        branch: Option[domain.Branch],
+        vehicleCategory: domain.VehicleCategory,
+      ): domain.Vehicle =
       this
         .into[domain.Vehicle]
         .withFieldConst(_.branch, branch)

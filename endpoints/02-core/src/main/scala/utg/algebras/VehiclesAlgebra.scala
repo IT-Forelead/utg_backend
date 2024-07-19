@@ -28,8 +28,8 @@ object VehiclesAlgebra {
       branchesRepository: BranchesRepository[F],
       vehicleCategoriesRepository: VehicleCategoriesRepository[F],
     )(implicit
-      F: MonadThrow[F],
-     ): VehiclesAlgebra[F] =
+      F: MonadThrow[F]
+    ): VehiclesAlgebra[F] =
     new VehiclesAlgebra[F] {
       override def create(vehicleInput: VehicleInput): F[VehicleId] =
         for {

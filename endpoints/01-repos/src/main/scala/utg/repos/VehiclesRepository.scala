@@ -108,7 +108,7 @@ object VehiclesRepository {
 
     override def get(filters: VehicleFilters): F[ResponseData[Vehicle]] = {
       val af =
-        VehiclesSql.get(filters).paginateOpt(filters.limit.map(_.value), filters.page.map(_.value))
+        VehiclesSql.get(filters).paginateOpt(filters.limit, filters.page)
       af.fragment
         .query(VehiclesSql.codec *: int8)
         .queryList(af.argument)
@@ -153,7 +153,7 @@ object VehiclesRepository {
 
     override def getAsStream(filters: VehicleFilters): fs2.Stream[F, dto.Vehicle] = {
       val af =
-        VehiclesSql.get(filters).paginateOpt(filters.limit.map(_.value), filters.page.map(_.value))
+        VehiclesSql.get(filters).paginateOpt(filters.limit, filters.page)
       af.fragment.query(VehiclesSql.codec *: int8).queryStream(af.argument).map(_._1)
     }
   }

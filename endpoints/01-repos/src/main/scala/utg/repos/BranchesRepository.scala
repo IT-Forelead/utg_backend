@@ -6,7 +6,6 @@ import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits._
 import skunk._
-import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
