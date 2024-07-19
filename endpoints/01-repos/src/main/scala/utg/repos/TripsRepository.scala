@@ -19,6 +19,7 @@ trait TripsRepository[F[_]] {
   def create(trip: dto.Trip): F[Unit]
   def createAccompanyingPersons(inputList: List[dto.AccompanyingPerson]): F[Unit]
   def get(filters: TripFilters): F[ResponseData[dto.Trip]]
+  def findById(id: TripId): F[Option[dto.Trip]]
   def findAccompanyingPersonByIds(
       ids: List[TripId]
     ): F[Map[TripId, List[dto.AccompanyingPerson]]]
@@ -32,9 +33,8 @@ object TripsRepository {
     override def create(trip: dto.Trip): F[Unit] =
       TripsSql.insert.execute(trip)
 
-    override def createAccompanyingPersons(
-        inputList: List[dto.AccompanyingPerson]
-      ): F[Unit] = AccompanyingPersonsSql.insert(inputList).execute(inputList)
+    override def createAccompanyingPersons(inputList: List[dto.AccompanyingPerson]): F[Unit] =
+      AccompanyingPersonsSql.insert(inputList).execute(inputList)
 
     override def get(filters: TripFilters): F[ResponseData[dto.Trip]] = {
       val af = TripsSql.get(filters).paginateOpt(filters.limit, filters.offset)
@@ -47,6 +47,9 @@ object TripsRepository {
           ResponseData(list, count)
         }
     }
+
+    override def findById(id: TripId): F[Option[dto.Trip]] =
+      TripsSql.findById.queryOption(id)
 
     override def findAccompanyingPersonByIds(
         ids: List[TripId]

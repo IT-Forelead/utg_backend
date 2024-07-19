@@ -5,17 +5,23 @@ import skunk.codec.all.bool
 import skunk.codec.all.date
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
+
 import utg.domain.TripId
 import utg.domain.args.trips.TripFilters
 
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
     (id *: zonedDateTime *: date *: date.opt *: nes *: nes.opt *: nes.opt *: nes.opt *: workingModeType
-      *: nes.opt *: VehiclesSql.id *: UsersSql.id *: VehiclesSql.id.opt *: VehiclesSql.id.opt *: bool)
+      *: nes.opt *: VehiclesSql.id *: UsersSql.id *: VehiclesSql
+        .id
+        .opt *: VehiclesSql.id.opt *: bool)
       .to[dto.Trip]
 
   val insert: Command[dto.Trip] =
     sql"""INSERT INTO trips VALUES ($codec)""".command
+
+  val findById: Query[TripId, dto.Trip] =
+    sql"""SELECT * FROM trips WHERE deleted = false AND id = $id""".query(codec)
 
   def get(filters: TripFilters): AppliedFragment = {
     val searchFilters = List(
@@ -29,7 +35,7 @@ private[repos] object TripsSql extends Sql[TripId] {
     )
 
     val baseQuery: AppliedFragment =
-      sql"""SELECT *, COUNT(*) OVER() AS total FROM trips""".apply(Void)
-    baseQuery.whereAndOpt(searchFilters)
+      sql"""SELECT *, COUNT(*) OVER() AS total FROM trips WHERE deleted = false""".apply(Void)
+    baseQuery.andOpt(searchFilters)
   }
 }

@@ -3,7 +3,9 @@ package utg.repos.sql
 import skunk._
 import skunk.codec.all.bool
 import skunk.implicits._
-import utg.domain.{AccompanyingPersonId, TripId}
+
+import utg.domain.AccompanyingPersonId
+import utg.domain.TripId
 
 private[repos] object AccompanyingPersonsSql extends Sql[AccompanyingPersonId] {
   private[repos] val codec =
@@ -13,5 +15,6 @@ private[repos] object AccompanyingPersonsSql extends Sql[AccompanyingPersonId] {
     sql"""INSERT INTO trip_accompanying_persons VALUES ${codec.values.list(item)}""".command
 
   def findByTripIds(ids: List[TripId]): Query[ids.type, dto.AccompanyingPerson] =
-    sql"""SELECT * FROM trip_accompanying_persons WHERE trip_id IN (${TripsSql.id.values.list(ids)})""".query(codec)
+    sql"""SELECT * FROM trip_accompanying_persons WHERE trip_id IN (${TripsSql.id.values.list(ids)})"""
+      .query(codec)
 }

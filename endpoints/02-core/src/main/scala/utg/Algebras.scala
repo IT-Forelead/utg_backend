@@ -58,7 +58,7 @@ object Algebras {
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
       vehicles = VehiclesAlgebra.make[F](vehicles, branches, vehicleCategories),
       trips = TripsAlgebra.make[F](trips, users, vehicles),
-      tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators)
+      tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
     )
   }
 }

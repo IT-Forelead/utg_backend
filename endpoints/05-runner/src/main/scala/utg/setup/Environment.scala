@@ -10,7 +10,6 @@ import cats.effect.std.Random
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.NoOp.instance
 import eu.timepit.refined.pureconfig._
-import eu.timepit.refined.types.string.NonEmptyString
 import org.http4s.server
 import org.typelevel.log4cats.Logger
 import pureconfig.generic.auto.exportReader
@@ -20,12 +19,15 @@ import uz.scala.flyway.Migrations
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.redis.RedisClient
 import uz.scala.skunk.SkunkSession
-import utg.{Algebras, Phone, Repositories}
+
+import utg.Algebras
+import utg.Phone
+import utg.Repositories
 import utg.auth.impl.Auth
 import utg.auth.impl.LiveMiddleware
 import utg.domain.AuthedUser
 import utg.domain.auth.AccessCredentials
-import utg.http.{Environment => ServerEnvironment}
+import utg.http.{ Environment => ServerEnvironment }
 import utg.utils.ConfigLoader
 
 case class Environment[F[_]: Async: Logger: Dispatcher: Random](

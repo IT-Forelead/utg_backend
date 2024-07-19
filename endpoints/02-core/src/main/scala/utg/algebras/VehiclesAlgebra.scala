@@ -2,6 +2,7 @@ package utg.algebras
 
 import cats.MonadThrow
 import cats.implicits._
+
 import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleId
@@ -12,7 +13,7 @@ import utg.effects.GenUUID
 import utg.repos.BranchesRepository
 import utg.repos.VehicleCategoriesRepository
 import utg.repos.VehiclesRepository
-import utg.repos.sql.{dto, vehicleType}
+import utg.repos.sql.dto
 import utg.utils.ID
 
 trait VehiclesAlgebra[F[_]] {

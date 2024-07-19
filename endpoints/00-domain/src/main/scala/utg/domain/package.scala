@@ -1,5 +1,7 @@
 package utg
 
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.util.UUID
 
 import scala.concurrent.duration.FiniteDuration
@@ -20,8 +22,6 @@ import pureconfig.error.FailureReason
 import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-import java.security.MessageDigest
-import java.math.BigInteger
 
 import utg.utils.uuid
 
@@ -47,8 +47,6 @@ package object domain {
   @newtype case class JwtAccessTokenKey(secret: NonEmptyString)
   @derive(eqv, show, uuid)
   @newtype case class TripVehicleIndicatorId(value: UUID)
-  @derive(eqv, show, uuid)
-  @newtype case class TripId(value: UUID)
 
   object JwtAccessTokenKey {
     implicit val reader: ConfigReader[JwtAccessTokenKey] =
@@ -78,8 +76,7 @@ package object domain {
   def generateShortHash(input: String): String = {
     val md = MessageDigest.getInstance("SHA-256")
     val hashBytes = md.digest(input.getBytes("UTF-8"))
-    val hashString = new BigInteger(1, hashBytes).toString(36)  // Using base-36 encoding
+    val hashString = new BigInteger(1, hashBytes).toString(36) // Using base-36 encoding
     hashString.take(6)
   }
-
 }

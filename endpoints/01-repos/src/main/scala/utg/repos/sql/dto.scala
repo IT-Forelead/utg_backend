@@ -163,14 +163,14 @@ object dto {
 
   case class TripVehicleIndicator(
       id: TripVehicleIndicatorId,
+      createdAt: ZonedDateTime,
       tripId: TripId,
       vehicleId: VehicleId,
-      createdAt: ZonedDateTime,
-      indicator_type: VehicleIndicatorType,
-      registeredAt: ZonedDateTime,
-      paidDistance: Option[NonEmptyString],
-      odometerIndicator: NonEmptyString,
+      actionType: VehicleIndicatorActionType,
+      scheduledTime: ZonedDateTime,
       currentDateTime: ZonedDateTime,
+      odometerIndicator: NonNegDouble,
+      paidDistance: NonNegDouble,
       deleted: Boolean = false,
     )
 }

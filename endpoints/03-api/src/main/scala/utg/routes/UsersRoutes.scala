@@ -18,11 +18,15 @@ import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
-import utg.domain.args.users.{CreateRoleInput, UpdateUserInput, UserFilters, UserInput}
+import utg.domain.args.users.CreateRoleInput
+import utg.domain.args.users.UpdateUserInput
+import utg.domain.args.users.UserFilters
+import utg.domain.args.users.UserInput
 import utg.domain.auth.Credentials
 import utg.domain.enums.Privilege
 import utg.repos.sql.dto.User
