@@ -5,20 +5,18 @@ import cats.Applicative
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.effect.std.Random
-import cats.implicits.catsSyntaxApplicativeId
-import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
-import cats.implicits.toTraverseOps
+import cats.implicits._
 import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.syntax.refined._
+
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
-import utg.domain.args.users.{UpdateUserInput, UpdateUserRole, UserFilters, UserInput}
-import utg.domain.auth.{AccessCredentials, Credentials}
+import utg.domain.args.users._
+import utg.domain.auth._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
@@ -37,9 +35,7 @@ trait UsersAlgebra[F[_]] {
       userInput: UpdateUserInput,
       fileMeta: Option[FileMeta] = None,
     ): F[Unit]
-  def delete(
-      id: UserId,
-    ): F[Unit]
+  def delete(id: UserId): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
   def changePassword(changePassword: Credentials): F[Unit]
 }
@@ -62,8 +58,9 @@ object UsersAlgebra {
 
       override def findByIds(ids: List[UserId]): F[Map[UserId, User]] =
         NonEmptyList.fromList(ids).fold(Map.empty[UserId, User].pure[F]) { userIds =>
-          usersRepository.findByIds(userIds)
+          usersRepository.findByIds(userIds.toList)
         }
+
       override def create(userInput: UserInput): F[UserId] =
         for {
           id <- ID.make[F, UserId]
@@ -134,6 +131,5 @@ object UsersAlgebra {
         F.pure {
           usersRepository.getAsStream(filters)
         }
-
     }
 }

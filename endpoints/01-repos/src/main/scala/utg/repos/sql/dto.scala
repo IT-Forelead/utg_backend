@@ -1,6 +1,7 @@
 package utg.repos.sql
 
 import java.io.StringWriter
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -142,4 +143,42 @@ object dto {
         .withFieldConst(_.vehicleCategory, vehicleCategory.some)
         .transform
   }
+
+  case class Trip(
+      id: TripId,
+      createdAt: ZonedDateTime,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      serialNumber: NonEmptyString,
+      firstTab: Option[NonEmptyString],
+      secondTab: Option[NonEmptyString],
+      thirdTab: Option[NonEmptyString],
+      workingMode: WorkingModeType,
+      summation: Option[NonEmptyString],
+      vehicleId: VehicleId,
+      driverId: UserId,
+      trailerId: Option[VehicleId],
+      semiTrailerId: Option[VehicleId],
+      deleted: Boolean = false,
+    )
+
+  case class AccompanyingPerson(
+      id: AccompanyingPersonId,
+      tripId: TripId,
+      userId: UserId,
+      deleted: Boolean = false,
+    )
+
+  case class TripVehicleIndicator(
+      id: TripVehicleIndicatorId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      actionType: VehicleIndicatorActionType,
+      scheduledTime: ZonedDateTime,
+      currentDateTime: ZonedDateTime,
+      odometerIndicator: NonNegDouble,
+      paidDistance: NonNegDouble,
+      deleted: Boolean = false,
+    )
 }

@@ -8,13 +8,13 @@ import cats.implicits._
 import skunk._
 import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all._
-import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.domain.BranchId
 import utg.domain.RegionId
 import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleCategory
+import utg.domain.VehicleId
 import utg.domain.args.vehicles.VehicleFilters
 import utg.repos.sql.BranchesSql
 import utg.repos.sql.RegionsSql
@@ -27,6 +27,7 @@ trait VehiclesRepository[F[_]] {
   def get(filters: VehicleFilters): F[ResponseData[Vehicle]]
   def getAsStream(filters: VehicleFilters): fs2.Stream[F, dto.Vehicle]
   def makeVehicle(vehicleDto: dto.Vehicle): F[Vehicle]
+  def findByIds(ids: List[VehicleId]): F[Map[VehicleId, Vehicle]]
 }
 
 object VehiclesRepository {
@@ -118,6 +119,37 @@ object VehiclesRepository {
           }
         }
     }
+
+    override def findByIds(
+        ids: List[VehicleId]
+      ): F[Map[VehicleId, Vehicle]] =
+      NonEmptyList.fromList(ids).fold(Map.empty[VehicleId, Vehicle].pure[F]) { rIds =>
+        val branchIds = rIds.toList
+        VehiclesSql.findByIds(branchIds).queryList(branchIds).map {
+          _.map { dto =>
+            dto.id -> Vehicle(
+              id = dto.id,
+              createdAt = dto.createdAt,
+              vehicleType = dto.vehicleType,
+              branch = None,
+              vehicleCategory = None,
+              brand = dto.brand,
+              registeredNumber = dto.registeredNumber,
+              inventoryNumber = dto.inventoryNumber,
+              yearOfRelease = dto.yearOfRelease,
+              bodyNumber = dto.bodyNumber,
+              chassisNumber = dto.chassisNumber,
+              engineNumber = dto.engineNumber,
+              conditionType = dto.conditionType,
+              fuelType = dto.fuelType,
+              description = dto.description,
+              gpsTracking = dto.gpsTracking,
+              fuelLevelSensor = dto.fuelLevelSensor,
+              fuelTankVolume = dto.fuelTankVolume,
+            )
+          }.toMap
+        }
+      }
 
     override def getAsStream(filters: VehicleFilters): fs2.Stream[F, dto.Vehicle] = {
       val af =

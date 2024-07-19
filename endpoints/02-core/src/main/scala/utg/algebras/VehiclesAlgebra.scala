@@ -2,6 +2,7 @@ package utg.algebras
 
 import cats.MonadThrow
 import cats.implicits._
+
 import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleId

@@ -47,6 +47,10 @@ package object sql {
   val fuelType: Codec[FuelType] = `enum`[FuelType](FuelType, Type("fuel_type"))
   val gpsTrackingType: Codec[GpsTrackingType] =
     `enum`[GpsTrackingType](GpsTrackingType, Type("gps_tracking_type"))
+  val workingModeType: Codec[WorkingModeType] =
+    `enum`[WorkingModeType](WorkingModeType, Type("working_mode_type"))
+  val vehicleIndicatorActionType: Codec[VehicleIndicatorActionType] =
+    `enum`[VehicleIndicatorActionType](VehicleIndicatorActionType, Type("vehicle_indicator_action_type"))
 
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)

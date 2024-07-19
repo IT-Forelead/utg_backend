@@ -18,6 +18,9 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
   val insert: Command[dto.Vehicle] =
     sql"""INSERT INTO vehicles VALUES ($codec)""".command
 
+  def findByIds(ids: List[VehicleId]): Query[ids.type, dto.Vehicle] =
+    sql"""SELECT * FROM vehicles WHERE id IN (${id.values.list(ids)})""".query(codec)
+
   def get(filters: VehicleFilters): AppliedFragment = {
     val searchFilters = List(
       filters.brand.map(s => s"%$s%").map(sql"v.brand ILIKE $varchar"),

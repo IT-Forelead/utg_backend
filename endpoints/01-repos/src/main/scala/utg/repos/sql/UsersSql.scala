@@ -14,7 +14,9 @@ import utg.domain.auth.AccessCredentials
 
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: nes *: nes.opt *: phone *: RolesSql.id *: AssetsSql.id.opt *: nes.opt)
+    (id *: zonedDateTime *: nes *: nes *: nes.opt *: phone *: RolesSql.id *: AssetsSql
+      .id
+      .opt *: nes.opt)
       .to[dto.User]
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
     (codec *: passwordHash).map {
@@ -46,7 +48,7 @@ private[repos] object UsersSql extends Sql[UserId] {
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
           u.data.phone *: u
             .data
-            .roleId *: u.data.assetId *: u.data.branchCode *: u.password  *: EmptyTuple
+            .roleId *: u.data.assetId *: u.data.branchCode *: u.password *: EmptyTuple
       }
 
   val update: Command[dto.User] =
