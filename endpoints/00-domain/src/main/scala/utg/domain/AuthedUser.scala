@@ -21,6 +21,7 @@ sealed trait AuthedUser {
   val assetId: Option[AssetId]
   def access(privilege: Privilege): Boolean
 }
+
 object AuthedUser {
   @JsonCodec
   case class User(
@@ -32,7 +33,7 @@ object AuthedUser {
       role: Role,
       phone: Phone,
       assetId: Option[AssetId],
-      branch: Option[utg.domain.Branch],
+      branch: Option[Branch],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)
