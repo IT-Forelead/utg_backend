@@ -5,6 +5,8 @@ import cats.data.OptionT
 import cats.implicits._
 import eu.timepit.refined.types.numeric.NonNegDouble
 
+import utg.domain.TripId
+import utg.domain.TripVehicleIndicator
 import utg.domain.TripVehicleIndicatorId
 import utg.domain.args.tripVehicleIndicators.TripVehicleIndicatorInput
 import utg.effects.Calendar
@@ -17,6 +19,7 @@ import utg.utils.ID
 
 trait TripVehicleIndicatorsAlgebra[F[_]] {
   def create(input: TripVehicleIndicatorInput): F[TripVehicleIndicatorId]
+  def getByTripId(tripId: TripId): F[List[TripVehicleIndicator]]
 }
 
 object TripVehicleIndicatorsAlgebra {
@@ -48,5 +51,23 @@ object TripVehicleIndicatorsAlgebra {
               _ <- tripVehicleIndicatorsRepository.create(dtoTripVehicleIndicator)
             } yield id,
         )
+
+      override def getByTripId(tripId: TripId): F[List[TripVehicleIndicator]] =
+        for {
+          dtoVehicleIndicators <- tripVehicleIndicatorsRepository.getByTripId(tripId)
+          regions = dtoVehicleIndicators.map { vi =>
+            TripVehicleIndicator(
+              id = vi.id,
+              createdAt = vi.createdAt,
+              tripId = vi.tripId,
+              vehicleId = vi.vehicleId,
+              actionType = vi.actionType,
+              scheduledTime = vi.scheduledTime,
+              currentDateTime = vi.currentDateTime,
+              odometerIndicator = vi.odometerIndicator,
+              paidDistance = vi.paidDistance,
+            )
+          }
+        } yield regions
     }
 }
