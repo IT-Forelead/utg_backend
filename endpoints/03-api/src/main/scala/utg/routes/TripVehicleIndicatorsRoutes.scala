@@ -18,16 +18,16 @@ import utg.domain.enums.Privilege
 final case class TripVehicleIndicatorsRoutes[F[_]: JsonDecoder: MonadThrow](
     tripVehicleIndicatorsAlgebra: TripVehicleIndicatorsAlgebra[F]
   ) extends Routes[F, AuthedUser] {
-  override val path = "/trips"
+  override val path = "/vehicle-indicators"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "vehicle" / "indicator" / "create" as user
+    case ar @ POST -> Root / "create" as user
          if user.access(Privilege.CreateUser) =>
       ar.req.decodeR[TripVehicleIndicatorInput] { create =>
         tripVehicleIndicatorsAlgebra.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / "vehicle-indicator" / UUIDVar(id) as user
+    case GET -> Root / UUIDVar(id) as user
          if user.access(Privilege.ViewUsers) =>
       tripVehicleIndicatorsAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
   }
