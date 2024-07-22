@@ -44,6 +44,8 @@ package object domain {
   @newtype case class TripId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class AccompanyingPersonId(value: UUID)
+  @derive(eqv, show, uuid)
+  @newtype case class TripDriverTaskId(value: UUID)
   @newtype case class JwtAccessTokenKey(secret: NonEmptyString)
   @derive(eqv, show, uuid)
   @newtype case class TripVehicleIndicatorId(value: UUID)
