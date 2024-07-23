@@ -184,4 +184,28 @@ object dto {
       paidDistance: NonNegDouble,
       deleted: Boolean = false,
     )
+
+  case class TripFuelExpense(
+      id: TripFuelExpenseId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      fuelBrand: Option[NonEmptyString],
+      brandCode: Option[NonEmptyString],
+      fuelGiven: Option[NonNegDouble],
+      fuelAttendant: Option[NonEmptyString],
+      attendantSignature: Option[AssetId],
+      fuelInTank: Option[NonNegDouble],
+      fuelRemaining: Option[NonNegDouble],
+      normChangeCoefficient: Option[NonNegDouble],
+      equipmentWorkingTime: Option[NonNegDouble],
+      engineWorkingTime: Option[NonNegDouble],
+      tankCheckMechanicId: Option[UserId],
+      tankCheckMechanicSignature: Option[AssetId],
+      remainingCheckMechanicId: Option[UserId],
+      remainingCheckMechanicSignature: Option[AssetId],
+      dispatcherId: Option[UserId],
+      dispatcherSignature: Option[AssetId],
+      deleted: Boolean = false,
+    )
 }

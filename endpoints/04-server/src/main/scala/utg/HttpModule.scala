@@ -32,6 +32,7 @@ object HttpModule {
         new BranchesRoutes[F](env.algebras.branches),
         new TripsRoutes[F](env.algebras.trips),
         new TripVehicleIndicatorsRoutes[F](env.algebras.tripVehicleIndicators),
+        new TripFuelExpensesRoutes[F](env.algebras.tripFuelExpensesAlgebra),
       )
       .map { r =>
         Router(

@@ -16,6 +16,7 @@ case class Repositories[F[_]](
     vehicles: VehiclesRepository[F],
     trips: TripsRepository[F],
     tripVehicleIndicators: TripVehicleIndicatorsRepository[F],
+    tripFuelExpenses: TripFuelExpensesRepository[F],
   )
 
 object Repositories {
@@ -33,5 +34,6 @@ object Repositories {
       vehicles = VehiclesRepository.make[F],
       trips = TripsRepository.make[F],
       tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
+      tripFuelExpenses = TripFuelExpensesRepository.make[F],
     )
 }
