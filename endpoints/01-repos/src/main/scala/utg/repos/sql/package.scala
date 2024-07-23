@@ -15,6 +15,7 @@ import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg._
+import utg.domain.SignId
 import utg.domain.enums._
 import utg.effects.IsUUID
 
@@ -54,6 +55,7 @@ package object sql {
       VehicleIndicatorActionType,
       Type("vehicle_indicator_action_type"),
     )
+  val signId: Codec[SignId] = uuid.imap[SignId](uuid => SignId(uuid))(_.value)
 
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)

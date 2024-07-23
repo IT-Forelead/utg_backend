@@ -184,4 +184,15 @@ object dto {
       paidDistance: NonNegDouble,
       deleted: Boolean = false,
     )
+
+  case class LineDelay(
+      id: LineDelayId,
+      name: NonEmptyString,
+      startTime: ZonedDateTime,
+      endTime: ZonedDateTime,
+      signId: SignId,
+    ) {
+    def toDomain: domain.LineDelay =
+      this.transformInto[domain.LineDelay]
+  }
 }
