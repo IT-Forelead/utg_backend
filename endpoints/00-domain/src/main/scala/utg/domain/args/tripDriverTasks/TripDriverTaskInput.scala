@@ -1,13 +1,14 @@
 package utg.domain.args.tripDriverTasks
 
+import java.time.ZonedDateTime
+
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
-import utg.domain.TripId
-
-import java.time.ZonedDateTime
 import io.circe.refined._
+
+import utg.domain.TripId
 
 @JsonCodec
 case class TripDriverTaskInput(

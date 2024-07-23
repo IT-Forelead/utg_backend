@@ -2,22 +2,33 @@ package utg.routes
 
 import cats.MonadThrow
 import cats.effect.Async
-import cats.implicits.{toFlatMapOps, toFunctorOps}
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
 import io.estatico.newtype.ops.toCoercibleIdOps
-import org.http4s.{AuthedRoutes, Charset, Headers, MediaType, Response}
+import org.http4s.AuthedRoutes
+import org.http4s.Charset
+import org.http4s.Headers
+import org.http4s.MediaType
+import org.http4s.Response
 import org.http4s.circe.JsonDecoder
-import org.http4s.headers.{`Content-Disposition`, `Content-Type`}
+import org.http4s.headers.`Content-Disposition`
+import org.http4s.headers.`Content-Type`
 import org.typelevel.ci.CIStringSyntax
-import utg.algebras.TripDriverTasksAlgebra
-import utg.domain.args.tripDriverTasks.{TripDriverTaskFilters, TripDriverTaskInput, UpdateTripDriverTaskInput}
-import utg.domain.{AuthedUser, TripDriverTaskId}
-import utg.domain.enums.Privilege
-import uz.scala.http4s.syntax.all.{deriveEntityEncoder, http4SyntaxReqOps}
+import uz.scala.http4s.syntax.all.deriveEntityEncoder
+import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
+import utg.algebras.TripDriverTasksAlgebra
+import utg.domain.AuthedUser
 import utg.domain.TripDriverTaskCsvGenerator.makeCsv
+import utg.domain.TripDriverTaskId
+import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
+import utg.domain.args.tripDriverTasks.TripDriverTaskInput
+import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput
+import utg.domain.enums.Privilege
 
 final case class TripDriverTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
-                                                                              tripDriverTasks: TripDriverTasksAlgebra[F],
+    tripDriverTasks: TripDriverTasksAlgebra[F]
   ) extends Routes[F, AuthedUser] {
   override val path = "/trip-driver-tasks"
 

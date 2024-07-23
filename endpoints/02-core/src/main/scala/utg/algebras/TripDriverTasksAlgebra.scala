@@ -1,15 +1,20 @@
 package utg.algebras
 
 import cats.MonadThrow
-import cats.implicits._
 import cats.effect.std.Random
+import cats.implicits._
 import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
+
+import utg.domain.ResponseData
 import utg.domain.TripDriverTask
-import utg.domain.{ResponseData, TripDriverTaskId}
-import utg.domain.args.tripDriverTasks.{TripDriverTaskFilters, TripDriverTaskInput, UpdateTripDriverTaskInput}
-import utg.effects.{Calendar, GenUUID}
+import utg.domain.TripDriverTaskId
+import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
+import utg.domain.args.tripDriverTasks.TripDriverTaskInput
+import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput
+import utg.effects.Calendar
+import utg.effects.GenUUID
 import utg.repos.TripDriverTasksRepository
 import utg.repos.sql.dto
 import utg.utils.ID
@@ -24,17 +29,17 @@ trait TripDriverTasksAlgebra[F[_]] {
       tripDriverTaskInput: UpdateTripDriverTaskInput,
     ): F[Unit]
   def delete(
-      id: TripDriverTaskId,
+      id: TripDriverTaskId
     ): F[Unit]
 }
 object TripDriverTasksAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
-                                             tripDriverTasksRepository: TripDriverTasksRepository[F],
-                                           )(implicit
-                                             F: MonadThrow[F],
-                                             P: PasswordHasher[F, SCrypt],
-                                             logger: Logger[F],
-                                           ): TripDriverTasksAlgebra[F] =
+      tripDriverTasksRepository: TripDriverTasksRepository[F]
+    )(implicit
+      F: MonadThrow[F],
+      P: PasswordHasher[F, SCrypt],
+      logger: Logger[F],
+    ): TripDriverTasksAlgebra[F] =
     new TripDriverTasksAlgebra[F] {
       override def get(filters: TripDriverTaskFilters): F[ResponseData[TripDriverTask]] =
         tripDriverTasksRepository.get(filters)
@@ -56,15 +61,15 @@ object TripDriverTasksAlgebra {
             freightName = tripDriverTaskInput.freightName,
             numberOfInteractions = tripDriverTaskInput.numberOfInteractions,
             distance = tripDriverTaskInput.distance,
-            freightVolume = tripDriverTaskInput.freightVolume
+            freightVolume = tripDriverTaskInput.freightVolume,
           )
           _ <- tripDriverTasksRepository.create(tripDriverTask)
         } yield id
 
       override def update(
-                           id: TripDriverTaskId,
-                           tripDriverTaskInput: UpdateTripDriverTaskInput,
-                         ): F[Unit] =
+          id: TripDriverTaskId,
+          tripDriverTaskInput: UpdateTripDriverTaskInput,
+        ): F[Unit] =
         for {
           _ <- tripDriverTasksRepository.update(id)(
             _.copy(
@@ -91,9 +96,5 @@ object TripDriverTasksAlgebra {
             }
           }
         }
-
     }
 }
-
-
-

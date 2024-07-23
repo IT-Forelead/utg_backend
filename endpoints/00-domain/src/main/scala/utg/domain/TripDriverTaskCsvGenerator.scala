@@ -1,12 +1,13 @@
 package utg.domain
 
-import cats.effect.{Concurrent, Sync}
-import com.github.tototoshi.csv.CSVWriter
-import fs2.text.utf8
-
 import java.io.StringWriter
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
+import cats.effect.Concurrent
+import cats.effect.Sync
+import com.github.tototoshi.csv.CSVWriter
+import fs2.text.utf8
 
 object TripDriverTaskCsvGenerator {
   def writeAsCsv(rows: List[String]): String = {
@@ -27,7 +28,7 @@ object TripDriverTaskCsvGenerator {
       "Freight Name",
       "Number Of Interactions",
       "Distance",
-      "Freight Volume"
+      "Freight Volume",
     )
   private def toCSVField(tripDriverTask: TripDriverTask): List[String] =
     List[String](

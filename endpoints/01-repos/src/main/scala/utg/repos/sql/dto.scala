@@ -169,7 +169,7 @@ object dto {
         driver: Option[domain.AuthedUser.User],
         trailer: Option[domain.Vehicle],
         semiTrailer: Option[domain.Vehicle],
-        accompanyingPersons: Option[List[AuthedUser.User]]
+        accompanyingPersons: Option[List[AuthedUser.User]],
       ): domain.Trip =
       this
         .into[domain.Trip]

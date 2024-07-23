@@ -3,16 +3,23 @@ package utg.repos
 import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
-import cats.implicits.{catsSyntaxApplicativeErrorId, toFunctorOps}
+import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.toFunctorOps
 import skunk.Session
+import skunk._
 import skunk.codec.all.int8
-import utg.domain.{ResponseData, TripDriverTask, TripDriverTaskId}
+import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
+import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
+import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
+import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
+import utg.domain.ResponseData
+import utg.domain.TripDriverTask
+import utg.domain.TripDriverTaskId
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.exception.AError
-import utg.repos.sql.{TripDriverTasksSql, dto}
-import uz.scala.skunk.syntax.all.{skunkSyntaxCommandOps, skunkSyntaxFragmentOps, skunkSyntaxQueryOps}
-import skunk._
-import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+import utg.repos.sql.TripDriverTasksSql
+import utg.repos.sql.dto
 
 trait TripDriverTasksRepository[F[_]] {
   def findById(id: TripDriverTaskId): F[Option[TripDriverTask]]
@@ -29,16 +36,13 @@ object TripDriverTasksRepository {
       implicit
       session: Resource[F, Session[F]]
     ): TripDriverTasksRepository[F] = new TripDriverTasksRepository[F] {
-
-    private def makeTripDriverTasks(dtos: List[dto.TripDriverTask]): List[TripDriverTask] = {
+    private def makeTripDriverTasks(dtos: List[dto.TripDriverTask]): List[TripDriverTask] =
       dtos.map { tripDriverTaskDto =>
         tripDriverTaskDto.toDomain
       }
-    }
 
-    def makeTripDriverTask(tripDriverTaskDto: dto.TripDriverTask): TripDriverTask = {
+    def makeTripDriverTask(tripDriverTaskDto: dto.TripDriverTask): TripDriverTask =
       tripDriverTaskDto.toDomain
-    }
 
     override def findById(id: TripDriverTaskId): F[Option[TripDriverTask]] =
       OptionT(TripDriverTasksSql.findById.queryOption(id)).map(makeTripDriverTask).value
@@ -51,9 +55,12 @@ object TripDriverTasksRepository {
         .get(filters)
         .paginateOpt(filters.limit.map(_.value), filters.page.map(_.value))
       af.fragment.query(TripDriverTasksSql.codec *: int8).queryList(af.argument).map {
-      tripDriverTasksDto =>
-          ResponseData(makeTripDriverTasks(tripDriverTasksDto.map(_.head)), tripDriverTasksDto.headOption.fold(0L)(_.tail.head))
-        }
+        tripDriverTasksDto =>
+          ResponseData(
+            makeTripDriverTasks(tripDriverTasksDto.map(_.head)),
+            tripDriverTasksDto.headOption.fold(0L)(_.tail.head),
+          )
+      }
     }
 
     override def update(
