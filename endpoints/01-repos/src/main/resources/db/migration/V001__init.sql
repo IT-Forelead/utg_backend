@@ -309,6 +309,27 @@ CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
+
+CREATE TABLE IF NOT EXISTS trip_driver_tasks (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  whose_discretion VARCHAR NOT NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  pickup_location VARCHAR NOT NULL,
+  delivery_location VARCHAR NOT NULL,
+  freight_name VARCHAR NOT NULL,
+  number_of_interactions INT NOT NULL,
+  distance DOUBLE PRECISION NULL,
+  freight_volume DOUBLE PRECISION NULL
+);
+
+CREATE TABLE IF NOT EXISTS line_delays (
+  id UUID PRIMARY KEY NOT NULL,
+  name VARCHAR NOT NULL,
+  start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  sign_id UUID NOT NULL
+);
 CREATE TABLE IF NOT EXISTS comlpete_tasks (
   id UUID PRIMARY KEY NOT NULL,
   trip_number VARCHAR NULL,
