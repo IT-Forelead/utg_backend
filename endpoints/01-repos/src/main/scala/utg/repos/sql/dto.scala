@@ -163,7 +163,23 @@ object dto {
       trailerId: Option[VehicleId],
       semiTrailerId: Option[VehicleId],
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain(
+        vehicle: Option[domain.Vehicle],
+        driver: Option[domain.AuthedUser.User],
+        trailer: Option[domain.Vehicle],
+        semiTrailer: Option[domain.Vehicle],
+        accompanyingPersons: Option[List[AuthedUser.User]],
+      ): domain.Trip =
+      this
+        .into[domain.Trip]
+        .withFieldConst(_.vehicle, vehicle)
+        .withFieldConst(_.driver, driver)
+        .withFieldConst(_.trailer, trailer)
+        .withFieldConst(_.semiTrailer, semiTrailer)
+        .withFieldConst(_.accompanyingPersons, accompanyingPersons)
+        .transform
+  }
 
   case class AccompanyingPerson(
       id: AccompanyingPersonId,
@@ -184,6 +200,46 @@ object dto {
       paidDistance: NonNegDouble,
       deleted: Boolean = false,
     )
+
+  case class TripFuelExpense(
+      id: TripFuelExpenseId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      fuelBrand: Option[NonEmptyString],
+      brandCode: Option[NonEmptyString],
+      fuelGiven: Option[NonNegDouble],
+      fuelAttendant: Option[NonEmptyString],
+      attendantSignature: Option[AssetId],
+      fuelInTank: Option[NonNegDouble],
+      fuelRemaining: Option[NonNegDouble],
+      normChangeCoefficient: Option[NonNegDouble],
+      equipmentWorkingTime: Option[NonNegDouble],
+      engineWorkingTime: Option[NonNegDouble],
+      tankCheckMechanicId: Option[UserId],
+      tankCheckMechanicSignature: Option[AssetId],
+      remainingCheckMechanicId: Option[UserId],
+      remainingCheckMechanicSignature: Option[AssetId],
+      dispatcherId: Option[UserId],
+      dispatcherSignature: Option[AssetId],
+      deleted: Boolean = false,
+    )
+
+  case class TripDriverTask(
+      id: TripDriverTaskId,
+      tripId: TripId,
+      whoseDiscretion: NonEmptyString,
+      arrivalTime: ZonedDateTime,
+      pickupLocation: NonEmptyString,
+      deliveryLocation: NonEmptyString,
+      freightName: NonEmptyString,
+      numberOfInteractions: NonNegInt,
+      distance: NonNegDouble,
+      freightVolume: NonNegDouble,
+    ) {
+    def toDomain: domain.TripDriverTask =
+      this.transformInto[domain.TripDriverTask]
+  }
 
   case class LineDelay(
       id: LineDelayId,
