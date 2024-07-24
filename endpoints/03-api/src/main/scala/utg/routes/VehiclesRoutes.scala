@@ -41,17 +41,17 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     )
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[VehicleInput] { create =>
         vehiclesAlgebra.create(create).flatMap(Created(_))
       }
 
-    case ar @ POST -> Root =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[VehicleFilters] { create =>
         vehiclesAlgebra.get(create).flatMap(Ok(_))
       }
 
-    case GET -> Root / "csv" =>
+    case GET -> Root / "csv" as _ =>
       vehiclesAlgebra
         .getAsStream(VehicleFilters())
         .map { report =>

@@ -20,17 +20,17 @@ final case class VehicleCategoriesRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/vehicle-categories"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[VehicleCategoryInput] { input =>
         vehicleCategoriesAlgebra.create(input).flatMap(Created(_))
       }
 
-    case ar @ POST -> Root =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[VehicleCategoryFilters] { filters =>
         vehicleCategoriesAlgebra.get(filters).flatMap(Ok(_))
       }
 
-    case ar @ POST -> Root / "update" =>
+    case ar @ POST -> Root / "update" as _ =>
       ar.req.decodeR[VehicleCategory] { update =>
         vehicleCategoriesAlgebra.update(update).flatMap(Accepted(_))
       }

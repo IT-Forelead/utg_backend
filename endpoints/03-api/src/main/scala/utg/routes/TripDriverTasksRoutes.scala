@@ -44,20 +44,20 @@ final case class TripDriverTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     )
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[TripDriverTaskInput] { create =>
         tripDriverTasks.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(tripDriverTaskId) =>
+    case GET -> Root / UUIDVar(tripDriverTaskId) as _ =>
       tripDriverTasks.findById(tripDriverTaskId.coerce[TripDriverTaskId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[TripDriverTaskFilters] { create =>
         tripDriverTasks.get(create).flatMap(Ok(_))
       }
 
-    case GET -> Root / "csv" =>
+    case GET -> Root / "csv" as _ =>
       tripDriverTasks
         .getAsStream(TripDriverTaskFilters())
         .map { report =>
@@ -67,10 +67,10 @@ final case class TripDriverTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
           )
         }
 
-    case DELETE -> Root / UUIDVar(tripDriverTaskId) =>
+    case DELETE -> Root / UUIDVar(tripDriverTaskId) as _ =>
       tripDriverTasks.delete(tripDriverTaskId.coerce[TripDriverTaskId]).flatMap(Ok(_))
 
-    case ar @ PUT -> Root =>
+    case ar @ PUT -> Root as _ =>
       ar.req.decodeR[UpdateTripDriverTaskInput] { update =>
         tripDriverTasks.update(update.tripDriverTaskId, update).flatMap(Ok(_))
       }

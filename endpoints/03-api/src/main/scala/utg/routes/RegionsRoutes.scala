@@ -16,7 +16,7 @@ final case class RegionsRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/regions"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case GET -> Root =>
+    case GET -> Root as _ =>
       regionsAlgebra.getRegions.flatMap(Ok(_))
   }
 }

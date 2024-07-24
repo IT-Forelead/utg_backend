@@ -24,23 +24,23 @@ final case class LineDelaysRoutes[F[_]: JsonDecoder: MonadThrow: Async](
   override val path = "/line-delays"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[LineDelayInput] { create =>
         lineDelays.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(lineDelayId) =>
+    case GET -> Root / UUIDVar(lineDelayId) as _ =>
       lineDelays.findById(lineDelayId.coerce[LineDelayId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[LineDelayFilters] { create =>
         lineDelays.get(create).flatMap(Ok(_))
       }
 
-    case DELETE -> Root / UUIDVar(lineDelayId) =>
+    case DELETE -> Root / UUIDVar(lineDelayId) as _ =>
       lineDelays.delete(lineDelayId.coerce[LineDelayId]).flatMap(Ok(_))
 
-    case ar @ PUT -> Root =>
+    case ar @ PUT -> Root as _ =>
       ar.req.decodeR[UpdateLineDelayInput] { update =>
         lineDelays.update(update.lineDelayId, update).flatMap(Ok(_))
       }

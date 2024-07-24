@@ -40,20 +40,20 @@ final case class BranchesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     )
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[BranchInput] { create =>
         branchesAlgebra.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root =>
+    case GET -> Root as _ =>
       branchesAlgebra.getBranches.flatMap(Ok(_))
 
-    case ar @ PUT -> Root =>
+    case ar @ PUT -> Root as _ =>
       ar.req.decodeR[UpdateBranchInput] { update =>
         branchesAlgebra.update(update).flatMap(Accepted(_))
       }
 
-    case GET -> Root / "csv" =>
+    case GET -> Root / "csv" as _ =>
       branchesAlgebra
         .getAsStream(BranchFilters())
         .map { report =>

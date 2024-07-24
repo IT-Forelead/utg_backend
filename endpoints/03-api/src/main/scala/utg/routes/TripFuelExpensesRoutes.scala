@@ -20,12 +20,12 @@ final case class TripFuelExpensesRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/fuel-expenses"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[TripFuelExpenseInput] { create =>
         tripFuelExpensesAlgebra.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(id) =>
+    case GET -> Root / UUIDVar(id) as _ =>
       tripFuelExpensesAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
   }
 }

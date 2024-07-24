@@ -19,12 +19,12 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/trips"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[TripInput] { create =>
         tripsAlgebra.create(create).flatMap(Created(_))
       }
 
-    case ar @ POST -> Root =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[TripFilters] { filters =>
         tripsAlgebra.get(filters).flatMap(Ok(_))
       }
