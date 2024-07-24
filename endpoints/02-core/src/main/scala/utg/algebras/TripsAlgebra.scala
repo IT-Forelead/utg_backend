@@ -5,10 +5,13 @@ import cats.data.NonEmptyList
 import cats.implicits._
 
 import utg.domain.AccompanyingPersonId
+import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.Trip
 import utg.domain.TripId
 import utg.domain.UserId
+import utg.domain.Vehicle
+import utg.domain.VehicleId
 import utg.domain.args.trips.TripFilters
 import utg.domain.args.trips.TripInput
 import utg.effects.Calendar
@@ -81,11 +84,30 @@ object TripsAlgebra {
             dtoTrips.data.map(_.id)
           )
           usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
-          userById <- usersRepository.findByIds(usersIds)
-          vehicles <- vehicleRepository.findByIds(dtoTrips.data.map(_.vehicleId))
-          drivers <- usersRepository.findByIds(dtoTrips.data.map(_.driverId))
-          trailers <- vehicleRepository.findByIds(dtoTrips.data.flatMap(_.trailerId))
-          semiTrailers <- vehicleRepository.findByIds(dtoTrips.data.flatMap(_.semiTrailerId))
+          userById <- NonEmptyList.fromList(usersIds).fold(Map.empty[UserId, User].pure[F]) {
+            userIds =>
+              usersRepository.findByIds(userIds.toList)
+          }
+          vehicles <- NonEmptyList
+            .fromList(dtoTrips.data.map(_.vehicleId))
+            .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
+              vehicleRepository.findByIds(vehicleIds.toList)
+            }
+          drivers <- NonEmptyList
+            .fromList(dtoTrips.data.map(_.driverId))
+            .fold(Map.empty[UserId, User].pure[F]) { userIds =>
+              usersRepository.findByIds(userIds.toList)
+            }
+          trailers <- NonEmptyList
+            .fromList(dtoTrips.data.flatMap(_.trailerId))
+            .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
+              vehicleRepository.findByIds(vehicleIds.toList)
+            }
+          semiTrailers <- NonEmptyList
+            .fromList(dtoTrips.data.flatMap(_.semiTrailerId))
+            .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
+              vehicleRepository.findByIds(vehicleIds.toList)
+            }
           trip = dtoTrips.data.map { t =>
             val accompanyingUsers = accompanyingByTripId
               .get(t.id)
