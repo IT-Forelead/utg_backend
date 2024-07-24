@@ -17,6 +17,8 @@ case class Repositories[F[_]](
     trips: TripsRepository[F],
     tripVehicleIndicators: TripVehicleIndicatorsRepository[F],
     tripFuelExpenses: TripFuelExpensesRepository[F],
+    tripDriverTasks: TripDriverTasksRepository[F],
+    lineDelays: LineDelaysRepository[F],
   )
 
 object Repositories {
@@ -35,5 +37,7 @@ object Repositories {
       trips = TripsRepository.make[F],
       tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
       tripFuelExpenses = TripFuelExpensesRepository.make[F],
+      tripDriverTasks = TripDriverTasksRepository.make[F],
+      lineDelays = LineDelaysRepository.make[F],
     )
 }

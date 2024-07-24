@@ -21,14 +21,12 @@ final case class TripVehicleIndicatorsRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/vehicle-indicators"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as user
-         if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[TripVehicleIndicatorInput] { create =>
         tripVehicleIndicatorsAlgebra.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(id) as user
-         if user.access(Privilege.ViewUsers) =>
+    case GET -> Root / UUIDVar(id) as _ =>
       tripVehicleIndicatorsAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
   }
 }

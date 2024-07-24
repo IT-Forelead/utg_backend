@@ -21,7 +21,6 @@ import utg.algebras.BranchesAlgebra
 import utg.domain.AuthedUser
 import utg.domain.BranchCsvGenerator.makeCsv
 import utg.domain.args.branches._
-import utg.domain.enums.Privilege
 
 final case class BranchesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     branchesAlgebra: BranchesAlgebra[F]
@@ -41,20 +40,20 @@ final case class BranchesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     )
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[BranchInput] { create =>
         branchesAlgebra.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root as _ =>
       branchesAlgebra.getBranches.flatMap(Ok(_))
 
-    case ar @ PUT -> Root as user if user.access(Privilege.CreateUser) =>
+    case ar @ PUT -> Root as _ =>
       ar.req.decodeR[UpdateBranchInput] { update =>
         branchesAlgebra.update(update).flatMap(Accepted(_))
       }
 
-    case GET -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root / "csv" as _ =>
       branchesAlgebra
         .getAsStream(BranchFilters())
         .map { report =>

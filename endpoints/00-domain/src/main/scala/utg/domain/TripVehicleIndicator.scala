@@ -19,4 +19,6 @@ case class TripVehicleIndicator(
     currentDateTime: ZonedDateTime,
     odometerIndicator: NonNegDouble,
     paidDistance: NonNegDouble,
+    isFulledEnteredAction: Boolean,
+    isFulledExitAction: Boolean,
   )

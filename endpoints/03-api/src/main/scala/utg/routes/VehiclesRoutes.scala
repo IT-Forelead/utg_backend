@@ -22,7 +22,6 @@ import utg.domain.AuthedUser
 import utg.domain.VehicleCsvGenerator.makeCsv
 import utg.domain.args.vehicles.VehicleFilters
 import utg.domain.args.vehicles.VehicleInput
-import utg.domain.enums.Privilege
 
 final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     vehiclesAlgebra: VehiclesAlgebra[F]
@@ -42,17 +41,17 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     )
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[VehicleInput] { create =>
         vehiclesAlgebra.create(create).flatMap(Created(_))
       }
 
-    case ar @ POST -> Root as user if user.access(Privilege.ViewUsers) =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[VehicleFilters] { create =>
         vehiclesAlgebra.get(create).flatMap(Ok(_))
       }
 
-    case GET -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root / "csv" as _ =>
       vehiclesAlgebra
         .getAsStream(VehicleFilters())
         .map { report =>

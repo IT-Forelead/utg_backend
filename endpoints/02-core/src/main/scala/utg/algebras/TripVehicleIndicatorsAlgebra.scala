@@ -9,6 +9,7 @@ import utg.domain.TripId
 import utg.domain.TripVehicleIndicator
 import utg.domain.TripVehicleIndicatorId
 import utg.domain.args.tripVehicleIndicators.TripVehicleIndicatorInput
+import utg.domain.enums.VehicleIndicatorActionType
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
@@ -55,7 +56,13 @@ object TripVehicleIndicatorsAlgebra {
       override def getByTripId(tripId: TripId): F[List[TripVehicleIndicator]] =
         for {
           dtoVehicleIndicators <- tripVehicleIndicatorsRepository.getByTripId(tripId)
-          regions = dtoVehicleIndicators.map { vi =>
+          isFulledEnteredAction = dtoVehicleIndicators.exists(
+            _.actionType == VehicleIndicatorActionType.Enter
+          )
+          isFulledExitAction = dtoVehicleIndicators.exists(
+            _.actionType == VehicleIndicatorActionType.Exit
+          )
+          tripVehicleIndicators = dtoVehicleIndicators.map { vi =>
             TripVehicleIndicator(
               id = vi.id,
               createdAt = vi.createdAt,
@@ -66,8 +73,10 @@ object TripVehicleIndicatorsAlgebra {
               currentDateTime = vi.currentDateTime,
               odometerIndicator = vi.odometerIndicator,
               paidDistance = vi.paidDistance,
+              isFulledExitAction = isFulledExitAction,
+              isFulledEnteredAction = isFulledEnteredAction,
             )
           }
-        } yield regions
+        } yield tripVehicleIndicators
     }
 }
