@@ -13,7 +13,6 @@ import utg.algebras.VehicleCategoriesAlgebra
 import utg.domain.AuthedUser
 import utg.domain.VehicleCategory
 import utg.domain.args.vehicleCategories._
-import utg.domain.enums.Privilege
 
 final case class VehicleCategoriesRoutes[F[_]: JsonDecoder: MonadThrow](
     vehicleCategoriesAlgebra: VehicleCategoriesAlgebra[F]
@@ -21,17 +20,17 @@ final case class VehicleCategoriesRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/vehicle-categories"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root / "create" =>
       ar.req.decodeR[VehicleCategoryInput] { input =>
         vehicleCategoriesAlgebra.create(input).flatMap(Created(_))
       }
 
-    case ar @ POST -> Root as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root =>
       ar.req.decodeR[VehicleCategoryFilters] { filters =>
         vehicleCategoriesAlgebra.get(filters).flatMap(Ok(_))
       }
 
-    case ar @ POST -> Root / "update" as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root / "update" =>
       ar.req.decodeR[VehicleCategory] { update =>
         vehicleCategoriesAlgebra.update(update).flatMap(Accepted(_))
       }

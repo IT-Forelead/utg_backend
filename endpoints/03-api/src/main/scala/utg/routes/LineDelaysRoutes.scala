@@ -14,11 +14,9 @@ import uz.scala.http4s.utils.Routes
 import utg.algebras.LineDelaysAlgebra
 import utg.domain.AuthedUser
 import utg.domain.LineDelayId
-import utg.domain.UserId
 import utg.domain.args.lineDelays.LineDelayFilters
 import utg.domain.args.lineDelays.LineDelayInput
 import utg.domain.args.lineDelays.UpdateLineDelayInput
-import utg.domain.enums.Privilege
 
 final case class LineDelaysRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     lineDelays: LineDelaysAlgebra[F]
@@ -26,23 +24,23 @@ final case class LineDelaysRoutes[F[_]: JsonDecoder: MonadThrow: Async](
   override val path = "/line-delays"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root / "create" =>
       ar.req.decodeR[LineDelayInput] { create =>
         lineDelays.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(lineDelayId) as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root / UUIDVar(lineDelayId) =>
       lineDelays.findById(lineDelayId.coerce[LineDelayId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root as user if user.access(Privilege.ViewUsers) =>
+    case ar @ POST -> Root =>
       ar.req.decodeR[LineDelayFilters] { create =>
         lineDelays.get(create).flatMap(Ok(_))
       }
 
-    case DELETE -> Root / UUIDVar(lineDelayId) as user if user.access(Privilege.CreateUser) =>
+    case DELETE -> Root / UUIDVar(lineDelayId) =>
       lineDelays.delete(lineDelayId.coerce[LineDelayId]).flatMap(Ok(_))
 
-    case ar @ PUT -> Root as user if user.access(Privilege.UpdateUser) =>
+    case ar @ PUT -> Root =>
       ar.req.decodeR[UpdateLineDelayInput] { update =>
         lineDelays.update(update.lineDelayId, update).flatMap(Ok(_))
       }
