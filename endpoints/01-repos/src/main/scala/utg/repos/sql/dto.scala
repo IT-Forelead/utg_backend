@@ -208,4 +208,16 @@ object dto {
       dispatcherSignature: Option[AssetId],
       deleted: Boolean = false,
     )
+
+  case class CompleteTask(
+                     id: CompleteTaskId,
+                     tripNumber: Option[NonEmptyString],
+                     invoiceNumber: Option[NonEmptyString],
+                     arrivalTime: Option[ZonedDateTime],
+                     consignorSignId: Option[ConsignorSignId],
+                     documentId: Option[DocumentId]
+                   ) {
+    def toDomain: domain.CompleteTask =
+      this.transformInto[domain.CompleteTask]
+  }
 }
