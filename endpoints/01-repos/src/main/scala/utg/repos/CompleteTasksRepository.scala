@@ -1,17 +1,24 @@
 package utg.repos
 
-import cats.data.{NonEmptyList, OptionT}
-import cats.effect.{Async, Resource}
-import cats.implicits.{catsSyntaxApplicativeErrorId, toFlatMapOps, toFunctorOps}
-import eu.timepit.refined.types.string.NonEmptyString
+import cats.data.OptionT
+import cats.effect.Async
+import cats.effect.Resource
+import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.toFunctorOps
 import skunk.Session
 import skunk.codec.all.int8
-import utg.domain.args.completeTasks.CompleteTaskFilters
-import utg.domain.{CompleteTask, CompleteTaskId, RegionId, ResponseData, Role, auth}
-import utg.exception.AError
-import utg.repos.sql.{BranchesSql, CompleteTasksSql, RegionsSql, RolesSql, dto}
-import uz.scala.skunk.syntax.all.{skunkSyntaxCommandOps, skunkSyntaxFragmentOps, skunkSyntaxQueryOps}
+import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
+import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
+import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
+import utg.domain.CompleteTask
+import utg.domain.CompleteTaskId
+import utg.domain.ResponseData
+import utg.domain.args.completeTasks.CompleteTaskFilters
+import utg.exception.AError
+import utg.repos.sql.CompleteTasksSql
+import utg.repos.sql.dto
 
 trait CompleteTasksRepository[F[_]] {
   def findById(id: CompleteTaskId): F[Option[CompleteTask]]
@@ -23,18 +30,19 @@ trait CompleteTasksRepository[F[_]] {
 
 object CompleteTasksRepository {
   def make[F[_]: Async](
-                         implicit
-                         session: Resource[F, Session[F]]
-                       ): CompleteTasksRepository[F] = new CompleteTasksRepository[F] {
-    private def makeCompleteTask(completeTaskDto: dto.CompleteTask): F[Option[CompleteTask]] =
+      implicit
+      session: Resource[F, Session[F]]
+    ): CompleteTasksRepository[F] = new CompleteTasksRepository[F] {
+    private def makeCompleteTask(completeTaskDto: dto.CompleteTask): CompleteTask =
+      completeTaskDto.toDomain
 
-
-    private def makeCompleteTasks(dtos: List[dto.CompleteTask]): F[List[CompleteTask]] = {
-
-    }
+    private def makeCompleteTasks(dtos: List[dto.CompleteTask]): List[CompleteTask] =
+      dtos.map { completeTaskDto =>
+        completeTaskDto.toDomain
+      }
 
     override def findById(id: CompleteTaskId): F[Option[CompleteTask]] =
-      OptionT(CompleteTasksSql.findById.queryOption(id)).flatMapF(makeCompleteTask).value
+      OptionT(CompleteTasksSql.findById.queryOption(id)).map(makeCompleteTask).value
 
     override def create(completeTaskAndHash: dto.CompleteTask): F[Unit] =
       CompleteTasksSql.insert.execute(completeTaskAndHash)
@@ -43,24 +51,22 @@ object CompleteTasksRepository {
       val af = CompleteTasksSql
         .select(filters)
         .paginateOpt(filters.limit.map(_.value), filters.page.map(_.value))
-      af.fragment.query(CompleteTasksSql.codec *: int8).queryList(af.argument).flatMap { completeTasksDto =>
-        makeCompleteTasks(completeTasksDto.map(_.head)).map { completeTasks =>
-          ResponseData(completeTasks, completeTasksDto.headOption.fold(0L)(_.tail.head))
-        }
+      af.fragment.query(CompleteTasksSql.codec *: int8).queryList(af.argument).map {
+        completeTasksDto =>
+          ResponseData(
+            makeCompleteTasks(completeTasksDto.map(_.head)),
+            completeTasksDto.headOption.fold(0L)(_.tail.head),
+          )
       }
     }
 
     override def update(id: CompleteTaskId)(update: dto.CompleteTask => dto.CompleteTask): F[Unit] =
       OptionT(CompleteTasksSql.findById.queryOption(id)).cataF(
-        AError.Internal(s"CompleteTask not found by id [$id]").raiseError[F, Unit],
+        AError.Internal(s"Complete Task not found by id [$id]").raiseError[F, Unit],
         completeTask => CompleteTasksSql.update.execute(update(completeTask)),
       )
 
     override def delete(id: CompleteTaskId): F[Unit] =
       CompleteTasksSql.delete.execute(id)
-
   }
 }
-
-
-

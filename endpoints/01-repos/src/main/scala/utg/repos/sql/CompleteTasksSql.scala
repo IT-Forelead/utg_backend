@@ -1,66 +1,53 @@
 package utg.repos.sql
 
-import shapeless.HNil
 import skunk._
-import skunk.codec.all.varchar
+import skunk.codec.all.bool
 import skunk.implicits._
+import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
+
 import utg.domain.CompleteTaskId
 import utg.domain.args.completeTasks.CompleteTaskFilters
-import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 private[repos] object CompleteTasksSql extends Sql[CompleteTaskId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: nes *: nes.opt *: phone *: RolesSql.id *: AssetsSql
-      .id
-      .opt *: nes.opt)
+    (id *: zonedDateTime *: TripsSql.id *: nes.opt *: nes.opt *: zonedDateTime.opt *: consignorSignId.opt *: documentId.opt *: bool)
       .to[dto.CompleteTask]
 
   val findById: Query[CompleteTaskId, dto.CompleteTask] =
-    sql"""SELECT id, created_at, firstname, lastname, middle_name, phone, role_id, asset_id, branch_code FROM complete_tasks
+    sql"""SELECT * FROM complete_tasks
           WHERE id = $id LIMIT 1""".query(codec)
 
   val insert: Command[dto.CompleteTask] =
-    sql"""INSERT INTO complete_tasks VALUES ($id, $zonedDateTime, $nes, $nes, ${nes.opt}, $phone, ${RolesSql.id}, ${AssetsSql
-        .id
-        .opt}, ${nes.opt}, $passwordHash)"""
+    sql"""INSERT INTO complete_tasks VALUES ($id, ${nes.opt}, ${nes.opt}, ${zonedDateTime.opt}, ${consignorSignId.opt},, ${documentId.opt},)"""
       .command
       .contramap { (ct: dto.CompleteTask) =>
-        ct.data.id *: ct.data.createdAt *: ct.data.firstname *: ct.data.lastname *: ct.data.middleName *:
-          ct.data.phone *: ct
-            .data
-            .roleId *: ct.data.assetId *: ct.data.branchCode *: ct.password *: EmptyTuple
+        ct.id *: ct.tripNumber *: ct.invoiceNumber *: ct.arrivalTime *: ct.consignorSignId *: ct.documentId *: EmptyTuple
       }
 
   val update: Command[dto.CompleteTask] =
     sql"""UPDATE complete_tasks
-       SET firstname = $nes,
-       lastname = $nes,
-       middle_name = ${nes.opt},
-       phone = $phone,
-       role_id = ${RolesSql.id},
-       asset_id = ${AssetsSql.id.opt},
-       branch_code = ${nes.opt}
+       SET trip_number = ${nes.opt},
+       invoice_number = ${nes.opt},
+       arrival_time = ${zonedDateTime.opt},
+       consignor_sign_id = ${consignorSignId.opt},
+       document_id = ${documentId.opt}
        WHERE id = $id
      """
       .command
       .contramap {
-        case complete_task: dto.CompleteTask =>
-          complete_task.firstname *: complete_task.lastname *: complete_task.middleName *: complete_task.phone *: complete_task.roleId *: complete_task.assetId *: complete_task.branchCode *: complete_task.id *: EmptyTuple
+        case ct: dto.CompleteTask =>
+          ct.tripNumber *: ct.invoiceNumber *: ct.arrivalTime *: ct.consignorSignId *: ct.documentId *: ct.id *: EmptyTuple
       }
 
-  
   private def searchFilter(filters: CompleteTaskFilters): List[Option[AppliedFragment]] =
     List(
     )
 
-  
-
   def select(filters: CompleteTaskFilters): AppliedFragment = {
     val baseQuery: Fragment[Void] =
-      sql"""SELECT *,
-              COUNT(*) OVER() AS total
-            FROM complete_tasks ct"""
-    baseQuery(Void).whereAndOpt(searchFilter(filters))
+      sql"""SELECT *, COUNT(*) OVER() AS total
+            FROM complete_tasks WHERE deleted = false"""
+    baseQuery(Void).andOpt(searchFilter(filters))
   }
 
   def delete: Command[CompleteTaskId] =

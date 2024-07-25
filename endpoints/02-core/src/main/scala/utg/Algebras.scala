@@ -70,7 +70,7 @@ object Algebras {
       tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
       tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks),
       lineDelays = LineDelaysAlgebra.make[F](lineDelays),
-      completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks),
+      completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
     )
   }
 }

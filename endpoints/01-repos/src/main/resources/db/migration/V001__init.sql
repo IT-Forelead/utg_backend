@@ -332,10 +332,13 @@ CREATE TABLE IF NOT EXISTS line_delays (
 );
 CREATE TABLE IF NOT EXISTS comlpete_tasks (
   id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
   trip_number VARCHAR NULL,
   invoice_number VARCHAR NULL,
   arrival_time TIMESTAMP WITH TIME ZONE NULL,
   consignor_sign_id UUID NULL,
-  document_id UUID NULL
+  document_id UUID NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
 );
 
