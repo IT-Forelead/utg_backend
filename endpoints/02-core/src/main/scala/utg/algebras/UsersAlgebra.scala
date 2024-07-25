@@ -83,7 +83,7 @@ object UsersAlgebra {
           accessCredentials = AccessCredentials(user, hash)
           _ <- usersRepository.create(accessCredentials)
           smsText =
-            s"\n\nPhone: ${user.phone}\nPassword: $password"
+            s"Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n %%UTG_DOMAIN%%\n Parolingiz: $password"
           _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
         } yield id
 
