@@ -4,6 +4,7 @@ import cats.effect.ExitCode
 import cats.effect.IO
 import cats.effect.IOApp
 import cats.effect.Resource
+import cats.effect.std.Random
 import cats.effect.std.Dispatcher
 import cats.implicits.toTraverseOps
 import org.typelevel.log4cats.Logger
@@ -19,7 +20,7 @@ object Main extends IOApp {
       implicit0(dispatcher: Dispatcher[IO]) <- Dispatcher.parallel[IO]
 
       env <- Environment.make[IO]
-
+      implicit0(random: Random[IO]) <- Resource.eval(Random.scalaUtilRandom[IO])
       httpModule <- HttpModule.make[IO](env.toServer)
     } yield List(httpModule)
 
