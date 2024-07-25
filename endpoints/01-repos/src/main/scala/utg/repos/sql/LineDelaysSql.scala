@@ -1,16 +1,15 @@
 package utg.repos.sql
 
 import skunk._
-import skunk.codec.all.varchar
+import skunk.codec.all.{bool, varchar}
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-
 import utg.domain.LineDelayId
 import utg.domain.args.lineDelays.LineDelayFilters
 
 private[repos] object LineDelaysSql extends Sql[LineDelayId] {
   private[repos] val codec =
-    (id *: nes *: zonedDateTime *: zonedDateTime *: signId)
+    (id *: zonedDateTime *: TripsSql.id *: nes *: zonedDateTime *: zonedDateTime *: signId *: bool)
       .to[dto.LineDelay]
 
   val findById: Query[LineDelayId, dto.LineDelay] =
@@ -45,8 +44,8 @@ private[repos] object LineDelaysSql extends Sql[LineDelayId] {
 
   def select(filters: LineDelayFilters): AppliedFragment = {
     val baseQuery: Fragment[Void] =
-      sql"""SELECT name, start_time, end_time, sign_id, COUNT(*) OVER() AS total FROM line_delays l"""
-    baseQuery(Void).whereAndOpt(searchFilter(filters))
+      sql"""SELECT name, start_time, end_time, sign_id, COUNT(*) OVER() AS total FROM line_delays WHERE deleted = false"""
+    baseQuery(Void).andOpt(searchFilter(filters))
   }
 
   def delete: Command[LineDelayId] =
