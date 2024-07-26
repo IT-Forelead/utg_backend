@@ -3,8 +3,9 @@ package utg.repos
 import cats.effect.Async
 import cats.effect.Resource
 import skunk._
-import utg.domain.TripId
 import uz.scala.skunk.syntax.all._
+
+import utg.domain.TripId
 import utg.repos.sql.TripVehicleIndicatorsSql
 import utg.repos.sql.dto
 

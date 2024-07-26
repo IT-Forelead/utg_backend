@@ -10,7 +10,7 @@ import utg.domain.TripFuelExpense
 import utg.domain.TripFuelExpenseId
 import utg.domain.TripId
 import utg.domain.UserId
-import utg.domain.args.tripFuelExpenses.TripFuelExpenseInput
+import utg.domain.args.tripFuelExpenses._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
@@ -23,6 +23,7 @@ import utg.utils.ID
 trait TripFuelExpensesAlgebra[F[_]] {
   def create(input: TripFuelExpenseInput): F[TripFuelExpenseId]
   def getByTripId(tripId: TripId): F[List[TripFuelExpense]]
+  def update(input: UpdateTripFuelExpenseInput): F[Unit]
 }
 
 object TripFuelExpensesAlgebra {
@@ -107,5 +108,36 @@ object TripFuelExpensesAlgebra {
             )
           }
         } yield tripFuelExpenses
+
+      override def update(input: UpdateTripFuelExpenseInput): F[Unit] =
+        OptionT(tripsRepository.findById(input.tripId))
+          .cataF(
+            AError
+              .Internal(s"Trip not found by id [$input.tripId]")
+              .raiseError[F, Unit],
+            trip =>
+              tripFuelExpensesRepository.update(input.id)(
+                _.copy(
+                  tripId = trip.id,
+                  vehicleId = trip.vehicleId,
+                  fuelBrand = input.fuelBrand,
+                  brandCode = input.brandCode,
+                  fuelGiven = input.fuelGiven,
+                  fuelAttendant = input.fuelAttendant,
+                  attendantSignature = input.attendantSignature,
+                  fuelInTank = input.fuelInTank,
+                  fuelRemaining = input.fuelRemaining,
+                  normChangeCoefficient = input.normChangeCoefficient,
+                  equipmentWorkingTime = input.equipmentWorkingTime,
+                  engineWorkingTime = input.engineWorkingTime,
+                  tankCheckMechanicId = input.tankCheckMechanicId,
+                  tankCheckMechanicSignature = input.tankCheckMechanicSignature,
+                  remainingCheckMechanicId = input.remainingCheckMechanicId,
+                  remainingCheckMechanicSignature = input.remainingCheckMechanicSignature,
+                  dispatcherId = input.dispatcherId,
+                  dispatcherSignature = input.dispatcherSignature,
+                )
+              ),
+          )
     }
 }

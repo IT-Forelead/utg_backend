@@ -2,6 +2,7 @@ package utg.algebras
 
 import cats.MonadThrow
 import cats.data.NonEmptyList
+import cats.data.OptionT
 import cats.implicits._
 
 import utg.domain.AccompanyingPersonId
@@ -25,6 +26,7 @@ import utg.utils.ID
 trait TripsAlgebra[F[_]] {
   def create(input: TripInput): F[TripId]
   def get(filters: TripFilters): F[ResponseData[Trip]]
+  def findById(id: TripId): F[Option[Trip]]
 }
 
 object TripsAlgebra {
@@ -133,5 +135,44 @@ object TripsAlgebra {
             )
           }
         } yield dtoTrips.copy(data = trip)
+
+      private def makeTrip(dtoTrip: dto.Trip): F[Trip] =
+        for {
+          accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(List(dtoTrip.id))
+          usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
+          userById <- usersRepository.findByIds(usersIds)
+          vehicles <- vehicleRepository.findByIds(List(dtoTrip.vehicleId))
+          drivers <- usersRepository.findByIds(List(dtoTrip.driverId))
+          trailers <- vehicleRepository.findByIds(dtoTrip.trailerId.toList)
+          semiTrailers <- vehicleRepository.findByIds(dtoTrip.semiTrailerId.toList)
+          accompanyingUsers = accompanyingByTripId
+            .get(dtoTrip.id)
+            .map(_.flatMap { ap =>
+              userById.get(ap.userId)
+            })
+          trip = Trip(
+            id = dtoTrip.id,
+            createdAt = dtoTrip.createdAt,
+            startDate = dtoTrip.startDate,
+            endDate = dtoTrip.endDate,
+            serialNumber = dtoTrip.serialNumber,
+            firstTab = dtoTrip.firstTab,
+            secondTab = dtoTrip.secondTab,
+            thirdTab = dtoTrip.thirdTab,
+            workingMode = dtoTrip.workingMode,
+            summation = dtoTrip.summation,
+            vehicle = vehicles.get(dtoTrip.vehicleId),
+            driver = drivers.get(dtoTrip.driverId),
+            trailer = dtoTrip.trailerId.flatMap(trailers.get),
+            semiTrailer = dtoTrip.semiTrailerId.flatMap(semiTrailers.get),
+            accompanyingPersons = accompanyingUsers,
+          )
+        } yield trip
+
+      override def findById(id: TripId): F[Option[Trip]] =
+        (for {
+          dtoTrip <- OptionT(tripsRepository.findById(id))
+          res <- OptionT.liftF(makeTrip(dtoTrip))
+        } yield res).value
     }
 }

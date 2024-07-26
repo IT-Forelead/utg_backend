@@ -9,24 +9,23 @@ import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
 
-import utg.algebras.TripVehicleIndicatorsAlgebra
+import utg.algebras.TripVehicleAcceptancesAlgebra
 import utg.domain.AuthedUser
 import utg.domain.TripId
-import utg.domain.args.tripVehicleIndicators.TripVehicleIndicatorInput
-import utg.domain.enums.Privilege
+import utg.domain.args.tripVehicleAcceptances.TripVehicleAcceptanceInput
 
-final case class TripVehicleIndicatorsRoutes[F[_]: JsonDecoder: MonadThrow](
-    tripVehicleIndicatorsAlgebra: TripVehicleIndicatorsAlgebra[F]
+final case class TripVehicleAcceptancesRoutes[F[_]: JsonDecoder: MonadThrow](
+    tripVehicleAcceptancesAlgebra: TripVehicleAcceptancesAlgebra[F]
   ) extends Routes[F, AuthedUser] {
-  override val path = "/vehicle-indicators"
+  override val path = "/vehicle-acceptances"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "create" as _ =>
-      ar.req.decodeR[TripVehicleIndicatorInput] { create =>
-        tripVehicleIndicatorsAlgebra.create(create).flatMap(Created(_))
+      ar.req.decodeR[TripVehicleAcceptanceInput] { create =>
+        tripVehicleAcceptancesAlgebra.create(create).flatMap(Created(_))
       }
 
     case GET -> Root / UUIDVar(id) as _ =>
-      tripVehicleIndicatorsAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
+      tripVehicleAcceptancesAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
   }
 }

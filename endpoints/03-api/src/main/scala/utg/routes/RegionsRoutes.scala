@@ -9,7 +9,6 @@ import uz.scala.http4s.utils.Routes
 
 import utg.algebras.RegionsAlgebra
 import utg.domain.AuthedUser
-import utg.domain.enums.Privilege
 
 final case class RegionsRoutes[F[_]: JsonDecoder: MonadThrow](
     regionsAlgebra: RegionsAlgebra[F]
@@ -17,7 +16,7 @@ final case class RegionsRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/regions"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case GET -> Root as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root as _ =>
       regionsAlgebra.getRegions.flatMap(Ok(_))
   }
 }

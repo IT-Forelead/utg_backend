@@ -308,3 +308,44 @@ CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
     CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE TABLE IF NOT EXISTS trip_driver_tasks (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  whose_discretion VARCHAR NOT NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  pickup_location VARCHAR NOT NULL,
+  delivery_location VARCHAR NOT NULL,
+  freight_name VARCHAR NOT NULL,
+  number_of_interactions INT NOT NULL,
+  distance DOUBLE PRECISION NULL,
+  freight_volume DOUBLE PRECISION NULL
+);
+
+CREATE TABLE IF NOT EXISTS line_delays (
+  id UUID PRIMARY KEY NOT NULL,
+  name VARCHAR NOT NULL,
+  start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  sign_id UUID NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS trip_vehicle_acceptances (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  action_type VEHICLE_INDICATOR_ACTION_TYPE NOT NULL,
+  condition CONDITION_TYPE NOT NULL,
+  mechanic_id UUID NULL
+    CONSTRAINT fk_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  mechanic_signature UUID NULL
+    CONSTRAINT fk_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL
+    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_signature UUID NULL
+    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
