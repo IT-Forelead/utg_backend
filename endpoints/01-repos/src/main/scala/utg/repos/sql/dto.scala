@@ -14,7 +14,6 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import fs2.text.utf8
 import io.scalaland.chimney.dsl._
-import uz.scala.syntax.refined._
 
 import utg._
 import utg.domain
@@ -269,5 +268,20 @@ object dto {
     ) {
     def toDomain: domain.LineDelay =
       this.transformInto[domain.LineDelay]
+  }
+
+  case class CompleteTask(
+      id: CompleteTaskId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      tripNumber: Option[NonEmptyString],
+      invoiceNumber: Option[NonEmptyString],
+      arrivalTime: Option[ZonedDateTime],
+      consignorSignId: Option[ConsignorSignId],
+      documentId: Option[DocumentId],
+      deleted: Boolean = false,
+    ) {
+    def toDomain: domain.CompleteTask =
+      this.transformInto[domain.CompleteTask]
   }
 }
