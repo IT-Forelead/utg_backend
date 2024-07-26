@@ -349,3 +349,16 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_acceptances (
     CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE TABLE IF NOT EXISTS comlpete_tasks (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  trip_number VARCHAR NULL,
+  invoice_number VARCHAR NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NULL,
+  consignor_sign_id UUID NULL,
+  document_id UUID NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+

@@ -3,7 +3,6 @@ package utg.routes
 import cats.MonadThrow
 import cats.effect.Async
 import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
 import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.circe.JsonDecoder

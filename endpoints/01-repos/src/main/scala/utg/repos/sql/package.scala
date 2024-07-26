@@ -1,7 +1,6 @@
 package utg.repos
 
 import java.time.ZonedDateTime
-
 import enumeratum.Enum
 import enumeratum.EnumEntry
 import eu.timepit.refined.types.numeric._
@@ -13,9 +12,8 @@ import skunk.data.Type
 import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg._
-import utg.domain.SignId
+import utg.domain.{ConsignorSignId, DocumentId, SignId}
 import utg.domain.enums._
 import utg.effects.IsUUID
 
@@ -56,6 +54,8 @@ package object sql {
       Type("vehicle_indicator_action_type"),
     )
   val signId: Codec[SignId] = uuid.imap[SignId](uuid => SignId(uuid))(_.value)
+  val consignorSignId: Codec[ConsignorSignId] = uuid.imap[ConsignorSignId](uuid => ConsignorSignId(uuid))(_.value)
+  val documentId: Codec[DocumentId] = uuid.imap[DocumentId](uuid => DocumentId(uuid))(_.value)
 
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)
