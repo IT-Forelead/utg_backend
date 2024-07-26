@@ -35,6 +35,7 @@ object HttpModule {
         new TripVehicleIndicatorsRoutes[F](env.algebras.tripVehicleIndicators),
         new TripFuelExpensesRoutes[F](env.algebras.tripFuelExpensesAlgebra),
         new AssetsRoutes[F](env.algebras.assets),
+        new TripVehicleAcceptancesRoutes[F](env.algebras.tripVehicleAcceptancesAlgebra),
       )
       .map { r =>
         Router(

@@ -6,5 +6,5 @@ import io.circe.refined._
 
 @JsonCodec
 case class AssetInput(
-    base64: NonEmptyString,
+    base64: NonEmptyString
   )

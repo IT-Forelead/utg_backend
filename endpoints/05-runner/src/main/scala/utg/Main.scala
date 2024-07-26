@@ -4,8 +4,8 @@ import cats.effect.ExitCode
 import cats.effect.IO
 import cats.effect.IOApp
 import cats.effect.Resource
-import cats.effect.std.Random
 import cats.effect.std.Dispatcher
+import cats.effect.std.Random
 import cats.implicits.toTraverseOps
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger

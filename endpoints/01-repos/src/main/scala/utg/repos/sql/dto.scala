@@ -201,6 +201,20 @@ object dto {
       deleted: Boolean = false,
     )
 
+  case class TripVehicleAcceptance(
+      id: TripVehicleAcceptanceId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      actionType: VehicleIndicatorActionType,
+      conditionType: ConditionType,
+      mechanicId: Option[UserId],
+      mechanicSignature: Option[AssetId],
+      driverId: UserId,
+      driverSignature: Option[AssetId],
+      deleted: Boolean = false,
+    )
+
   case class TripFuelExpense(
       id: TripFuelExpenseId,
       createdAt: ZonedDateTime,
