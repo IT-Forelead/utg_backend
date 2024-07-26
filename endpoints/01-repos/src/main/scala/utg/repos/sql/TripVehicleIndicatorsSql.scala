@@ -3,7 +3,9 @@ package utg.repos.sql
 import skunk._
 import skunk.codec.all.bool
 import skunk.implicits._
-import utg.domain.{TripId, TripVehicleIndicatorId}
+
+import utg.domain.TripId
+import utg.domain.TripVehicleIndicatorId
 
 private[repos] object TripVehicleIndicatorsSql extends Sql[TripVehicleIndicatorId] {
   private[repos] val codec: Codec[dto.TripVehicleIndicator] =

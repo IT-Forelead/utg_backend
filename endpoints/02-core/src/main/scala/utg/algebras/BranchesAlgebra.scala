@@ -1,12 +1,16 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.NonEmptyList
+import cats.implicits.catsSyntaxApplicativeId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.domain.Branch
 import utg.domain.BranchId
+import utg.domain.Region
+import utg.domain.RegionId
 import utg.domain.args.branches._
 import utg.domain.generateShortHash
 import utg.effects.GenUUID
@@ -45,7 +49,11 @@ object BranchesAlgebra {
       override def getBranches: F[List[Branch]] =
         for {
           branches <- branchesRepository.getBranches
-          regions <- regionsRepository.findByIds(branches.map(_.regionId))
+          regions <- NonEmptyList
+            .fromList(branches.map(_.regionId))
+            .fold(Map.empty[RegionId, Region].pure[F]) { regionIds =>
+              regionsRepository.findByIds(regionIds.toList)
+            }
           roles = branches.map { branch =>
             Branch(
               id = branch.id,

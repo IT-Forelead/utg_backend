@@ -1,12 +1,15 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.implicits._
 
+import utg.domain.AuthedUser.User
 import utg.domain.TripFuelExpense
 import utg.domain.TripFuelExpenseId
 import utg.domain.TripId
+import utg.domain.UserId
 import utg.domain.args.tripFuelExpenses._
 import utg.effects.Calendar
 import utg.effects.GenUUID
@@ -77,7 +80,9 @@ object TripFuelExpensesAlgebra {
               ).flatten
             )
             .distinct
-          users <- usersRepository.findByIds(userIds)
+          users <- NonEmptyList.fromList(userIds).fold(Map.empty[UserId, User].pure[F]) { userIds =>
+            usersRepository.findByIds(userIds.toList)
+          }
           tripFuelExpenses = dtoTripFuelExpenses.map { fe =>
             TripFuelExpense(
               id = fe.id,
