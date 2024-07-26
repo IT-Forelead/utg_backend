@@ -14,6 +14,7 @@ import utg.domain.RegionId
 import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleCategory
+import utg.domain.VehicleCategoryId
 import utg.domain.VehicleId
 import utg.domain.args.vehicles.VehicleFilters
 import utg.repos.sql.BranchesSql
@@ -58,20 +59,25 @@ object VehiclesRepository {
       } yield vehicleDto.toDomain(branch, vehicleCategory)
 
     private def makeVehicles(dtos: List[dto.Vehicle]): F[List[Vehicle]] = {
-      val vehicleCategoryIds = dtos.map(_.vehicleCategoryId)
+      val vehicleCategoryIds = NonEmptyList.fromList(dtos.map(_.vehicleCategoryId))
       for {
-        vehicleCategories <- VehicleCategoriesSql
-          .findByIds(vehicleCategoryIds)
-          .queryList(vehicleCategoryIds)
-          .map {
-            _.map { dtoVehicleCategory =>
-              dtoVehicleCategory.id -> VehicleCategory(
-                dtoVehicleCategory.id,
-                dtoVehicleCategory.name,
-                dtoVehicleCategory.vehicleType,
-              )
-            }.toMap
-          }
+        vehicleCategories <- vehicleCategoryIds.fold(
+          Map.empty[VehicleCategoryId, VehicleCategory].pure[F]
+        ) { vehicleCategoryIds =>
+          val vcIds = vehicleCategoryIds.toList
+          VehicleCategoriesSql
+            .findByIds(vcIds)
+            .queryList(vcIds)
+            .map {
+              _.map { dtoVehicleCategory =>
+                dtoVehicleCategory.id -> VehicleCategory(
+                  dtoVehicleCategory.id,
+                  dtoVehicleCategory.name,
+                  dtoVehicleCategory.vehicleType,
+                )
+              }.toMap
+            }
+        }
         ids = NonEmptyList.fromList(dtos.map(_.branchId))
         branchById <- ids.fold(Map.empty[BranchId, dto.Branch].pure[F]) { branches =>
           val branchesList = branches.toList
