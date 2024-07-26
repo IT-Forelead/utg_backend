@@ -5,6 +5,7 @@ import cats.effect.Async
 import cats.effect.ExitCode
 import cats.effect.kernel.Resource
 import cats.effect.std.Dispatcher
+import cats.effect.std.Random
 import cats.implicits.toFunctorOps
 import cats.implicits.toSemigroupKOps
 import org.http4s.HttpRoutes
@@ -19,7 +20,7 @@ import utg.http.Environment
 import utg.routes._
 
 object HttpModule {
-  private def allRoutes[F[_]: Async: JsonDecoder: Dispatcher: Logger](
+  private def allRoutes[F[_]: Async: JsonDecoder: Dispatcher: Logger: Random](
       env: Environment[F]
     ): NonEmptyList[HttpRoutes[F]] =
     NonEmptyList
@@ -33,6 +34,8 @@ object HttpModule {
         new TripsRoutes[F](env.algebras.trips),
         new TripVehicleIndicatorsRoutes[F](env.algebras.tripVehicleIndicators),
         new TripFuelExpensesRoutes[F](env.algebras.tripFuelExpensesAlgebra),
+        new AssetsRoutes[F](env.algebras.assets),
+        new TripVehicleAcceptancesRoutes[F](env.algebras.tripVehicleAcceptancesAlgebra),
       )
       .map { r =>
         Router(
@@ -40,7 +43,7 @@ object HttpModule {
         )
       }
 
-  def make[F[_]: Async: Dispatcher](
+  def make[F[_]: Async: Dispatcher: Random](
       env: Environment[F]
     )(implicit
       logger: Logger[F]

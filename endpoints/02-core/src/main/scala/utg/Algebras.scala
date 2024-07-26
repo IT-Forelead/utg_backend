@@ -26,6 +26,7 @@ case class Algebras[F[_]](
     trips: TripsAlgebra[F],
     tripVehicleIndicators: TripVehicleIndicatorsAlgebra[F],
     tripFuelExpensesAlgebra: TripFuelExpensesAlgebra[F],
+    tripVehicleAcceptancesAlgebra: TripVehicleAcceptancesAlgebra[F],
     tripDriverTasks: TripDriverTasksAlgebra[F],
     lineDelays: LineDelaysAlgebra[F],
     completeTasksAlgebra: CompleteTasksAlgebra[F],
@@ -51,6 +52,7 @@ object Algebras {
       trips,
       tripVehicleIndicators,
       tripFuelExpenses,
+      tripVehicleAcceptances,
       tripDriverTasks,
       lineDelays,
       completeTasks
@@ -68,6 +70,11 @@ object Algebras {
       trips = TripsAlgebra.make[F](trips, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
+      tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
+        tripVehicleAcceptances,
+        users,
+        trips,
+      ),
       tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks),
       lineDelays = LineDelaysAlgebra.make[F](lineDelays),
       completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),

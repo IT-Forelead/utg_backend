@@ -23,10 +23,12 @@ import utg.domain.AuthedUser.User
 import utg.domain.RegionId
 import utg.domain.ResponseData
 import utg.domain.Role
+import utg.domain.RoleId
 import utg.domain.UserId
 import utg.domain.args.users.UserFilters
 import utg.domain.auth
 import utg.domain.auth.AccessCredentials
+import utg.domain.enums.Privilege
 import utg.exception.AError
 import utg.repos.sql.BranchesSql
 import utg.repos.sql.RegionsSql
@@ -77,12 +79,17 @@ object UsersRepository {
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
-      val roleIds = dtos.map(_.roleId)
+      val roleIds = NonEmptyList.fromList(dtos.map(_.roleId))
       for {
-        roles <- RolesSql
-          .getByIds(roleIds)
-          .queryList(roleIds)
-          .map(_.groupMap(_.head)(_.tail))
+        roles <- roleIds.fold(
+          Map.empty[RoleId, NonEmptyString *: Option[Privilege] *: EmptyTuple].pure[F]
+        ) { roleIds =>
+          val rIds = roleIds.toList
+          RolesSql
+            .getByIds(rIds)
+            .queryList(rIds)
+            .map(_.map(r => r.head -> r.tail).toMap)
+        }
         codes = NonEmptyList.fromList(dtos.flatMap(_.branchCode))
         branchByCode <- codes.fold(Map.empty[NonEmptyString, dto.Branch].pure[F]) { branches =>
           val branchesList = branches.toList
@@ -97,20 +104,21 @@ object UsersRepository {
           RegionsSql
             .findByIds(regionIdList)
             .queryList(regionIdList)
-            .map(_.map(r => r.id -> r).toMap)
+            .map(a => a.map(r => r.id -> r).toMap)
         }
       } yield dtos.flatMap { userDto =>
-        val roleList = roles.getOrElse(userDto.roleId, Nil)
-        roleList.headOption.map { role =>
+        val roleOpt = roles.get(userDto.roleId)
+        roleOpt.map { role =>
           val maybeBranch = userDto
             .branchCode
             .flatMap(branchByCode.get)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
+          val privelegies = roleOpt.flatMap(_.tail.head).toList
           userDto.toDomain(
             Role(
               id = userDto.roleId,
               name = role.head,
-              privileges = roleList.flatMap(_.tail.head),
+              privileges = privelegies,
             ),
             maybeBranch,
           )
@@ -130,11 +138,14 @@ object UsersRepository {
       UsersSql.insert.execute(userAndHash)
 
     override def findByIds(ids: List[UserId]): F[Map[UserId, User]] =
-      UsersSql
-        .findByIds(ids)
-        .queryList(ids)
-        .flatMap(makeUsers)
-        .map(_.map(user => user.id -> user).toMap)
+      NonEmptyList.fromList(ids).fold(Map.empty[UserId, User].pure[F]) { userIds =>
+        val uIds = userIds.toList
+        UsersSql
+          .findByIds(uIds)
+          .queryList(uIds)
+          .flatMap(makeUsers)
+          .map(_.map(user => user.id -> user).toMap)
+      }
 
     override def get(filters: UserFilters): F[ResponseData[User]] = {
       val af = UsersSql

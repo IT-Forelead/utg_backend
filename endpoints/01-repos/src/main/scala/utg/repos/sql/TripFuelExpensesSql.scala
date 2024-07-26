@@ -24,7 +24,9 @@ private[repos] object TripFuelExpensesSql extends Sql[TripFuelExpenseId] {
          ORDER BY created_at DESC""".query(codec)
 
   val findById: Query[TripFuelExpenseId, dto.TripFuelExpense] =
-    sql"""SELECT * FROM trip_fuel_expenses WHERE deleted = false AND id = $id LIMIT 1""".query(codec)
+    sql"""SELECT * FROM trip_fuel_expenses WHERE deleted = false AND id = $id LIMIT 1""".query(
+      codec
+    )
 
   val update: Command[dto.TripFuelExpense] =
     sql"""UPDATE trip_fuel_expenses
