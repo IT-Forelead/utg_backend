@@ -75,8 +75,8 @@ object Algebras {
         users,
         trips,
       ),
-      tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks),
-      lineDelays = LineDelaysAlgebra.make[F](lineDelays),
+      tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks, trips),
+      lineDelays = LineDelaysAlgebra.make[F](lineDelays, trips),
       completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
     )
   }

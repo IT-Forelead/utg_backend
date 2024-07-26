@@ -1,7 +1,9 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.OptionT
 import cats.effect.std.Random
+import cats.implicits.catsSyntaxApplicativeErrorId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import org.typelevel.log4cats.Logger
@@ -14,7 +16,9 @@ import utg.domain.args.lineDelays.LineDelayInput
 import utg.domain.args.lineDelays.UpdateLineDelayInput
 import utg.effects.Calendar
 import utg.effects.GenUUID
+import utg.exception.AError
 import utg.repos.LineDelaysRepository
+import utg.repos.TripsRepository
 import utg.repos.sql.dto
 import utg.utils.ID
 
@@ -30,7 +34,8 @@ trait LineDelaysAlgebra[F[_]] {
 }
 object LineDelaysAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
-      lineDelaysRepository: LineDelaysRepository[F]
+      lineDelaysRepository: LineDelaysRepository[F],
+      tripsRepository: TripsRepository[F],
     )(implicit
       F: MonadThrow[F],
       logger: Logger[F],
@@ -43,17 +48,26 @@ object LineDelaysAlgebra {
         lineDelaysRepository.findById(id)
 
       override def create(lineDelayInput: LineDelayInput): F[LineDelayId] =
-        for {
-          id <- ID.make[F, LineDelayId]
-          lineDelay = dto.LineDelay(
-            id = id,
-            name = lineDelayInput.name,
-            startTime = lineDelayInput.startTime,
-            endTime = lineDelayInput.endTime,
-            signId = lineDelayInput.signId,
-          )
-          _ <- lineDelaysRepository.create(lineDelay)
-        } yield id
+        OptionT(tripsRepository.findById(lineDelayInput.tripId)).cataF(
+          AError
+            .Internal(s"Trip not found by id [${lineDelayInput.tripId}]")
+            .raiseError[F, LineDelayId],
+          trip =>
+            for {
+              id <- ID.make[F, LineDelayId]
+              now <- Calendar[F].currentZonedDateTime
+              lineDelay = dto.LineDelay(
+                id = id,
+                createdAt = now,
+                tripId = trip.id,
+                name = lineDelayInput.name,
+                startTime = lineDelayInput.startTime,
+                endTime = lineDelayInput.endTime,
+                signId = lineDelayInput.signId,
+              )
+              _ <- lineDelaysRepository.create(lineDelay)
+            } yield id,
+        )
 
       override def update(
           id: LineDelayId,

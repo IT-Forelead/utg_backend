@@ -1,6 +1,7 @@
 package utg.repos.sql
 
 import skunk._
+import skunk.codec.all.bool
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
@@ -9,8 +10,8 @@ import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 
 private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
   private[repos] val codec: Codec[dto.TripDriverTask] =
-    (id *: TripsSql.id *: nes *: zonedDateTime *: nes *: nes *: nes
-      *: nonNegInt *: nonNegDouble *: nonNegDouble).to[dto.TripDriverTask]
+    (id *: zonedDateTime *: TripsSql.id *: nes *: zonedDateTime *: nes *: nes *: nes *: nonNegInt *: nonNegDouble *: nonNegDouble *: bool)
+      .to[dto.TripDriverTask]
 
   val insert: Command[dto.TripDriverTask] =
     sql"""INSERT INTO trip_driver_tasks VALUES ($codec)""".command
@@ -20,8 +21,8 @@ private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
     )
 
     val baseQuery: AppliedFragment =
-      sql"""SELECT * FROM trip_driver_tasks""".apply(Void)
-    baseQuery.whereAndOpt(searchFilters)
+      sql"""SELECT * FROM trip_driver_tasks WHERE deleted = false""".apply(Void)
+    baseQuery.andOpt(searchFilters)
   }
 
   val update: Command[dto.TripDriverTask] =

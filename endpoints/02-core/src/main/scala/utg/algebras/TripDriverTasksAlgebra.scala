@@ -1,6 +1,7 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.OptionT
 import cats.effect.std.Random
 import cats.implicits._
 import org.typelevel.log4cats.Logger
@@ -15,7 +16,9 @@ import utg.domain.args.tripDriverTasks.TripDriverTaskInput
 import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput
 import utg.effects.Calendar
 import utg.effects.GenUUID
+import utg.exception.AError
 import utg.repos.TripDriverTasksRepository
+import utg.repos.TripsRepository
 import utg.repos.sql.dto
 import utg.utils.ID
 
@@ -34,7 +37,8 @@ trait TripDriverTasksAlgebra[F[_]] {
 }
 object TripDriverTasksAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
-      tripDriverTasksRepository: TripDriverTasksRepository[F]
+      tripDriverTasksRepository: TripDriverTasksRepository[F],
+      tripsRepository: TripsRepository[F],
     )(implicit
       F: MonadThrow[F],
       P: PasswordHasher[F, SCrypt],
@@ -48,23 +52,30 @@ object TripDriverTasksAlgebra {
         tripDriverTasksRepository.findById(id)
 
       override def create(tripDriverTaskInput: TripDriverTaskInput): F[TripDriverTaskId] =
-        for {
-          id <- ID.make[F, TripDriverTaskId]
-          now <- Calendar[F].currentZonedDateTime
-          tripDriverTask = dto.TripDriverTask(
-            id = id,
-            tripId = tripDriverTaskInput.tripId,
-            whoseDiscretion = tripDriverTaskInput.whoseDiscretion,
-            arrivalTime = tripDriverTaskInput.arrivalTime,
-            pickupLocation = tripDriverTaskInput.pickupLocation,
-            deliveryLocation = tripDriverTaskInput.deliveryLocation,
-            freightName = tripDriverTaskInput.freightName,
-            numberOfInteractions = tripDriverTaskInput.numberOfInteractions,
-            distance = tripDriverTaskInput.distance,
-            freightVolume = tripDriverTaskInput.freightVolume,
-          )
-          _ <- tripDriverTasksRepository.create(tripDriverTask)
-        } yield id
+        OptionT(tripsRepository.findById(tripDriverTaskInput.tripId)).cataF(
+          AError
+            .Internal(s"Trip not found by id [${tripDriverTaskInput.tripId}]")
+            .raiseError[F, TripDriverTaskId],
+          trip =>
+            for {
+              id <- ID.make[F, TripDriverTaskId]
+              now <- Calendar[F].currentZonedDateTime
+              tripDriverTask = dto.TripDriverTask(
+                id = id,
+                createdAt = now,
+                tripId = tripDriverTaskInput.tripId,
+                whoseDiscretion = tripDriverTaskInput.whoseDiscretion,
+                arrivalTime = tripDriverTaskInput.arrivalTime,
+                pickupLocation = tripDriverTaskInput.pickupLocation,
+                deliveryLocation = tripDriverTaskInput.deliveryLocation,
+                freightName = tripDriverTaskInput.freightName,
+                numberOfInteractions = tripDriverTaskInput.numberOfInteractions,
+                distance = tripDriverTaskInput.distance,
+                freightVolume = tripDriverTaskInput.freightVolume,
+              )
+              _ <- tripDriverTasksRepository.create(tripDriverTask)
+            } yield id,
+        )
 
       override def update(
           id: TripDriverTaskId,

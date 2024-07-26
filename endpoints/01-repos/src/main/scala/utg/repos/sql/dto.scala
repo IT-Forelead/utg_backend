@@ -240,6 +240,7 @@ object dto {
 
   case class TripDriverTask(
       id: TripDriverTaskId,
+      createdAt: ZonedDateTime,
       tripId: TripId,
       whoseDiscretion: NonEmptyString,
       arrivalTime: ZonedDateTime,
@@ -249,6 +250,7 @@ object dto {
       numberOfInteractions: NonNegInt,
       distance: NonNegDouble,
       freightVolume: NonNegDouble,
+      deleted: Boolean = false,
     ) {
     def toDomain: domain.TripDriverTask =
       this.transformInto[domain.TripDriverTask]
@@ -256,10 +258,13 @@ object dto {
 
   case class LineDelay(
       id: LineDelayId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
       name: NonEmptyString,
       startTime: ZonedDateTime,
       endTime: ZonedDateTime,
       signId: SignId,
+      deleted: Boolean = false,
     ) {
     def toDomain: domain.LineDelay =
       this.transformInto[domain.LineDelay]

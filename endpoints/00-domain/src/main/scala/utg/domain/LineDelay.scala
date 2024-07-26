@@ -9,6 +9,8 @@ import io.circe.refined._
 @JsonCodec
 case class LineDelay(
     id: LineDelayId,
+    createdAt: ZonedDateTime,
+    tripId: TripId,
     name: NonEmptyString,
     startTime: ZonedDateTime,
     endTime: ZonedDateTime,

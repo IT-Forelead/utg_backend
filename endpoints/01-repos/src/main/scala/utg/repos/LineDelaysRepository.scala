@@ -22,7 +22,7 @@ import utg.repos.sql.dto
 
 trait LineDelaysRepository[F[_]] {
   def findById(id: LineDelayId): F[Option[LineDelay]]
-  def create(lineDelayAndHash: dto.LineDelay): F[Unit]
+  def create(lineDelay: dto.LineDelay): F[Unit]
   def update(id: LineDelayId)(update: dto.LineDelay => dto.LineDelay): F[Unit]
   def delete(id: LineDelayId): F[Unit]
   def get(filters: LineDelayFilters): F[ResponseData[LineDelay]]
