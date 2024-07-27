@@ -72,6 +72,11 @@ object TripsAlgebra {
             driverId = input.driverId,
             trailerId = input.trailerId,
             semiTrailerId = input.semiTrailerId,
+            doctorId = None,
+            chiefMechanicId = None,
+            doctorSignature = None,
+            chiefMechanicSignature = None,
+            notes = None,
           )
           _ <- tripsRepository.create(dtoTrip)
           _ <- input.accompanyingPersons.traverse { userIds =>
@@ -85,28 +90,25 @@ object TripsAlgebra {
           accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(
             dtoTrips.data.map(_.id)
           )
+          doctorWithMechanicIds =  dtoTrips.data.flatMap { t => t.doctorId ++ t.chiefMechanicId }
           usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
           userById <- NonEmptyList.fromList(usersIds).fold(Map.empty[UserId, User].pure[F]) {
             userIds =>
-              usersRepository.findByIds(userIds.toList)
+              usersRepository.findByIds(userIds.toList ++ doctorWithMechanicIds)
           }
           vehicles <- NonEmptyList
             .fromList(dtoTrips.data.map(_.vehicleId))
             .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
               vehicleRepository.findByIds(vehicleIds.toList)
             }
+          trailerIds = dtoTrips.data.flatMap(tva => tva.trailerId ++ tva.semiTrailerId).distinct
           drivers <- NonEmptyList
             .fromList(dtoTrips.data.map(_.driverId))
             .fold(Map.empty[UserId, User].pure[F]) { userIds =>
               usersRepository.findByIds(userIds.toList)
             }
           trailers <- NonEmptyList
-            .fromList(dtoTrips.data.flatMap(_.trailerId))
-            .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
-              vehicleRepository.findByIds(vehicleIds.toList)
-            }
-          semiTrailers <- NonEmptyList
-            .fromList(dtoTrips.data.flatMap(_.semiTrailerId))
+            .fromList(trailerIds)
             .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
               vehicleRepository.findByIds(vehicleIds.toList)
             }
@@ -130,8 +132,13 @@ object TripsAlgebra {
               vehicle = vehicles.get(t.vehicleId),
               driver = drivers.get(t.driverId),
               trailer = t.trailerId.flatMap(trailers.get),
-              semiTrailer = t.semiTrailerId.flatMap(semiTrailers.get),
+              semiTrailer = t.semiTrailerId.flatMap(trailers.get),
               accompanyingPersons = accompanyingUsers,
+              doctor = doctors.get(t.doctorId),
+              doctorSignature = t.doctorSignature,
+              chiefMechanic = chiefMechanics.get(t.chiefMechanicId),
+              chiefMechanicSignature = t.chiefMechanicSignature,
+              notes = t.notes,
             )
           }
         } yield dtoTrips.copy(data = trip)
@@ -166,6 +173,11 @@ object TripsAlgebra {
             trailer = dtoTrip.trailerId.flatMap(trailers.get),
             semiTrailer = dtoTrip.semiTrailerId.flatMap(semiTrailers.get),
             accompanyingPersons = accompanyingUsers,
+            doctor = doctors.get(dtoTrip.doctorId),
+            doctorSignature = dtoTrip.doctorSignature,
+            chiefMechanic = chiefMechanics.get(dtoTrip.chiefMechanicId),
+            chiefMechanicSignature = dtoTrip.chiefMechanicSignature,
+            notes = dtoTrip.notes,
           )
         } yield trip
 

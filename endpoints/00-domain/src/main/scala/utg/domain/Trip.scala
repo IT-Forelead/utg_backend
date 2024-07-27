@@ -27,4 +27,9 @@ case class Trip(
     trailer: Option[Vehicle],
     semiTrailer: Option[Vehicle],
     accompanyingPersons: Option[List[User]],
+    doctor: Option[User],
+    doctorSignature: Option[AssetId],
+    chiefMechanic: Option[User],
+    chiefMechanicSignature: Option[AssetId],
+    notes: Option[NonEmptyString],
   )
