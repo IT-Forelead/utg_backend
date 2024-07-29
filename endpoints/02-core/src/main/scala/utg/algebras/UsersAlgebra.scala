@@ -75,11 +75,11 @@ object UsersAlgebra {
             phone = userInput.phone,
             assetId = None,
             branchCode = Option(userInput.branchCode),
+            licenseNumber = userInput.licenseNumber,
+            drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
           )
           password <- randomStr[F](8)
-
           hash <- SCrypt.hashpw[F](password)
-
           accessCredentials = AccessCredentials(user, hash)
           _ <- usersRepository.create(accessCredentials)
           smsText =
@@ -103,6 +103,8 @@ object UsersAlgebra {
               branchCode = userInput.branchCode,
               roleId = userInput.roleId,
               assetId = assetId,
+              licenseNumber = userInput.licenseNumber,
+              drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
             )
           )
         } yield {}

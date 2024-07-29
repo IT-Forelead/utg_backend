@@ -1,5 +1,6 @@
 package utg.domain.args.users
 
+import cats.data.NonEmptyList
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -7,6 +8,7 @@ import io.circe.refined._
 import utg.Phone
 import utg.domain.RoleId
 import utg.domain.UserId
+import utg.domain.enums.DrivingLicenseCategory
 
 @JsonCodec
 case class UpdateUserInput(
@@ -17,4 +19,6 @@ case class UpdateUserInput(
     phone: Phone,
     branchCode: Option[String],
     roleId: RoleId,
+    licenseNumber: Option[NonEmptyString],
+    drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
   )

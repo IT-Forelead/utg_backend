@@ -74,8 +74,10 @@ object UsersRepository {
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
         }
+        drivingLicenseCategories =
+          userDto.drivingLicenseCategories.flatMap(NonEmptyList.fromList)
       } yield optRole.map { role =>
-        userDto.toDomain(role, branch)
+        userDto.toDomain(role, branch, drivingLicenseCategories)
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
@@ -114,6 +116,8 @@ object UsersRepository {
             .flatMap(branchByCode.get)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
           val privelegies = roleOpt.flatMap(_.tail.head).toList
+          val drivingLicenseCategories =
+            userDto.drivingLicenseCategories.flatMap(NonEmptyList.fromList)
           userDto.toDomain(
             Role(
               id = userDto.roleId,
@@ -121,6 +125,7 @@ object UsersRepository {
               privileges = privelegies,
             ),
             maybeBranch,
+            drivingLicenseCategories,
           )
         }
       }

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+import cats.data.NonEmptyList
 import cats.effect.Concurrent
 import cats.effect.Sync
 import cats.implicits.catsSyntaxOptionId
@@ -31,13 +32,20 @@ object dto {
       roleId: RoleId,
       assetId: Option[AssetId],
       branchCode: Option[NonEmptyString],
+      licenseNumber: Option[NonEmptyString],
+      drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
     ) {
-    def toDomain(role: domain.Role, branch: Option[utg.domain.Branch]): AuthedUser.User =
+    def toDomain(
+        role: domain.Role,
+        branch: Option[utg.domain.Branch],
+        drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
+      ): AuthedUser.User =
       this
         .into[AuthedUser.User]
         .withFieldConst(_.role, role)
         .withFieldConst(_.phone, phone)
         .withFieldConst(_.branch, branch)
+        .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .transform
 
     def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
@@ -58,6 +66,7 @@ object dto {
         .into[User]
         .withFieldConst(_.roleId, user.role.id)
         .withFieldConst(_.branchCode, user.branch.map(_.code))
+        .withFieldConst(_.drivingLicenseCategories, user.drivingLicenseCategories.map(_.toList))
         .transform
 
     private val CsvHeaders: List[String] =

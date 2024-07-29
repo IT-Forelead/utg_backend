@@ -1,14 +1,14 @@
 package utg.domain
 
-import java.time.ZonedDateTime
+import cats.data.NonEmptyList
 
+import java.time.ZonedDateTime
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg.Phone
-import utg.domain.enums.Privilege
+import utg.domain.enums.{DrivingLicenseCategory, Privilege}
 
 @JsonCodec
 sealed trait AuthedUser {
@@ -34,6 +34,8 @@ object AuthedUser {
       phone: Phone,
       assetId: Option[AssetId],
       branch: Option[Branch],
+      licenseNumber: Option[NonEmptyString],
+      drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)
