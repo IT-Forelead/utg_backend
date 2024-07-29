@@ -6,7 +6,6 @@ import cats.data.OptionT
 import cats.implicits._
 
 import utg.domain.AccompanyingPersonId
-import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.Trip
 import utg.domain.TripId
@@ -90,15 +89,16 @@ object TripsAlgebra {
           accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(
             dtoTrips.data.map(_.id)
           )
-          usersIds = dtoTrips.data.flatMap(t => t.driverId.some ++ t.doctorId ++ t.chiefMechanicId).distinct
+          usersIds = dtoTrips
+            .data
+            .flatMap(t => t.driverId.some ++ t.doctorId ++ t.chiefMechanicId)
+            .distinct
           accompanyingUsersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
           userById <- usersRepository.findByIds(usersIds ++ accompanyingUsersIds)
-          vehicleIds = dtoTrips.data.flatMap(tva => tva.vehicleId.some ++ tva.trailerId ++ tva.semiTrailerId).distinct
-//          drivers <- NonEmptyList
-//            .fromList(dtoTrips.data.map(_.driverId))
-//            .fold(Map.empty[UserId, User].pure[F]) { userIds =>
-//              usersRepository.findByIds(userIds.toList)
-//            }
+          vehicleIds = dtoTrips
+            .data
+            .flatMap(tva => tva.vehicleId.some ++ tva.trailerId ++ tva.semiTrailerId)
+            .distinct
           vehicles <- NonEmptyList
             .fromList(vehicleIds)
             .fold(Map.empty[VehicleId, Vehicle].pure[F]) { vehicleIds =>
