@@ -5,6 +5,7 @@ import cats.data.NonEmptyList
 import cats.implicits.catsSyntaxApplicativeId
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
+import cats.implicits.toTraverseOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.domain.Branch
@@ -24,6 +25,7 @@ trait BranchesAlgebra[F[_]] {
   def getBranches: F[List[Branch]]
   def update(input: UpdateBranchInput): F[Unit]
   def getAsStream(filter: BranchFilters): F[fs2.Stream[F, Branch]]
+  def batch(branches: List[BranchInput]): F[List[Branch]]
 }
 
 object BranchesAlgebra {
@@ -78,5 +80,13 @@ object BranchesAlgebra {
             branchesRepository.makeBranch(branch)
           }
         }
+
+      override def batch(branches: List[BranchInput]): F[List[Branch]] =
+        for {
+          _ <- branches.traverse { branch =>
+            create(branch)
+          }
+          branches <- getBranches
+        } yield branches
     }
 }

@@ -62,5 +62,10 @@ final case class BranchesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
             "Branches_Report.csv",
           )
         }
+
+    case ar @ POST -> Root / "batch" as _ =>
+      ar.req.decodeR[List[BranchInput]] { branches =>
+        branchesAlgebra.batch(branches).flatMap(Ok(_))
+      }
   }
 }
