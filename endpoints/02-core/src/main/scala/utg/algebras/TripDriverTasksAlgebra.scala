@@ -11,6 +11,7 @@ import tsec.passwordhashers.jca.SCrypt
 import utg.domain.ResponseData
 import utg.domain.TripDriverTask
 import utg.domain.TripDriverTaskId
+import utg.domain.TripId
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.domain.args.tripDriverTasks.TripDriverTaskInput
 import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput
@@ -24,6 +25,7 @@ import utg.utils.ID
 
 trait TripDriverTasksAlgebra[F[_]] {
   def get(filters: TripDriverTaskFilters): F[ResponseData[TripDriverTask]]
+  def getByTripId(tripId: TripId): F[List[TripDriverTask]]
   def getAsStream(filters: TripDriverTaskFilters): F[fs2.Stream[F, TripDriverTask]]
   def findById(id: TripDriverTaskId): F[Option[TripDriverTask]]
   def create(tripDriverTaskInput: TripDriverTaskInput): F[TripDriverTaskId]
@@ -47,6 +49,26 @@ object TripDriverTasksAlgebra {
     new TripDriverTasksAlgebra[F] {
       override def get(filters: TripDriverTaskFilters): F[ResponseData[TripDriverTask]] =
         tripDriverTasksRepository.get(filters)
+
+      override def getByTripId(tripId: TripId): F[List[TripDriverTask]] =
+        for {
+          dtoTripDriverTasks <- tripDriverTasksRepository.getByTripId(tripId)
+          tripDriverTasks = dtoTripDriverTasks.map(tdt =>
+            TripDriverTask(
+              id = tdt.id,
+              createdAt = tdt.createdAt,
+              tripId = tdt.tripId,
+              whoseDiscretion = tdt.whoseDiscretion,
+              arrivalTime = tdt.arrivalTime,
+              pickupLocation = tdt.pickupLocation,
+              deliveryLocation = tdt.deliveryLocation,
+              freightName = tdt.freightName,
+              numberOfInteractions = tdt.numberOfInteractions,
+              distance = tdt.distance,
+              freightVolume = tdt.freightVolume,
+            )
+          )
+        } yield tripDriverTasks
 
       override def findById(id: TripDriverTaskId): F[Option[TripDriverTask]] =
         tripDriverTasksRepository.findById(id)

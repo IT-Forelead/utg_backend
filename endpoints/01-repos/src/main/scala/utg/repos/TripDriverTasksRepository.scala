@@ -12,10 +12,7 @@ import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
-import utg.domain.ResponseData
-import utg.domain.TripDriverTask
-import utg.domain.TripDriverTaskId
+import utg.domain.{ResponseData, TripDriverTask, TripDriverTaskId, TripId}
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.exception.AError
 import utg.repos.sql.TripDriverTasksSql
@@ -29,6 +26,7 @@ trait TripDriverTasksRepository[F[_]] {
   def get(filters: TripDriverTaskFilters): F[ResponseData[TripDriverTask]]
   def getAsStream(filters: TripDriverTaskFilters): fs2.Stream[F, dto.TripDriverTask]
   def makeTripDriverTask(tripDriverTaskDto: dto.TripDriverTask): TripDriverTask
+  def getByTripId(tripId: TripId): F[List[dto.TripDriverTask]]
 }
 
 object TripDriverTasksRepository {
@@ -62,6 +60,9 @@ object TripDriverTasksRepository {
           )
       }
     }
+
+    override def getByTripId(tripId: TripId): F[List[dto.TripDriverTask]] =
+      TripDriverTasksSql.selectByTripId.queryList(tripId)
 
     override def update(
         id: TripDriverTaskId

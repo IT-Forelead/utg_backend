@@ -17,11 +17,9 @@ import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
-
 import utg.algebras.TripDriverTasksAlgebra
-import utg.domain.AuthedUser
+import utg.domain.{AuthedUser, TripDriverTaskId, TripId}
 import utg.domain.TripDriverTaskCsvGenerator.makeCsv
-import utg.domain.TripDriverTaskId
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.domain.args.tripDriverTasks.TripDriverTaskInput
 import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput
@@ -49,13 +47,13 @@ final case class TripDriverTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
         tripDriverTasks.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(tripDriverTaskId) as _ =>
-      tripDriverTasks.findById(tripDriverTaskId.coerce[TripDriverTaskId]).flatMap(Ok(_))
-
     case ar @ POST -> Root as _ =>
       ar.req.decodeR[TripDriverTaskFilters] { create =>
         tripDriverTasks.get(create).flatMap(Ok(_))
       }
+
+    case GET -> Root / UUIDVar(tripId) as _ =>
+      tripDriverTasks.getByTripId(tripId.coerce[TripId]).flatMap(Ok(_))
 
     case GET -> Root / "csv" as _ =>
       tripDriverTasks

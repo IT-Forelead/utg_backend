@@ -4,8 +4,7 @@ import skunk._
 import skunk.codec.all.bool
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-
-import utg.domain.TripDriverTaskId
+import utg.domain.{TripDriverTaskId, TripId}
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 
 private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
@@ -24,6 +23,11 @@ private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
       sql"""SELECT * FROM trip_driver_tasks WHERE deleted = false""".apply(Void)
     baseQuery.andOpt(searchFilters)
   }
+
+  val selectByTripId: Query[TripId, dto.TripDriverTask] =
+    sql"""SELECT * FROM trip_driver_tasks
+         WHERE deleted = false AND trip_id = ${TripsSql.id}
+         ORDER BY created_at DESC""".query(codec)
 
   val update: Command[dto.TripDriverTask] =
     sql"""UPDATE trip_driver_tasks
@@ -48,6 +52,5 @@ private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
     sql"""DELETE FROM trip_driver_tasks u WHERE u.id = $id""".command
 
   val findById: Query[TripDriverTaskId, dto.TripDriverTask] =
-    sql"""SELECT * FROM trip_driver_tasks
-          WHERE id = $id LIMIT 1""".query(codec)
+    sql"""SELECT * FROM trip_driver_tasks WHERE id = $id LIMIT 1""".query(codec)
 }

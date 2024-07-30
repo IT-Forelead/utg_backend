@@ -11,6 +11,7 @@ import io.circe.refined._
 @JsonCodec
 case class TripDriverTask(
     id: TripDriverTaskId,
+    createdAt: ZonedDateTime,
     tripId: TripId,
     whoseDiscretion: NonEmptyString,
     arrivalTime: ZonedDateTime,
