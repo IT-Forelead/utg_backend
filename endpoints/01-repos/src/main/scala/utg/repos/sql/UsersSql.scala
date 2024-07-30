@@ -116,6 +116,8 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.role_id AS role_id,
               u.asset_id AS asset_id,
               u.branch_code AS branch_code,
+              u.license_number,
+              u.driving_license_categories,
               COUNT(*) OVER() AS total
             FROM users u"""
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)
