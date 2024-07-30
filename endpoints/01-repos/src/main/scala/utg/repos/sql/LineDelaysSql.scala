@@ -1,9 +1,11 @@
 package utg.repos.sql
 
 import skunk._
-import skunk.codec.all.{bool, varchar}
+import skunk.codec.all.bool
+import skunk.codec.all.varchar
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
+
 import utg.domain.LineDelayId
 import utg.domain.args.lineDelays.LineDelayFilters
 

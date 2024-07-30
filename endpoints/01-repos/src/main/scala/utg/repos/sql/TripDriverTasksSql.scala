@@ -4,7 +4,9 @@ import skunk._
 import skunk.codec.all.bool
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-import utg.domain.{TripDriverTaskId, TripId}
+
+import utg.domain.TripDriverTaskId
+import utg.domain.TripId
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 
 private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {

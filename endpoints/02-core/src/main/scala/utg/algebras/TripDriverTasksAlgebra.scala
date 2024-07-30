@@ -33,9 +33,7 @@ trait TripDriverTasksAlgebra[F[_]] {
       id: TripDriverTaskId,
       tripDriverTaskInput: UpdateTripDriverTaskInput,
     ): F[Unit]
-  def delete(
-      id: TripDriverTaskId
-    ): F[Unit]
+  def delete(id: TripDriverTaskId): F[Unit]
 }
 object TripDriverTasksAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
@@ -85,7 +83,7 @@ object TripDriverTasksAlgebra {
               tripDriverTask = dto.TripDriverTask(
                 id = id,
                 createdAt = now,
-                tripId = tripDriverTaskInput.tripId,
+                tripId = trip.id,
                 whoseDiscretion = tripDriverTaskInput.whoseDiscretion,
                 arrivalTime = tripDriverTaskInput.arrivalTime,
                 pickupLocation = tripDriverTaskInput.pickupLocation,

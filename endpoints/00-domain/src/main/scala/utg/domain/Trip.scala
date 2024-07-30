@@ -3,6 +3,7 @@ package utg.domain
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
+import eu.timepit.refined.types.numeric.NonNegDouble
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -29,6 +30,7 @@ case class Trip(
     accompanyingPersons: Option[List[User]],
     doctor: Option[User],
     doctorSignature: Option[AssetId],
+    fuelSupply: Option[NonNegDouble],
     chiefMechanic: Option[User],
     chiefMechanicSignature: Option[AssetId],
     notes: Option[NonEmptyString],

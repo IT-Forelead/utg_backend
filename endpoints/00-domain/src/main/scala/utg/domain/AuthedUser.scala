@@ -1,14 +1,16 @@
 package utg.domain
 
-import cats.data.NonEmptyList
-
 import java.time.ZonedDateTime
+
+import cats.data.NonEmptyList
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
 import utg.Phone
-import utg.domain.enums.{DrivingLicenseCategory, Privilege}
+import utg.domain.enums.DrivingLicenseCategory
+import utg.domain.enums.Privilege
 
 @JsonCodec
 sealed trait AuthedUser {

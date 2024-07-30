@@ -55,7 +55,7 @@ object Algebras {
       tripVehicleAcceptances,
       tripDriverTasks,
       lineDelays,
-      completeTasks
+      completeTasks,
     ) = repositories
     val assetsAlgebra = AssetsAlgebra.make[F](assets, s3Client)
     Algebras[F](
