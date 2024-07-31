@@ -23,6 +23,13 @@ case class Algebras[F[_]](
     branches: BranchesAlgebra[F],
     vehicleCategories: VehicleCategoriesAlgebra[F],
     vehicles: VehiclesAlgebra[F],
+    trips: TripsAlgebra[F],
+    tripVehicleIndicators: TripVehicleIndicatorsAlgebra[F],
+    tripFuelExpensesAlgebra: TripFuelExpensesAlgebra[F],
+    tripVehicleAcceptancesAlgebra: TripVehicleAcceptancesAlgebra[F],
+    tripDriverTasks: TripDriverTasksAlgebra[F],
+    lineDelays: LineDelaysAlgebra[F],
+    completeTasksAlgebra: CompleteTasksAlgebra[F],
   )
 
 object Algebras {
@@ -34,8 +41,22 @@ object Algebras {
     )(implicit
       P: PasswordHasher[F, SCrypt]
     ): Algebras[F] = {
-    val Repositories(users, assets, roles, regions, branches, vehicleCategories, vehicles) =
-      repositories
+    val Repositories(
+      users,
+      assets,
+      roles,
+      regions,
+      branches,
+      vehicleCategories,
+      vehicles,
+      trips,
+      tripVehicleIndicators,
+      tripFuelExpenses,
+      tripVehicleAcceptances,
+      tripDriverTasks,
+      lineDelays,
+      completeTasks,
+    ) = repositories
     val assetsAlgebra = AssetsAlgebra.make[F](assets, s3Client)
     Algebras[F](
       auth = auth,
@@ -45,7 +66,18 @@ object Algebras {
       regions = RegionsAlgebra.make[F](regions),
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
-      vehicles = VehiclesAlgebra.make[F](vehicles),
+      vehicles = VehiclesAlgebra.make[F](vehicles, branches, vehicleCategories),
+      trips = TripsAlgebra.make[F](trips, users, vehicles),
+      tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
+      tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
+      tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
+        tripVehicleAcceptances,
+        users,
+        trips,
+      ),
+      tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks, trips),
+      lineDelays = LineDelaysAlgebra.make[F](lineDelays, trips),
+      completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
     )
   }
 }

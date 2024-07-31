@@ -1,7 +1,52 @@
 CREATE TYPE VEHICLE_TYPE AS ENUM (
-  'bus',
-  'truck',
-  'car'
+  'auto',
+  'special_road_vehicles',
+  'trailer',
+  'welding_equipment',
+  'other_mechanism'
+);
+
+CREATE TYPE CONDITION_TYPE AS ENUM (
+  'valid',
+  'invalid',
+  'write_off'
+);
+
+CREATE TYPE FUEL_TYPE AS ENUM (
+  'petrol',
+  'diesel',
+  'methane',
+  'propane',
+  'hybrid',
+  'electric'
+);
+
+CREATE TYPE GPS_TRACKING_TYPE AS ENUM (
+  'not_installed',
+  'installed',
+  'enabled',
+  'disabled'
+);
+
+CREATE TYPE WORKING_MODE_TYPE AS ENUM (
+  'daily',
+  'business_trip',
+  'mixed'
+);
+
+CREATE TYPE VEHICLE_INDICATOR_ACTION_TYPE AS ENUM (
+  'enter',
+  'exit'
+);
+
+CREATE TYPE DRIVING_LICENSE_CATEGORY AS ENUM (
+  'A',
+  'B',
+  'C',
+  'D',
+  'BE',
+  'CE',
+  'DE'
 );
 
 CREATE TABLE IF NOT EXISTS assets(
@@ -82,6 +127,8 @@ CREATE TABLE IF NOT EXISTS users (
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   branch_code VARCHAR NULL,
+  license_number VARCHAR NULL,
+  driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
   password VARCHAR NOT NULL
 );
 
@@ -125,8 +172,8 @@ INSERT INTO
     "lastname",
     "phone",
     "role_id",
-    "password",
-    "branch_code"
+    "branch_code",
+    "password"
   )
 VALUES
   (
@@ -136,8 +183,8 @@ VALUES
     'Super Manager',
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
-    '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY=',
-    null
+    null,
+    '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY='
   );
 
   -- Create the trigger function
@@ -172,14 +219,173 @@ VALUES
 CREATE TABLE IF NOT EXISTS vehicle_categories (
   id UUID PRIMARY KEY NOT NULL,
   name VARCHAR NOT NULL,
+  vehicle_type VEHICLE_TYPE NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS vehicles (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  name VARCHAR NOT NULL,
-  registered_number VARCHAR NOT NULL UNIQUE,
+  branch_id UUID NOT NULL
+    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_category_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_category REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
   vehicle_type VEHICLE_TYPE NOT NULL,
-  fuel_tank_volume DOUBLE PRECISION NOT NULL
+  brand VARCHAR NOT NULL,
+  registered_number VARCHAR NULL UNIQUE,
+  inventory_number VARCHAR NOT NULL UNIQUE,
+  year_of_release INT NOT NULL,
+  body_number VARCHAR NULL,
+  chassis_number VARCHAR NULL,
+  engine_number VARCHAR NULL,
+  condition CONDITION_TYPE NOT NULL,
+  fuel_type FUEL_TYPE NULL,
+  description VARCHAR NULL,
+  gps_tracking GPS_TRACKING_TYPE NULL,
+  fuel_level_sensor DOUBLE PRECISION NULL,
+  fuel_tank_volume DOUBLE PRECISION NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE TABLE IF NOT EXISTS trips (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NULL,
+  serial_number VARCHAR NOT NULL,
+  first_tab VARCHAR NULL,
+  second_tab VARCHAR NULL,
+  third_tab VARCHAR NULL,
+  work_order WORKING_MODE_TYPE NOT NULL,
+  summation VARCHAR NULL,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL
+    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  trailer_id UUID NULL
+    CONSTRAINT fk_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  semi_trailer_id UUID NULL
+    CONSTRAINT fk_semi_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  doctor_id UUID NULL
+    CONSTRAINT fk_doctor_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  doctor_signature UUID NULL
+    CONSTRAINT fk_doctor_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_supply DOUBLE PRECISION NULL,
+  chief_mechanic_id UUID NULL
+    CONSTRAINT fk_chief_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  chief_mechanic_signature UUID NULL
+    CONSTRAINT fk_chief_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  notes VARCHAR NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_accompanying_persons (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  user_id UUID NOT NULL CONSTRAINT fk_user_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false,
+  UNIQUE (trip_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  action_type VEHICLE_INDICATOR_ACTION_TYPE NOT NULL,
+  scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  current_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  odometer_indicator DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+  paid_distance DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_brand VARCHAR NULL,
+  brand_code VARCHAR NULL,
+  fuel_given DOUBLE PRECISION NULL,
+  fuel_attendant VARCHAR NULL,
+  attendant_signature UUID NULL
+    CONSTRAINT fk_attendant_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_in_tank DOUBLE PRECISION NULL,
+  fuel_remaining DOUBLE PRECISION NULL,
+  norm_change_coeff DOUBLE PRECISION NULL,
+  equipment_working_time DOUBLE PRECISION NULL,
+  engine_working_time DOUBLE PRECISION NULL,
+  tank_check_mechanic UUID NULL
+    CONSTRAINT fk_tank_check_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  tank_check_mechanic_signature UUID NULL
+    CONSTRAINT fk_tank_check_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  remaining_check_mechanic UUID NULL
+    CONSTRAINT fk_remaining_check_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  remaining_check_mechanic_signature UUID NULL
+    CONSTRAINT fk_remaining_check_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  dispatcher UUID NULL
+    CONSTRAINT fk_dispatcher_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  dispatcher_signature UUID NULL
+    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_driver_tasks (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  whose_discretion VARCHAR NOT NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  pickup_location VARCHAR NOT NULL,
+  delivery_location VARCHAR NOT NULL,
+  freight_name VARCHAR NOT NULL,
+  number_of_interactions INT NOT NULL,
+  distance DOUBLE PRECISION NULL,
+  freight_volume DOUBLE PRECISION NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_line_delays (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  name VARCHAR NOT NULL,
+  start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  sign_id UUID NOT NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_vehicle_acceptances (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  action_type VEHICLE_INDICATOR_ACTION_TYPE NOT NULL,
+  condition CONDITION_TYPE NOT NULL,
+  mechanic_id UUID NULL
+    CONSTRAINT fk_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  mechanic_signature UUID NULL
+    CONSTRAINT fk_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL
+    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_signature UUID NULL
+    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS comlpete_tasks (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  trip_number VARCHAR NULL,
+  invoice_number VARCHAR NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NULL,
+  consignor_sign_id UUID NULL,
+  document_id UUID NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+

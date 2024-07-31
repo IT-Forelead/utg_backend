@@ -27,4 +27,7 @@ private[repos] object RolesSql extends Sql[RoleId] {
 
   val getAllPrivileges: Query[Void, RoleId *: Privilege *: EmptyTuple] =
     sql"""SELECT * FROM role_privileges""".query(id *: privilege)
+
+  val insert: Command[RoleId *: NonEmptyString *: EmptyTuple] =
+    sql"""INSERT INTO roles (id, name) VALUES ($id, $nes)""".command
 }

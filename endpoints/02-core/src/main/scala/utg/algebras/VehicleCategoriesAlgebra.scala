@@ -3,18 +3,18 @@ package utg.algebras
 import cats.MonadThrow
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
-import eu.timepit.refined.types.string.NonEmptyString
 
 import utg.domain.VehicleCategory
 import utg.domain.VehicleCategoryId
+import utg.domain.args.vehicleCategories._
 import utg.effects.GenUUID
 import utg.repos.VehicleCategoriesRepository
 import utg.repos.sql.dto
 import utg.utils.ID
 
 trait VehicleCategoriesAlgebra[F[_]] {
-  def create(name: NonEmptyString): F[VehicleCategoryId]
-  def get: F[List[VehicleCategory]]
+  def create(input: VehicleCategoryInput): F[VehicleCategoryId]
+  def get(filters: VehicleCategoryFilters): F[List[VehicleCategory]]
   def update(input: VehicleCategory): F[Unit]
 }
 
@@ -23,24 +23,26 @@ object VehicleCategoriesAlgebra {
       vehicleCategoriesRepository: VehicleCategoriesRepository[F]
     ): VehicleCategoriesAlgebra[F] =
     new VehicleCategoriesAlgebra[F] {
-      override def create(name: NonEmptyString): F[VehicleCategoryId] =
+      override def create(input: VehicleCategoryInput): F[VehicleCategoryId] =
         for {
           id <- ID.make[F, VehicleCategoryId]
           dtoBranch = dto.VehicleCategory(
             id = id,
-            name = name,
+            name = input.name,
+            vehicleType = input.vehicleType,
           )
           _ <- vehicleCategoriesRepository.create(dtoBranch)
         } yield id
 
-      override def get: F[List[VehicleCategory]] =
+      override def get(filters: VehicleCategoryFilters): F[List[VehicleCategory]] =
         vehicleCategoriesRepository
-          .get
+          .get(filters)
           .map(
             _.map(vc =>
               VehicleCategory(
                 id = vc.id,
                 name = vc.name,
+                vehicleType = vc.vehicleType,
               )
             )
           )

@@ -8,23 +8,21 @@ import dev.profunktor.auth.AuthHeaders
 import dev.profunktor.auth.jwt.JwtAuth
 import dev.profunktor.auth.jwt.JwtSymmetricAuth
 import dev.profunktor.auth.jwt.JwtToken
-import eu.timepit.refined.types.string.NonEmptyString
 import org.http4s.Request
 import org.typelevel.log4cats.Logger
 import pdi.jwt.JwtAlgorithm
 import tsec.passwordhashers.jca.SCrypt
-import utg.Phone
 import uz.scala.redis.RedisClient
 import uz.scala.syntax.all.circeSyntaxDecoderOps
 import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
+
+import utg.Phone
 import utg.auth.AuthConfig
 import utg.auth.utils.AuthMiddleware
 import utg.auth.utils.JwtExpire
 import utg.auth.utils.Tokens
 import utg.domain.AuthedUser
-import utg.domain.auth.AccessCredentials
-import utg.domain.auth.AuthTokens
-import utg.domain.auth.Credentials
+import utg.domain.auth._
 import utg.exception.AError.AuthError
 import utg.exception.AError.AuthError.NoSuchUser
 import utg.exception.AError.AuthError.PasswordDoesNotMatch

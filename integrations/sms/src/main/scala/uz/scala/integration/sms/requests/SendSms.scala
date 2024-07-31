@@ -28,7 +28,7 @@ object SendSms {
             .sms
             .map(s =>
               s.copy(
-                text = s"${req.appDomain}\n\n{s.text}"
+                text = s.text.replace("%%UTG_DOMAIN%%", req.appDomain.value)
               )
             )
             .toJson,

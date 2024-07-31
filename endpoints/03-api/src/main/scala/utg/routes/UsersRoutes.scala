@@ -23,11 +23,11 @@ import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
+import utg.domain.args.users.CreateRoleInput
 import utg.domain.args.users.UpdateUserInput
 import utg.domain.args.users.UserFilters
 import utg.domain.args.users.UserInput
 import utg.domain.auth.Credentials
-import utg.domain.enums.Privilege
 import utg.repos.sql.dto.User
 
 final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
@@ -57,40 +57,43 @@ final case class UsersRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     }
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as user if user.access(Privilege.CreateUser) =>
+    case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[UserInput] { create =>
         users.create(create).flatMap(Created(_))
       }
 
-    case GET -> Root / UUIDVar(userId) as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root / UUIDVar(userId) as _ =>
       users.findById(userId.coerce[UserId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root as user if user.access(Privilege.ViewUsers) =>
+    case ar @ POST -> Root as _ =>
       ar.req.decodeR[UserFilters] { create =>
         users.get(create).flatMap(Ok(_))
       }
 
-    case ar @ POST -> Root / "csv" as user if user.access(Privilege.ViewUsers) =>
-      ar.req.decodeR[UserFilters] { filter =>
-        users
-          .getAsStream(filter)
-          .map { report =>
-            csvResponse(
-              report.through(User.makeCsv[F]),
-              "Users_Report.csv",
-            )
-          }
-      }
+    case GET -> Root / "csv" as _ =>
+      users
+        .getAsStream(UserFilters())
+        .map { report =>
+          csvResponse(
+            report.through(User.makeCsv[F]),
+            "Users_Report.csv",
+          )
+        }
 
-    case GET -> Root / "roles" as user if user.access(Privilege.ViewUsers) =>
+    case GET -> Root / "roles" as _ =>
       roles.getAll.flatMap(Ok(_))
 
-    case DELETE -> Root / UUIDVar(userId) as user if user.access(Privilege.CreateUser) =>
+    case DELETE -> Root / UUIDVar(userId) as _ =>
       users.delete(userId.coerce[UserId]).flatMap(Ok(_))
 
-    case ar @ POST -> Root / UUIDVar(userId) as user if user.access(Privilege.UpdateUser) =>
+    case ar @ PUT -> Root as _ =>
       ar.req.decodeR[UpdateUserInput] { update =>
-        users.update(userId.coerce[UserId], update).flatMap(Ok(_))
+        users.update(update.userId, update).flatMap(Ok(_))
+      }
+
+    case ar @ POST -> Root / "roles" as _ =>
+      ar.req.decodeR[CreateRoleInput] { value =>
+        roles.createRole(value.name).flatMap(Ok(_))
       }
   }
 }

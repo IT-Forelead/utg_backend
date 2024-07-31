@@ -14,6 +14,13 @@ case class Repositories[F[_]](
     branches: BranchesRepository[F],
     vehicleCategories: VehicleCategoriesRepository[F],
     vehicles: VehiclesRepository[F],
+    trips: TripsRepository[F],
+    tripVehicleIndicators: TripVehicleIndicatorsRepository[F],
+    tripFuelExpenses: TripFuelExpensesRepository[F],
+    tripVehicleAcceptances: TripVehicleAcceptancesRepository[F],
+    tripDriverTasks: TripDriverTasksRepository[F],
+    lineDelays: LineDelaysRepository[F],
+    completeTasks: CompleteTasksRepository[F],
   )
 
 object Repositories {
@@ -29,5 +36,12 @@ object Repositories {
       branches = BranchesRepository.make[F],
       vehicleCategories = VehicleCategoriesRepository.make[F],
       vehicles = VehiclesRepository.make[F],
+      trips = TripsRepository.make[F],
+      tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
+      tripFuelExpenses = TripFuelExpensesRepository.make[F],
+      tripVehicleAcceptances = TripVehicleAcceptancesRepository.make[F],
+      tripDriverTasks = TripDriverTasksRepository.make[F],
+      lineDelays = LineDelaysRepository.make[F],
+      completeTasks = CompleteTasksRepository.make[F],
     )
 }

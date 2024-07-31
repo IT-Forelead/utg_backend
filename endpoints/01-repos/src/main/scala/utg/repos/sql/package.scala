@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 
 import enumeratum.Enum
 import enumeratum.EnumEntry
-import eu.timepit.refined.types.numeric.NonNegDouble
+import eu.timepit.refined.types.numeric._
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk.Codec
 import skunk.codec.all._
@@ -14,10 +14,11 @@ import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
-import utg.Phone
-import utg.RegisteredNumber
-import utg.domain.enums.Privilege
-import utg.domain.enums.VehicleType
+import utg._
+import utg.domain.ConsignorSignId
+import utg.domain.DocumentId
+import utg.domain.SignId
+import utg.domain.enums._
 import utg.effects.IsUUID
 
 package object sql {
@@ -34,11 +35,40 @@ package object sql {
   val phone: Codec[Phone] = varchar.imap[Phone](identity(_))(_.value)
   val registeredNumber: Codec[RegisteredNumber] =
     varchar.imap[RegisteredNumber](identity(_))(_.value)
+  val inventoryNumber: Codec[InventoryNumber] =
+    varchar.imap[InventoryNumber](identity(_))(_.value)
   val privilege: Codec[Privilege] = varchar.imap[Privilege](Privilege.withName)(_.entryName)
   val zonedDateTime: Codec[ZonedDateTime] = timestamptz.imap(_.toZonedDateTime)(_.toOffsetDateTime)
   val nonNegDouble: Codec[NonNegDouble] =
     float8.imap[NonNegDouble](double => NonNegDouble.unsafeFrom(double))(_.value)
-  val vehicleType: Codec[VehicleType] = `enum`[VehicleType](VehicleType, Type("vehicle_type"))
+  val nonNegInt: Codec[NonNegInt] =
+    int4.imap[NonNegInt](int => NonNegInt.unsafeFrom(int))(_.value)
+  val vehicleType: Codec[VehicleType] =
+    `enum`[VehicleType](VehicleType, Type("vehicle_type"))
+  val conditionType: Codec[ConditionType] =
+    `enum`[ConditionType](ConditionType, Type("condition_type"))
+  val fuelType: Codec[FuelType] = `enum`[FuelType](FuelType, Type("fuel_type"))
+  val gpsTrackingType: Codec[GpsTrackingType] =
+    `enum`[GpsTrackingType](GpsTrackingType, Type("gps_tracking_type"))
+  val workingModeType: Codec[WorkingModeType] =
+    `enum`[WorkingModeType](WorkingModeType, Type("working_mode_type"))
+  val vehicleIndicatorActionType: Codec[VehicleIndicatorActionType] =
+    `enum`[VehicleIndicatorActionType](
+      VehicleIndicatorActionType,
+      Type("vehicle_indicator_action_type"),
+    )
+  val signId: Codec[SignId] = uuid.imap[SignId](uuid => SignId(uuid))(_.value)
+  val consignorSignId: Codec[ConsignorSignId] =
+    uuid.imap[ConsignorSignId](uuid => ConsignorSignId(uuid))(_.value)
+  val documentId: Codec[DocumentId] = uuid.imap[DocumentId](uuid => DocumentId(uuid))(_.value)
+
+  private val _drivingLicenseCategory: Codec[Arr[DrivingLicenseCategory]] =
+    `_enum`[DrivingLicenseCategory](
+      DrivingLicenseCategory,
+      Type("_driving_license_category", List(Type("driving_license_category"))),
+    )
+  val drivingLicenseCategories: Codec[List[DrivingLicenseCategory]] =
+    _drivingLicenseCategory.imap(_.flattenTo(List))(Arr(_: _*))
 
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)
