@@ -72,8 +72,25 @@ jobs:
             echo "Waiting for PostgreSQL to be ready..."
             sleep 5
           done
+
+      - name: Restore PostgreSQL Data
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/postgresql/data
+          key: ${{ runner.os }}-postgresql-data-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-postgresql-data
+
       - name: Run Flyway migrations
         run: sbt flywayMigrate
+
+      - name: Save PostgreSQL Data
+        uses: actions/cache@v3
+        with:
+          path: /var/lib/postgresql/data
+          key: ${{ runner.os }}-postgresql-data-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-postgresql-data
       - name: "Building base image 🏗"
         run: |
           cd .build
