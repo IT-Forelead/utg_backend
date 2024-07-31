@@ -172,6 +172,7 @@ object dto {
       semiTrailerId: Option[VehicleId],
       doctorId: Option[UserId],
       doctorSignature: Option[AssetId],
+      fuelSupply: Option[NonNegDouble],
       chiefMechanicId: Option[UserId],
       chiefMechanicSignature: Option[AssetId],
       notes: Option[NonEmptyString],

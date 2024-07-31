@@ -270,6 +270,7 @@ CREATE TABLE IF NOT EXISTS trips (
     CONSTRAINT fk_doctor_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   doctor_signature UUID NULL
     CONSTRAINT fk_doctor_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_supply DOUBLE PRECISION NULL,
   chief_mechanic_id UUID NULL
     CONSTRAINT fk_chief_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   chief_mechanic_signature UUID NULL

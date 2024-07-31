@@ -12,7 +12,11 @@ import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-import utg.domain.{ResponseData, TripDriverTask, TripDriverTaskId, TripId}
+
+import utg.domain.ResponseData
+import utg.domain.TripDriverTask
+import utg.domain.TripDriverTaskId
+import utg.domain.TripId
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.exception.AError
 import utg.repos.sql.TripDriverTasksSql

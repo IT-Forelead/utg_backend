@@ -6,12 +6,17 @@ import cats.implicits.toFlatMapOps
 import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.circe.JsonDecoder
-import utg.algebras.CompleteTasksAlgebra
-import utg.domain.{AuthedUser, CompleteTaskId}
-import utg.domain.args.completeTasks.{CompleteTaskFilters, CompleteTaskInput, UpdateCompleteTaskInput}
-import utg.domain.enums.Privilege
-import uz.scala.http4s.syntax.all.{deriveEntityEncoder, http4SyntaxReqOps}
+import uz.scala.http4s.syntax.all.deriveEntityEncoder
+import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
+import utg.algebras.CompleteTasksAlgebra
+import utg.domain.AuthedUser
+import utg.domain.CompleteTaskId
+import utg.domain.args.completeTasks.CompleteTaskFilters
+import utg.domain.args.completeTasks.CompleteTaskInput
+import utg.domain.args.completeTasks.UpdateCompleteTaskInput
+import utg.domain.enums.Privilege
 
 final case class CompleteTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     completeTasks: CompleteTasksAlgebra[F]

@@ -17,9 +17,12 @@ import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
+
 import utg.algebras.TripDriverTasksAlgebra
-import utg.domain.{AuthedUser, TripDriverTaskId, TripId}
+import utg.domain.AuthedUser
 import utg.domain.TripDriverTaskCsvGenerator.makeCsv
+import utg.domain.TripDriverTaskId
+import utg.domain.TripId
 import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.domain.args.tripDriverTasks.TripDriverTaskInput
 import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput

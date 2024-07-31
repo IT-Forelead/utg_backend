@@ -8,5 +8,4 @@ import io.circe.refined._
 case class CompleteTaskFilters(
     limit: Option[PosInt] = None,
     page: Option[PosInt] = None,
-
   )
