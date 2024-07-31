@@ -79,7 +79,7 @@ jobs:
           path: /var/lib/postgresql/data
           key: ${{ runner.os }}-postgresql-data-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-postgresql-data
+            ${{ runner.os }}-postgresql-data-
 
       - name: Run Flyway migrations
         run: sbt flywayMigrate
@@ -89,8 +89,7 @@ jobs:
         with:
           path: /var/lib/postgresql/data
           key: ${{ runner.os }}-postgresql-data-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-postgresql-data
+
       - name: "Building base image 🏗"
         run: |
           cd .build
