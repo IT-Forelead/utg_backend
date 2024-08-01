@@ -1,6 +1,7 @@
 package utg.routes
 
 import cats.MonadThrow
+import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
 import org.http4s.AuthedRoutes
 import org.http4s.circe.JsonDecoder
@@ -10,6 +11,7 @@ import uz.scala.http4s.utils.Routes
 
 import utg.algebras.TripsAlgebra
 import utg.domain.AuthedUser
+import utg.domain.args.trips.TripDoctorApprovalInput
 import utg.domain.args.trips.TripFilters
 import utg.domain.args.trips.TripInput
 
@@ -22,6 +24,11 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
     case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[TripInput] { create =>
         tripsAlgebra.create(create).flatMap(Created(_))
+      }
+
+    case ar @ POST -> Root / "doctor-approval" as user =>
+      ar.req.decodeR[TripDoctorApprovalInput] { create =>
+        tripsAlgebra.updateDoctorApproval(create.copy(doctorId = Some(user.id))) >> NoContent()
       }
 
     case ar @ POST -> Root as _ =>

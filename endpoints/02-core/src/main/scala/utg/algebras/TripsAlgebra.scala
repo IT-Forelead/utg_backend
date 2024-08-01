@@ -12,6 +12,7 @@ import utg.domain.TripId
 import utg.domain.UserId
 import utg.domain.Vehicle
 import utg.domain.VehicleId
+import utg.domain.args.trips.TripDoctorApprovalInput
 import utg.domain.args.trips.TripFilters
 import utg.domain.args.trips.TripInput
 import utg.effects.Calendar
@@ -26,6 +27,7 @@ trait TripsAlgebra[F[_]] {
   def create(input: TripInput): F[TripId]
   def get(filters: TripFilters): F[ResponseData[Trip]]
   def findById(id: TripId): F[Option[Trip]]
+  def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
 }
 
 object TripsAlgebra {
@@ -184,5 +186,8 @@ object TripsAlgebra {
           dtoTrip <- OptionT(tripsRepository.findById(id))
           res <- OptionT.liftF(makeTrip(dtoTrip))
         } yield res).value
+
+      override def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit] =
+        tripsRepository.updateDoctorApproval(input)
     }
 }

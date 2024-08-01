@@ -7,6 +7,7 @@ import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import utg.domain.TripId
+import utg.domain.args.trips.TripDoctorApprovalInput
 import utg.domain.args.trips.TripFilters
 
 private[repos] object TripsSql extends Sql[TripId] {
@@ -39,4 +40,16 @@ private[repos] object TripsSql extends Sql[TripId] {
       sql"""SELECT *, COUNT(*) OVER() AS total FROM trips WHERE deleted = false""".apply(Void)
     baseQuery.andOpt(searchFilters)
   }
+
+  val updateDoctorApprovalSql: Command[TripDoctorApprovalInput] =
+    sql"""UPDATE trips
+       SET doctor_id = ${UsersSql.id.opt},
+       doctor_signature = ${AssetsSql.id.opt}
+       WHERE id = $id
+     """
+      .command
+      .contramap {
+        case tfe: TripDoctorApprovalInput =>
+          tfe.doctorId *: tfe.doctorSignature *: tfe.tripId *: EmptyTuple
+      }
 }
