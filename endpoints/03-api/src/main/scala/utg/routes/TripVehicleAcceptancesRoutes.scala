@@ -1,6 +1,7 @@
 package utg.routes
 
 import cats.MonadThrow
+import cats.implicits.catsSyntaxOptionId
 import cats.implicits.toFlatMapOps
 import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
@@ -20,9 +21,11 @@ final case class TripVehicleAcceptancesRoutes[F[_]: JsonDecoder: MonadThrow](
   override val path = "/vehicle-acceptances"
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as _ =>
+    case ar @ POST -> Root / "create" as user =>
       ar.req.decodeR[TripVehicleAcceptanceInput] { create =>
-        tripVehicleAcceptancesAlgebra.create(create).flatMap(Created(_))
+        tripVehicleAcceptancesAlgebra
+          .create(create.copy(mechanicId = user.id.some))
+          .flatMap(Created(_))
       }
 
     case GET -> Root / UUIDVar(id) as _ =>
