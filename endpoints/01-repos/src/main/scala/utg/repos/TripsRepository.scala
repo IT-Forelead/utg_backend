@@ -10,8 +10,7 @@ import uz.scala.skunk.syntax.all._
 
 import utg.domain.ResponseData
 import utg.domain.TripId
-import utg.domain.args.trips.TripDoctorApprovalInput
-import utg.domain.args.trips.TripFilters
+import utg.domain.args.trips._
 import utg.repos.sql.AccompanyingPersonsSql
 import utg.repos.sql.TripsSql
 import utg.repos.sql.dto
@@ -25,6 +24,7 @@ trait TripsRepository[F[_]] {
       ids: List[TripId]
     ): F[Map[TripId, List[dto.AccompanyingPerson]]]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
+  def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
 }
 
 object TripsRepository {
@@ -66,5 +66,8 @@ object TripsRepository {
         }
     override def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit] =
       TripsSql.updateDoctorApprovalSql.execute(input)
+
+    override def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit] =
+      TripsSql.updateChiefMechanicApprovalSql.execute(input)
   }
 }

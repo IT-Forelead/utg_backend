@@ -7,8 +7,7 @@ import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import utg.domain.TripId
-import utg.domain.args.trips.TripDoctorApprovalInput
-import utg.domain.args.trips.TripFilters
+import utg.domain.args.trips._
 
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
@@ -51,5 +50,18 @@ private[repos] object TripsSql extends Sql[TripId] {
       .contramap {
         case tfe: TripDoctorApprovalInput =>
           tfe.doctorId *: tfe.doctorSignature *: tfe.tripId *: EmptyTuple
+      }
+
+  val updateChiefMechanicApprovalSql: Command[TripChiefMechanicInput] =
+    sql"""UPDATE trips
+       SET fuel_supply = ${nonNegDouble.opt},
+       chief_mechanic_id = ${UsersSql.id.opt},
+       chief_mechanic_signature = ${AssetsSql.id.opt}
+       WHERE id = $id
+     """
+      .command
+      .contramap {
+        case tfe: TripChiefMechanicInput =>
+          tfe.fuelSupply *: tfe.chiefMechanicId *: tfe.chiefMechanicSignature *: tfe.tripId *: EmptyTuple
       }
 }

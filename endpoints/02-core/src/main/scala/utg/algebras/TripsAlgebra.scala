@@ -12,9 +12,7 @@ import utg.domain.TripId
 import utg.domain.UserId
 import utg.domain.Vehicle
 import utg.domain.VehicleId
-import utg.domain.args.trips.TripDoctorApprovalInput
-import utg.domain.args.trips.TripFilters
-import utg.domain.args.trips.TripInput
+import utg.domain.args.trips._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
@@ -29,6 +27,7 @@ trait TripsAlgebra[F[_]] {
   def get(filters: TripFilters): F[ResponseData[Trip]]
   def findById(id: TripId): F[Option[Trip]]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
+  def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
 }
 
 object TripsAlgebra {
@@ -195,6 +194,15 @@ object TripsAlgebra {
               .Internal(s"Trip not found by id [$input.tripId]")
               .raiseError[F, Unit],
             _ => tripsRepository.updateDoctorApproval(input),
+          )
+
+      override def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit] =
+        OptionT(tripsRepository.findById(input.tripId))
+          .cataF(
+            AError
+              .Internal(s"Trip not found by id [$input.tripId]")
+              .raiseError[F, Unit],
+            _ => tripsRepository.updateChiefMechanicApproval(input),
           )
     }
 }

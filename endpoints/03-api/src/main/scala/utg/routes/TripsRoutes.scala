@@ -11,9 +11,7 @@ import uz.scala.http4s.utils.Routes
 
 import utg.algebras.TripsAlgebra
 import utg.domain.AuthedUser
-import utg.domain.args.trips.TripDoctorApprovalInput
-import utg.domain.args.trips.TripFilters
-import utg.domain.args.trips.TripInput
+import utg.domain.args.trips._
 
 final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
     tripsAlgebra: TripsAlgebra[F]
@@ -28,7 +26,16 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
 
     case ar @ POST -> Root / "doctor-approval" as user =>
       ar.req.decodeR[TripDoctorApprovalInput] { create =>
-        tripsAlgebra.updateDoctorApproval(create.copy(doctorId = Some(user.id))) >> NoContent()
+        tripsAlgebra.updateDoctorApproval(
+          create.copy(doctorId = Some(user.id))
+        ) >> NoContent()
+      }
+
+    case ar @ POST -> Root / "chief-mechanic-approval" as user =>
+      ar.req.decodeR[TripChiefMechanicInput] { create =>
+        tripsAlgebra.updateChiefMechanicApproval(
+          create.copy(chiefMechanicId = Some(user.id))
+        ) >> NoContent()
       }
 
     case ar @ POST -> Root as _ =>
