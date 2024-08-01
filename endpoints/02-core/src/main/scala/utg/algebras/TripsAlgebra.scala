@@ -17,6 +17,7 @@ import utg.domain.args.trips.TripFilters
 import utg.domain.args.trips.TripInput
 import utg.effects.Calendar
 import utg.effects.GenUUID
+import utg.exception.AError
 import utg.repos.TripsRepository
 import utg.repos.UsersRepository
 import utg.repos.VehiclesRepository
@@ -188,6 +189,12 @@ object TripsAlgebra {
         } yield res).value
 
       override def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit] =
-        tripsRepository.updateDoctorApproval(input)
+        OptionT(tripsRepository.findById(input.tripId))
+          .cataF(
+            AError
+              .Internal(s"Trip not found by id [$input.tripId]")
+              .raiseError[F, Unit],
+            _ => tripsRepository.updateDoctorApproval(input),
+          )
     }
 }
