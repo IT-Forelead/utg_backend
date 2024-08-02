@@ -397,14 +397,4 @@ CREATE TABLE IF NOT EXISTS comlpete_tasks (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE TABLE IF NOT EXISTS vehicle_histories (
-  id UUID PRIMARY KEY NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  vehicle_id UUID NOT NULL
-    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  branch_id UUID NOT NULL
-    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  registered_number VARCHAR NULL UNIQUE,
-);
-
 
