@@ -56,8 +56,8 @@ object TripVehicleIndicatorsAlgebra {
       override def getByTripId(tripId: TripId): F[List[TripVehicleIndicator]] =
         for {
           dtoVehicleIndicators <- tripVehicleIndicatorsRepository.getByTripId(tripId)
-          isFulledEnteredAction = dtoVehicleIndicators.exists(
-            _.actionType == VehicleIndicatorActionType.Enter
+          isFulledBackAction = dtoVehicleIndicators.exists(
+            _.actionType == VehicleIndicatorActionType.Back
           )
           isFulledExitAction = dtoVehicleIndicators.exists(
             _.actionType == VehicleIndicatorActionType.Exit
@@ -74,7 +74,7 @@ object TripVehicleIndicatorsAlgebra {
               odometerIndicator = vi.odometerIndicator,
               paidDistance = vi.paidDistance,
               isFulledExitAction = isFulledExitAction,
-              isFulledEnteredAction = isFulledEnteredAction,
+              isFulledBackAction = isFulledBackAction,
             )
           }
         } yield tripVehicleIndicators

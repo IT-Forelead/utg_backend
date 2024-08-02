@@ -9,11 +9,11 @@ import utg.domain.TripId
 
 private[repos] object TripFuelExpensesSql extends Sql[TripFuelExpenseId] {
   private[repos] val codec: Codec[dto.TripFuelExpense] =
-    (id *: zonedDateTime *: TripsSql.id *: VehiclesSql.id *: nes.opt *: nes.opt *: nonNegDouble.opt *: nes.opt
-      *: AssetsSql.id.opt *: nonNegDouble.opt *: nonNegDouble.opt *: nonNegDouble.opt
-      *: nonNegDouble.opt *: nonNegDouble.opt *: UsersSql.id.opt *: AssetsSql.id.opt
-      *: UsersSql.id.opt *: AssetsSql.id.opt *: UsersSql.id.opt *: AssetsSql.id.opt *: bool)
-      .to[dto.TripFuelExpense]
+    (id *: zonedDateTime *: TripsSql.id *: VehiclesSql.id *: nes.opt *: nes.opt *: nonNegDouble.opt
+      *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt *: nonNegDouble.opt
+      *: nonNegDouble.opt *: nonNegDouble.opt *: nonNegDouble.opt *: UsersSql.id.opt
+      *: AssetsSql.id.opt *: UsersSql.id.opt *: AssetsSql.id.opt *: UsersSql.id.opt
+      *: AssetsSql.id.opt *: bool).to[dto.TripFuelExpense]
 
   val insert: Command[dto.TripFuelExpense] =
     sql"""INSERT INTO trip_fuel_expenses VALUES ($codec)""".command
@@ -35,8 +35,8 @@ private[repos] object TripFuelExpensesSql extends Sql[TripFuelExpenseId] {
        fuel_brand = ${nes.opt},
        brand_code = ${nes.opt},
        fuel_given = ${nonNegDouble.opt},
-       fuel_attendant = ${nes.opt},
-       attendant_signature = ${AssetsSql.id.opt},
+       refueler_id = ${UsersSql.id.opt},
+       refueler_signature = ${AssetsSql.id.opt},
        fuel_in_tank = ${nonNegDouble.opt},
        fuel_remaining = ${nonNegDouble.opt},
        norm_change_coeff = ${nonNegDouble.opt},
@@ -53,7 +53,7 @@ private[repos] object TripFuelExpensesSql extends Sql[TripFuelExpenseId] {
       .command
       .contramap {
         case tfe: dto.TripFuelExpense =>
-          tfe.tripId *: tfe.vehicleId *: tfe.fuelBrand *: tfe.brandCode *: tfe.fuelGiven *: tfe.fuelAttendant *:
+          tfe.tripId *: tfe.vehicleId *: tfe.fuelBrand *: tfe.brandCode *: tfe.fuelGiven *: tfe.refuelerId *:
             tfe.attendantSignature *: tfe.fuelInTank *: tfe.fuelRemaining *: tfe.normChangeCoefficient *:
             tfe.equipmentWorkingTime *: tfe.engineWorkingTime *: tfe.tankCheckMechanicId *:
             tfe.tankCheckMechanicSignature *: tfe.remainingCheckMechanicId *: tfe.remainingCheckMechanicSignature *:

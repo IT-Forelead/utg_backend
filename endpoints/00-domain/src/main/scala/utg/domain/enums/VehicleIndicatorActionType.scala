@@ -8,7 +8,7 @@ sealed trait VehicleIndicatorActionType extends Snakecase
 object VehicleIndicatorActionType
     extends CirceEnum[VehicleIndicatorActionType]
        with Enum[VehicleIndicatorActionType] {
-  case object Enter extends VehicleIndicatorActionType
   case object Exit extends VehicleIndicatorActionType
+  case object Back extends VehicleIndicatorActionType
   override def values: IndexedSeq[VehicleIndicatorActionType] = findValues
 }

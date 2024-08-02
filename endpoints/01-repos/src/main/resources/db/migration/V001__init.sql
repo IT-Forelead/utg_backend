@@ -35,8 +35,8 @@ CREATE TYPE WORKING_MODE_TYPE AS ENUM (
 );
 
 CREATE TYPE VEHICLE_INDICATOR_ACTION_TYPE AS ENUM (
-  'enter',
-  'exit'
+  'exit',
+  'back'
 );
 
 CREATE TYPE DRIVING_LICENSE_CATEGORY AS ENUM (
@@ -308,9 +308,10 @@ CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
   fuel_brand VARCHAR NULL,
   brand_code VARCHAR NULL,
   fuel_given DOUBLE PRECISION NULL,
-  fuel_attendant VARCHAR NULL,
-  attendant_signature UUID NULL
-    CONSTRAINT fk_attendant_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  refueler_id UUID NULL
+    CONSTRAINT fk_refueler_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  refueler_signature UUID NULL
+    CONSTRAINT fk_refueler_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   fuel_in_tank DOUBLE PRECISION NULL,
   fuel_remaining DOUBLE PRECISION NULL,
   norm_change_coeff DOUBLE PRECISION NULL,

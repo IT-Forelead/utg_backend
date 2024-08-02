@@ -50,7 +50,7 @@ object TripFuelExpensesAlgebra {
                 fuelBrand = input.fuelBrand,
                 brandCode = input.brandCode,
                 fuelGiven = input.fuelGiven,
-                fuelAttendant = input.fuelAttendant,
+                refuelerId = input.refuelerId,
                 attendantSignature = input.attendantSignature,
                 fuelInTank = input.fuelInTank,
                 fuelRemaining = input.fuelRemaining,
@@ -74,6 +74,7 @@ object TripFuelExpensesAlgebra {
           userIds = dtoTripFuelExpenses
             .flatMap(tfe =>
               List(
+                tfe.refuelerId,
                 tfe.tankCheckMechanicId,
                 tfe.remainingCheckMechanicId,
                 tfe.dispatcherId,
@@ -92,7 +93,7 @@ object TripFuelExpensesAlgebra {
               fuelBrand = fe.fuelBrand,
               brandCode = fe.brandCode,
               fuelGiven = fe.fuelGiven,
-              fuelAttendant = fe.fuelAttendant,
+              refueler = fe.refuelerId.flatMap(users.get),
               attendantSignature = fe.attendantSignature,
               fuelInTank = fe.fuelInTank,
               fuelRemaining = fe.fuelRemaining,
@@ -123,7 +124,7 @@ object TripFuelExpensesAlgebra {
                   fuelBrand = input.fuelBrand,
                   brandCode = input.brandCode,
                   fuelGiven = input.fuelGiven,
-                  fuelAttendant = input.fuelAttendant,
+                  refuelerId = input.refuelerId,
                   attendantSignature = input.attendantSignature,
                   fuelInTank = input.fuelInTank,
                   fuelRemaining = input.fuelRemaining,
