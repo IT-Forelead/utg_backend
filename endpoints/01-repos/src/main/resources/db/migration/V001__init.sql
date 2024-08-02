@@ -162,7 +162,15 @@ VALUES
   (
     '847f4f8f-0856-4e2a-8838-caab6816f69c',
     'viewer'
-  );
+  ),
+  (
+    'cdffe4e0-ac3b-474a-a4fd-144a5f832943',
+    'main_mechanic'
+  ),
+  (
+    '95fe6cba-7ea4-415e-8faf-500a3199dc14',
+    'refueller'
+  )
 
 INSERT INTO
   "users" (
@@ -388,4 +396,15 @@ CREATE TABLE IF NOT EXISTS comlpete_tasks (
   document_id UUID NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE TABLE IF NOT EXISTS vehicle_histories (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  branch_id UUID NOT NULL
+    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  registered_number VARCHAR NULL UNIQUE,
+);
+
 
