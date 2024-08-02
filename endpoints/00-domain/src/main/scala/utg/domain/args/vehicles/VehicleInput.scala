@@ -1,5 +1,6 @@
 package utg.domain.args.vehicles
 
+import cats.data.NonEmptyList
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
@@ -25,7 +26,7 @@ case class VehicleInput(
     chassisNumber: Option[NonEmptyString],
     engineNumber: Option[NonEmptyString],
     conditionType: ConditionType,
-    fuelType: Option[FuelType],
+    fuelTypes: Option[NonEmptyList[FuelType]],
     description: Option[NonEmptyString],
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],

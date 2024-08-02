@@ -66,7 +66,7 @@ object Algebras {
       regions = RegionsAlgebra.make[F](regions),
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
-      vehicles = VehiclesAlgebra.make[F](vehicles, branches, vehicleCategories),
+      vehicles = VehiclesAlgebra.make[F](vehicles),
       trips = TripsAlgebra.make[F](trips, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),

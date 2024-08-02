@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   chassis_number VARCHAR NULL,
   engine_number VARCHAR NULL,
   condition CONDITION_TYPE NOT NULL,
-  fuel_type FUEL_TYPE NULL,
+  fuel_types _FUEL_TYPE NULL,
   description VARCHAR NULL,
   gps_tracking GPS_TRACKING_TYPE NULL,
   fuel_level_sensor DOUBLE PRECISION NULL,

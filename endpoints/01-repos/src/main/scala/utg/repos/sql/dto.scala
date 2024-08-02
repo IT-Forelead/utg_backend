@@ -137,7 +137,7 @@ object dto {
       chassisNumber: Option[NonEmptyString],
       engineNumber: Option[NonEmptyString],
       conditionType: ConditionType,
-      fuelType: Option[FuelType],
+      fuelTypes: Option[List[FuelType]],
       description: Option[NonEmptyString],
       gpsTracking: Option[GpsTrackingType],
       fuelLevelSensor: Option[NonNegDouble],
@@ -147,11 +147,13 @@ object dto {
     def toDomain(
         branch: Option[domain.Branch],
         vehicleCategory: domain.VehicleCategory,
+        fuelTypes: Option[NonEmptyList[FuelType]],
       ): domain.Vehicle =
       this
         .into[domain.Vehicle]
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.vehicleCategory, vehicleCategory.some)
+        .withFieldConst(_.fuelTypes, fuelTypes)
         .transform
   }
 
