@@ -10,6 +10,7 @@ import io.circe.refined._
 
 import utg.domain.AuthedUser.User
 import utg.domain.enums.WorkingModeType
+import utg.domain.enums.StatusType
 
 @JsonCodec
 case class Trip(
@@ -34,4 +35,5 @@ case class Trip(
     chiefMechanic: Option[User],
     chiefMechanicSignature: Option[AssetId],
     notes: Option[NonEmptyString],
+    status: StatusType,
   )

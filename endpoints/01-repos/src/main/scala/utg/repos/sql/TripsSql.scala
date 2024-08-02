@@ -16,7 +16,7 @@ private[repos] object TripsSql extends Sql[TripId] {
       *: VehiclesSql
         .id
         .opt *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt *: UsersSql.id.opt
-      *: AssetsSql.id.opt *: nes.opt *: bool).to[dto.Trip]
+      *: AssetsSql.id.opt *: nes.opt *: statusType *: bool).to[dto.Trip]
 
   val insert: Command[dto.Trip] =
     sql"""INSERT INTO trips VALUES ($codec)""".command
@@ -29,6 +29,7 @@ private[repos] object TripsSql extends Sql[TripId] {
       filters.workingMode.map(sql"working_mode = $workingModeType"),
       filters.vehicleId.map(sql"vehicle_id = ${VehiclesSql.id}"),
       filters.driverId.map(sql"driver_id = ${UsersSql.id}"),
+      filters.status.map(sql"status = $statusType"),
       filters.startDate.map(sql"start_date = $date"),
       filters.endDate.map(sql"end_date = $date"),
       filters.from.map(sql"created_at >= $zonedDateTime"),

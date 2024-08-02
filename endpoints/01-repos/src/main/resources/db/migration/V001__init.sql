@@ -34,6 +34,13 @@ CREATE TYPE WORKING_MODE_TYPE AS ENUM (
   'mixed'
 );
 
+CREATE TYPE STATUS_TYPE AS ENUM (
+  'new',
+  'in_progress',
+  'completed',
+  'closed'
+);
+
 CREATE TYPE VEHICLE_INDICATOR_ACTION_TYPE AS ENUM (
   'enter',
   'exit'
@@ -276,6 +283,7 @@ CREATE TABLE IF NOT EXISTS trips (
   chief_mechanic_signature UUID NULL
     CONSTRAINT fk_chief_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   notes VARCHAR NULL,
+  status STATUS_TYPE NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
