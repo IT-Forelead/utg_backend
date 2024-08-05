@@ -74,21 +74,15 @@ jobs:
             sleep 5
           done
 
-      - name: Restore PostgreSQL Data from cache
-        uses: actions/cache@v2
+      - name: Download Database Backup
+        uses: actions/download-artifact@v3
         with:
-          path: /var/lib/postgresql/data
-          key: postgres-data-cache
-          restore-keys: |
-            postgres-data-cache
-      - name: Restore PostgreSQL Data
+          name: postgres-backup
+          path: .
+      - name: Restore Database Backup
         run: |
-          echo "Restoring PostgreSQL data from cache..."
-          sudo systemctl stop postgresql
-          sudo cp -r /var/lib/postgresql/data /tmp/restore
-          sudo chown -R postgres:postgres /var/lib/postgresql/data
-          sudo systemctl start postgresql
-          echo "PostgreSQL data restored." 
+          echo "Restoring PostgreSQL database backup..."
+          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
 
       - name: Verify PostgreSQL Data
         run: |
@@ -103,11 +97,16 @@ jobs:
           export PGPASSWORD=postgres
           psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
 
-      - name: Save PostgreSQL Data
-        uses: actions/cache@v2
+      - name: Create Database Backup
+        run: |
+          echo "Creating PostgreSQL database backup..."
+          docker exec -t $(docker ps -q -f "ancestor=postgres:latest") pg_dump -U postgres mydatabase > backup.sql
+
+      - name: Upload Database Backup
+        uses: actions/upload-artifact@v3
         with:
-          path: /var/lib/postgresql/data
-          key: postgres-data-cache
+          name: postgres-backup
+          path: backup.sql
 
       - name: "Building base image 🏗"
         run: |
