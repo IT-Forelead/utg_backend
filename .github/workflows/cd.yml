@@ -66,6 +66,7 @@ jobs:
             ~/AppData/Local/Coursier/Cache/v1
             ~/Library/Caches/Coursier/v1
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+
       - name: Wait for PostgreSQL
         run: |
           until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
@@ -74,13 +75,19 @@ jobs:
           done
 
       - name: Restore PostgreSQL Data
-        run: |
-          echo "Restoring PostgreSQL data from cache..."
-          sudo systemctl stop postgresql
-          sudo cp -r /var/lib/postgresql/data /tmp/restore
-          sudo chown -R postgres:postgres /var/lib/postgresql/data
-          sudo systemctl start postgresql
-          echo "PostgreSQL data restored."
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/postgresql/data
+          key: postgres-data-cache
+          restore-keys: |
+            postgres-data-cache
+          script: |
+            echo "Restoring PostgreSQL data from cache..."
+            sudo systemctl stop postgresql
+            sudo cp -r /var/lib/postgresql/data /tmp/restore
+            sudo chown -R postgres:postgres /var/lib/postgresql/data
+            sudo systemctl start postgresql
+            echo "PostgreSQL data restored." 
 
       - name: Verify PostgreSQL Data
         run: |
