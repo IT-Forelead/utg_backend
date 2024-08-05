@@ -6,6 +6,8 @@ on:
 
 env:
   AWS_ECR_REPOSITORY: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  S3_BACKUP_PATH: warehouse/
 
 jobs:
   build:
@@ -74,14 +76,10 @@ jobs:
             sleep 5
           done
 
-      - name: Download Database Backup
-        uses: actions/download-artifact@v3
-        with:
-          name: postgres-backup
-          path: .
       - name: Restore Database Backup
         run: |
-          echo "Restoring PostgreSQL database backup..."
+          echo "Restoring PostgreSQL database backup from S3..."
+          aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql backup.sql
           docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
 
       - name: Verify PostgreSQL Data
@@ -102,11 +100,17 @@ jobs:
           echo "Creating PostgreSQL database backup..."
           docker exec -t $(docker ps -q -f "ancestor=postgres:latest") pg_dump -U postgres mydatabase > backup.sql
 
-      - name: Upload Database Backup
-        uses: actions/upload-artifact@v3
+      - name: Upload Database Backup to S3
+        uses: aws-actions/s3-sync-action@v1
         with:
-          name: postgres-backup
-          path: backup.sql
+          args: --acl private
+          source-dir: .
+          destination-bucket: ${{ secrets.S3_BUCKET }}
+          destination-prefix: ${{ env.S3_BACKUP_PATH }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
 
       - name: "Building base image 🏗"
         run: |
