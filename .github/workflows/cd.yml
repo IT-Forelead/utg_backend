@@ -74,20 +74,21 @@ jobs:
             sleep 5
           done
 
-      - name: Restore PostgreSQL Data
+      - name: Restore PostgreSQL Data from cache
         uses: actions/cache@v2
         with:
           path: /var/lib/postgresql/data
           key: postgres-data-cache
           restore-keys: |
             postgres-data-cache
-          script: |
-            echo "Restoring PostgreSQL data from cache..."
-            sudo systemctl stop postgresql
-            sudo cp -r /var/lib/postgresql/data /tmp/restore
-            sudo chown -R postgres:postgres /var/lib/postgresql/data
-            sudo systemctl start postgresql
-            echo "PostgreSQL data restored." 
+      - name: Restore PostgreSQL Data
+        run: |
+          echo "Restoring PostgreSQL data from cache..."
+          sudo systemctl stop postgresql
+          sudo cp -r /var/lib/postgresql/data /tmp/restore
+          sudo chown -R postgres:postgres /var/lib/postgresql/data
+          sudo systemctl start postgresql
+          echo "PostgreSQL data restored." 
 
       - name: Verify PostgreSQL Data
         run: |
