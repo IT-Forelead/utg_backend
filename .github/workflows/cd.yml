@@ -79,13 +79,8 @@ jobs:
       - name: Restore Database Backup
         run: |
           echo "Checking if PostgreSQL database backup exists in S3..."
-          if aws s3 ls s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql 2>&1 | grep -q 'NoSuchKey'; then
-            echo "No backup found in S3. Skipping restore..."
-          else
-            echo "Restoring PostgreSQL database backup from S3..."
-            aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql backup.sql
-            docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
-          fi
+          aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql backup.sql || true
+          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql || true
 
       - name: Verify PostgreSQL Data
         run: |
