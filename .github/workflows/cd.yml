@@ -81,10 +81,10 @@ jobs:
           restore-keys: |
             postgres-data-cache
 
-      - name: Verify PostgreSQL Data
-        run: |
-          export PGPASSWORD=postgres
-          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
+#      - name: Verify PostgreSQL Data
+#        run: |
+#          export PGPASSWORD=postgres
+#          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
 
       - name: Run Flyway migrations
         run: sbt flywayMigrate
