@@ -387,6 +387,6 @@ CREATE TABLE IF NOT EXISTS comlpete_tasks (
   arrival_time TIMESTAMP WITH TIME ZONE NULL,
   consignor_sign_id UUID NULL,
   document_id UUID NULL,
-  deleted BOOLEAN NOT NULL DEFAULT true
+  deleted BOOLEAN NOT NULL DEFAULT false
 );
 
