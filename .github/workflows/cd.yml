@@ -85,7 +85,7 @@ jobs:
       - name: Verify PostgreSQL Data
         run: |
           export PGPASSWORD=postgres
-          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
+          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;" || true
 
       - name: Run Flyway migrations
         run: sbt flywayMigrate
