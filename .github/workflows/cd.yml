@@ -101,16 +101,9 @@ jobs:
           docker exec -t $(docker ps -q -f "ancestor=postgres:latest") pg_dump -U postgres mydatabase > backup.sql
 
       - name: Upload Database Backup to S3
-        uses: aws-actions/s3-sync-action@v1
-        with:
-          args: --acl private
-          source-dir: .
-          destination-bucket: ${{ secrets.S3_BUCKET }}
-          destination-prefix: ${{ env.S3_BACKUP_PATH }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          echo "Uploading PostgreSQL database backup to S3..."
+          aws s3 cp backup.sql s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql
 
       - name: "Building base image 🏗"
         run: |
