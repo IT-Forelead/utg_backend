@@ -77,18 +77,26 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /var/lib/postgresql/data
-          key: ${{ runner.os }}-postgresql-data-${{ github.sha }}
+          key: postgres-data-cache
           restore-keys: |
-            ${{ runner.os }}-postgresql-data-
+            postgres-data-cache
+
+      - name: Verify PostgreSQL Data
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -c "SELECT COUNT(*) FROM regions;"
 
       - name: Run Flyway migrations
         run: sbt flywayMigrate
 
+      - name: Verify PostgreSQL Data
+        run: |
+          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -c "SELECT COUNT(*) FROM regions;"
+
       - name: Save PostgreSQL Data
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: /var/lib/postgresql/data
-          key: ${{ runner.os }}-postgresql-data-${{ github.sha }}
+          key: postgres-data-cache
 
       - name: "Building base image 🏗"
         run: |
