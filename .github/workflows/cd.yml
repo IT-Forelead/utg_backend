@@ -83,14 +83,16 @@ jobs:
 
       - name: Verify PostgreSQL Data
         run: |
-          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -c "SELECT COUNT(*) FROM regions;"
+          export PGPASSWORD=postgres
+          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
 
       - name: Run Flyway migrations
         run: sbt flywayMigrate
 
       - name: Verify PostgreSQL Data
         run: |
-          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -c "SELECT COUNT(*) FROM regions;"
+          export PGPASSWORD=postgres
+          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
 
       - name: Save PostgreSQL Data
         uses: actions/cache@v2
