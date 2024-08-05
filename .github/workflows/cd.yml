@@ -74,20 +74,20 @@ jobs:
             sleep 5
           done
 
-#      - name: Download Database Backup
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: postgres-backup
-#          path: .
-#      - name: Restore Database Backup
-#        run: |
-#          echo "Restoring PostgreSQL database backup..."
-#          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
+      - name: Download Database Backup
+        uses: actions/download-artifact@v3
+        with:
+          name: postgres-backup
+          path: .
+      - name: Restore Database Backup
+        run: |
+          echo "Restoring PostgreSQL database backup..."
+          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
 
-#      - name: Verify PostgreSQL Data
-#        run: |
-#          export PGPASSWORD=postgres
-#          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
+      - name: Verify PostgreSQL Data
+        run: |
+          export PGPASSWORD=postgres
+          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
 
       - name: Run Flyway migrations
         run: sbt flywayMigrate
