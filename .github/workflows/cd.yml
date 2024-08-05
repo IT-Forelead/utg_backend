@@ -78,7 +78,7 @@ jobs:
 
       - name: Restore Database Backup
         run: |
-          echo "Checking if PostgreSQL database backup exists in S3..."
+          echo "Checking if PostgreSQL database backup exists in S3... "
           aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql backup.sql || true
           docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql || true
 
