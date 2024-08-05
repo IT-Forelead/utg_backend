@@ -74,15 +74,15 @@ jobs:
             sleep 5
           done
 
-      - name: Download Database Backup
-        uses: actions/download-artifact@v3
-        with:
-          name: postgres-backup
-          path: .
-      - name: Restore Database Backup
-        run: |
-          echo "Restoring PostgreSQL database backup..."
-          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
+#      - name: Download Database Backup
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: postgres-backup
+#          path: .
+#      - name: Restore Database Backup
+#        run: |
+#          echo "Restoring PostgreSQL database backup..."
+#          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql
 
       - name: Verify PostgreSQL Data
         run: |
