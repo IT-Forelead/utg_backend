@@ -1,6 +1,7 @@
 package utg.domain.args.users
 
 import cats.data.NonEmptyList
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -15,6 +16,7 @@ case class UserInput(
     firstname: NonEmptyString,
     lastname: NonEmptyString,
     middleName: Option[NonEmptyString],
+    personalNumber: NonNegInt,
     phone: Phone,
     branchCode: NonEmptyString,
     licenseNumber: Option[NonEmptyString],
