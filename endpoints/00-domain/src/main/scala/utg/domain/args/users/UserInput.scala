@@ -19,6 +19,6 @@ case class UserInput(
     personalNumber: NonNegInt,
     phone: Phone,
     branchCode: NonEmptyString,
-    licenseNumber: Option[NonEmptyString],
+    drivingLicenseNumber: Option[NonEmptyString],
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
   )

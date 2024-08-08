@@ -123,12 +123,12 @@ CREATE TABLE IF NOT EXISTS users (
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
   middle_name VARCHAR NULL,
-  personal_number INT NOT NULL,
-  phone VARCHAR NOT NULL,
+  personal_number INT NOT NULL UNIQUE,
+  phone VARCHAR NOT NULL UNIQUE,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   branch_code VARCHAR NULL,
-  license_number VARCHAR NULL,
+  driving_license_number VARCHAR NULL UNIQUE,
   driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
   password VARCHAR NOT NULL
 );
@@ -171,6 +171,7 @@ INSERT INTO
     "created_at",
     "firstname",
     "lastname",
+    "personal_number",
     "phone",
     "role_id",
     "branch_code",
@@ -182,6 +183,7 @@ VALUES
     '2022-11-07T06:43:01.089Z',
     'Admin',
     'Super Manager',
+    1,
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
     null,
@@ -261,8 +263,6 @@ CREATE TABLE IF NOT EXISTS trips (
   summation VARCHAR NULL,
   vehicle_id UUID NOT NULL
     CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  driver_id UUID NOT NULL
-    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   trailer_id UUID NULL
     CONSTRAINT fk_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   semi_trailer_id UUID NULL
@@ -283,9 +283,10 @@ CREATE TABLE IF NOT EXISTS trips (
 CREATE TABLE IF NOT EXISTS trip_drivers (
   id UUID PRIMARY KEY NOT NULL,
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  driver_id UUID NOT NULL CONSTRAINT fk_user_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driving_license_number VARCHAR NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false,
-  UNIQUE (trip_id, user_id)
+  UNIQUE (trip_id, driver_id)
 );
 
 CREATE TABLE IF NOT EXISTS trip_accompanying_persons (

@@ -76,7 +76,7 @@ object UsersAlgebra {
             phone = userInput.phone,
             assetId = None,
             branchCode = Option(userInput.branchCode),
-            licenseNumber = userInput.licenseNumber,
+            drivingLicenseNumber = userInput.drivingLicenseNumber,
             drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
           )
           password <- randomStr[F](8)
@@ -105,7 +105,7 @@ object UsersAlgebra {
               branchCode = userInput.branchCode,
               roleId = userInput.roleId,
               assetId = assetId,
-              licenseNumber = userInput.licenseNumber,
+              drivingLicenseNumber = userInput.drivingLicenseNumber,
               drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
             )
           )

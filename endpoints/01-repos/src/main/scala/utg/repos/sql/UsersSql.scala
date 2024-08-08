@@ -31,12 +31,12 @@ private[repos] object UsersSql extends Sql[UserId] {
     sql"""SELECT * FROM users WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
   val findById: Query[UserId, dto.User] =
-    sql"""SELECT id, created_at, firstname, lastname, middle_name, personal_number, phone, role_id, asset_id, branch_code, license_number, driving_license_categories
+    sql"""SELECT id, created_at, firstname, lastname, middle_name, personal_number, phone, role_id, asset_id, branch_code, driving_license_number, driving_license_categories
           FROM users
           WHERE id = $id LIMIT 1""".query(codec)
 
   def findByIds(ids: List[UserId]): Query[ids.type, dto.User] =
-    sql"""SELECT id, created_at, firstname, lastname, middle_name, personal_number, phone, role_id, asset_id, branch_code, license_number, driving_license_categories
+    sql"""SELECT id, created_at, firstname, lastname, middle_name, personal_number, phone, role_id, asset_id, branch_code, driving_license_number, driving_license_categories
           FROM users
           WHERE id IN (${id.values.list(ids)})""".query(codec)
 
@@ -48,7 +48,7 @@ private[repos] object UsersSql extends Sql[UserId] {
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
           u.data.personalNumber *: u.data.phone *: u.data.roleId *: u.data.assetId *:
-          u.data.branchCode *: u.data.licenseNumber *: u.data.drivingLicenseCategories *:
+          u.data.branchCode *: u.data.drivingLicenseNumber *: u.data.drivingLicenseCategories *:
           u.password *: EmptyTuple
       }
 
@@ -62,7 +62,7 @@ private[repos] object UsersSql extends Sql[UserId] {
        role_id = ${RolesSql.id},
        asset_id = ${AssetsSql.id.opt},
        branch_code = ${nes.opt},
-       license_number = ${nes.opt},
+       driving_license_number = ${nes.opt},
        driving_license_categories = ${drivingLicenseCategories.opt}
        WHERE id = $id
      """
@@ -70,7 +70,7 @@ private[repos] object UsersSql extends Sql[UserId] {
       .contramap {
         case user: dto.User =>
           user.firstname *: user.lastname *: user.middleName *: user.personalNumber *: user.phone *: user.roleId *:
-            user.assetId *: user.branchCode *: user.licenseNumber *: user.drivingLicenseCategories *:
+            user.assetId *: user.branchCode *: user.drivingLicenseNumber *: user.drivingLicenseCategories *:
             user.id *: EmptyTuple
       }
 
@@ -114,7 +114,7 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.role_id AS role_id,
               u.asset_id AS asset_id,
               u.branch_code AS branch_code,
-              u.license_number,
+              u.driving_license_number,
               u.driving_license_categories,
               COUNT(*) OVER() AS total
             FROM users u"""

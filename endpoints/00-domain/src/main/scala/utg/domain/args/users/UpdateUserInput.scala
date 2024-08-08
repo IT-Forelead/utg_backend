@@ -21,6 +21,6 @@ case class UpdateUserInput(
     phone: Phone,
     branchCode: Option[String],
     roleId: RoleId,
-    licenseNumber: Option[NonEmptyString],
+    drivingLicenseNumber: Option[NonEmptyString],
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
   )

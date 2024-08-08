@@ -60,7 +60,7 @@ object TripsAlgebra {
               id <- ID.make[F, TripDriverId]
               userById <- usersRepository.findByIds(userIds)
               maybeDriverId = userById.get(userId).map(_.id)
-              maybeDrivingLicenseNumber = userById.get(userId).flatMap(_.licenseNumber)
+              maybeDrivingLicenseNumber = userById.get(userId).flatMap(_.drivingLicenseNumber)
               tripDriver = (maybeDriverId, maybeDrivingLicenseNumber).mapN {
                 case driverId -> drivingLicenseNumber =>
                   dto.TripDriver(

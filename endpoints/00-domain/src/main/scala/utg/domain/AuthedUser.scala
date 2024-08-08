@@ -38,7 +38,7 @@ object AuthedUser {
       phone: Phone,
       assetId: Option[AssetId],
       branch: Option[Branch],
-      licenseNumber: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"

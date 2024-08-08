@@ -33,7 +33,7 @@ object dto {
       roleId: RoleId,
       assetId: Option[AssetId],
       branchCode: Option[NonEmptyString],
-      licenseNumber: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
     ) {
     def toDomain(
