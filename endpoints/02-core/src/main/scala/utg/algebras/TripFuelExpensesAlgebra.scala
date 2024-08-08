@@ -82,7 +82,7 @@ object TripFuelExpensesAlgebra {
             )
             .distinct
           users <- NonEmptyList.fromList(userIds).fold(Map.empty[UserId, User].pure[F]) { userIds =>
-            usersRepository.findByIds(userIds.toList)
+            usersRepository.findByIds(userIds)
           }
           tripFuelExpenses = dtoTripFuelExpenses.map { fe =>
             TripFuelExpense(

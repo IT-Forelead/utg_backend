@@ -1,12 +1,15 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.implicits._
 
+import utg.domain.AuthedUser.User
 import utg.domain.TripId
 import utg.domain.TripVehicleAcceptance
 import utg.domain.TripVehicleAcceptanceId
+import utg.domain.UserId
 import utg.domain.args.tripVehicleAcceptances.TripVehicleAcceptanceInput
 import utg.effects.Calendar
 import utg.effects.GenUUID
@@ -47,7 +50,7 @@ object TripVehicleAcceptancesAlgebra {
                 conditionType = input.conditionType,
                 mechanicId = input.mechanicId,
                 mechanicSignature = input.mechanicSignature,
-                driverId = trip.driverId,
+                driverId = input.driverId,
                 driverSignature = input.driverSignature,
               )
               _ <- tripVehicleAcceptancesRepository.create(dtoTripVehicleAcceptance)
@@ -58,9 +61,12 @@ object TripVehicleAcceptancesAlgebra {
         for {
           dtoTripVehicleAcceptances <- tripVehicleAcceptancesRepository.getByTripId(tripId)
           userIds = dtoTripVehicleAcceptances
-            .flatMap(tva => tva.mechanicId ++ tva.driverId.some)
+            .flatMap(tva => tva.mechanicId ++ tva.driverId)
             .distinct
-          users <- usersRepository.findByIds(userIds)
+          users <- NonEmptyList.fromList(userIds).fold(Map.empty[UserId, User].pure[F]) {
+            nonEmptyUserIds =>
+              usersRepository.findByIds(nonEmptyUserIds)
+          }
           tripFuelExpenses = dtoTripVehicleAcceptances.map { fe =>
             TripVehicleAcceptance(
               id = fe.id,
@@ -71,7 +77,7 @@ object TripVehicleAcceptancesAlgebra {
               conditionType = fe.conditionType,
               mechanic = fe.mechanicId.flatMap(users.get),
               mechanicSignature = fe.mechanicSignature,
-              driver = users.get(fe.driverId),
+              driver = fe.driverId.flatMap(users.get),
               driverSignature = fe.driverSignature,
             )
           }

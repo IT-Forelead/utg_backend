@@ -3,6 +3,7 @@ package utg.domain
 import java.time.ZonedDateTime
 
 import cats.data.NonEmptyList
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -32,11 +33,12 @@ object AuthedUser {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
+      personalNumber: NonNegInt,
       role: Role,
       phone: Phone,
       assetId: Option[AssetId],
       branch: Option[Branch],
-      licenseNumber: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"

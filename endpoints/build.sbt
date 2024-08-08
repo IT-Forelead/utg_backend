@@ -55,9 +55,9 @@ lazy val `endpoints-runner` =
       LocalProject("support_database"),
     )
     .settings(
-      flywayUrl      := "jdbc:postgresql://localhost:5432/mydatabase",
-      flywayUser     := "postgres",
-      flywayPassword := "postgres",
+      flywayUrl               := "jdbc:postgresql://localhost:5432/mydatabase",
+      flywayUser              := "postgres",
+      flywayPassword          := "postgres",
       flywayBaselineOnMigrate := true,
       libraryDependencies ++= Seq(),
     )
