@@ -11,7 +11,7 @@ import utg.domain.args.trips._
 
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: date *: date.opt *: nes *: nes.opt *: nes.opt *: nes.opt *: workingModeType
+    (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType
       *: nes.opt *: VehiclesSql.id *: UsersSql.id *: VehiclesSql.id.opt
       *: VehiclesSql
         .id
@@ -63,5 +63,25 @@ private[repos] object TripsSql extends Sql[TripId] {
       .contramap {
         case tfe: TripChiefMechanicInput =>
           tfe.fuelSupply *: tfe.chiefMechanicId *: tfe.chiefMechanicSignature *: tfe.tripId *: EmptyTuple
+      }
+
+  val update: Command[dto.Trip] =
+    sql"""UPDATE trips
+       SET first_tab = ${nes.opt},
+       second_tab = ${nes.opt},
+       third_tab = ${nes.opt},
+       working_mode = ${workingModeType.opt},
+       summation = ${nes.opt},
+       vehicle_id = ${VehiclesSql.id},
+       driver_id = ${UsersSql.id},
+       trailer_id = ${VehiclesSql.id.opt},
+       semi_trailer_id = ${VehiclesSql.id.opt}
+       WHERE id = $id
+     """
+      .command
+      .contramap {
+        case trip: dto.Trip =>
+          trip.firstTab *: trip.secondTab *: trip.thirdTab *: trip.workingMode *: trip.summation *: trip.vehicleId *:
+            trip.driverId *: trip.trailerId *: trip.semiTrailerId *: trip.id *: EmptyTuple
       }
 }

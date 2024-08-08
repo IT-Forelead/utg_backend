@@ -1,16 +1,16 @@
 package utg.repos
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, OptionT}
 import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits._
 import skunk._
 import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all._
-
 import utg.domain.ResponseData
 import utg.domain.TripId
 import utg.domain.args.trips._
+import utg.exception.AError
 import utg.repos.sql.AccompanyingPersonsSql
 import utg.repos.sql.TripsSql
 import utg.repos.sql.dto
@@ -25,6 +25,7 @@ trait TripsRepository[F[_]] {
     ): F[Map[TripId, List[dto.AccompanyingPerson]]]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
   def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
+  def update(id: TripId)(update: dto.Trip => dto.Trip): F[Unit]
 }
 
 object TripsRepository {
@@ -69,5 +70,12 @@ object TripsRepository {
 
     override def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit] =
       TripsSql.updateChiefMechanicApprovalSql.execute(input)
+
+    override def update(tripId: TripId)(update: dto.Trip => dto.Trip): F[Unit] = {
+      OptionT(TripsSql.findById.queryOption(tripId)).cataF(
+        AError.Internal(s"Trip not found by id [$tripId]").raiseError[F, Unit],
+        trip => TripsSql.update.execute(update(trip)),
+      )
+    }
   }
 }

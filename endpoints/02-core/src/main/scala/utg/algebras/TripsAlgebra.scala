@@ -28,6 +28,7 @@ trait TripsAlgebra[F[_]] {
   def findById(id: TripId): F[Option[Trip]]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
   def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
+  def updateDispatcher(input: TripDispatcherInput): F[Unit]
 }
 
 object TripsAlgebra {
@@ -64,15 +65,15 @@ object TripsAlgebra {
             startDate = input.startDate,
             endDate = input.endDate,
             serialNumber = input.serialNumber,
-            firstTab = input.firstTab,
-            secondTab = input.secondTab,
-            thirdTab = input.thirdTab,
+            firstTab = None,
+            secondTab = None,
+            thirdTab = None,
             workingMode = input.workingMode,
-            summation = input.summation,
+            summation = None,
             vehicleId = input.vehicleId,
             driverId = input.driverId,
-            trailerId = input.trailerId,
-            semiTrailerId = input.semiTrailerId,
+            trailerId = None,
+            semiTrailerId = None,
             doctorId = None,
             doctorSignature = None,
             fuelSupply = None,
@@ -81,9 +82,6 @@ object TripsAlgebra {
             notes = None,
           )
           _ <- tripsRepository.create(dtoTrip)
-          _ <- input.accompanyingPersons.traverse { userIds =>
-            createAccompanyingPersons(id, userIds)
-          }
         } yield id
 
       override def get(filters: TripFilters): F[ResponseData[Trip]] =
@@ -203,6 +201,32 @@ object TripsAlgebra {
               .Internal(s"Trip not found by id [$input.tripId]")
               .raiseError[F, Unit],
             _ => tripsRepository.updateChiefMechanicApproval(input),
+          )
+
+      override def updateDispatcher(input: TripDispatcherInput): F[Unit] =
+        OptionT(tripsRepository.findById(input.tripId))
+          .cataF(
+            AError
+              .Internal(s"Trip not found by id [$input.tripId]")
+              .raiseError[F, Unit],
+            _ => tripsRepository.update(input.tripId)(
+              _.copy(
+                firstTab = input.firstTab,
+                secondTab = input.secondTab,
+                thirdTab = input.thirdTab,
+                workingMode = input.workingMode,
+                summation = input.summation,
+                vehicleId = input.vehicleId,
+                driverId = input.driverId,
+                trailerId = input.trailerId,
+                semiTrailerId = input.semiTrailerId,
+                doctorId = None,
+                doctorSignature = None,
+                fuelSupply = None,
+                chiefMechanicId = None,
+                chiefMechanicSignature = None,
+              )
+            )
           )
     }
 }
