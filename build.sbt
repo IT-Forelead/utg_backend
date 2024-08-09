@@ -34,6 +34,8 @@ lazy val common =
             com.github.cb372.retry,
             com.github.tototoshi.scalaCsv,
             org.typelevel.log4cats,
+            org.apache.poi,
+            org.apache.ooxml,
             ch.qos.logback,
             dev.optics.monocle,
             Dependencies.io.scalaland.chimney,

@@ -174,6 +174,12 @@ object Dependencies {
       lazy val postgresql =
         "org.flywaydb" % "flyway-database-postgresql" % Versions.flyway
     }
+
+    object apache {
+      lazy val poi = "org.apache.poi"     % "poi"          % "5.2.3"
+      lazy val ooxml = "org.apache.poi"     % "poi-ooxml"    % "5.2.3"
+      lazy val text = "org.apache.commons" % "commons-text" % "1.1"
+    }
   }
   object eu {
     object timepit {

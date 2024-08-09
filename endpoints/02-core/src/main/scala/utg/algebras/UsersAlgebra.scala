@@ -81,10 +81,11 @@ object UsersAlgebra {
           password <- randomStr[F](8)
           hash <- SCrypt.hashpw[F](password)
           accessCredentials = AccessCredentials(user, hash)
+          _ = println("====================================")
           _ <- usersRepository.create(accessCredentials)
-          smsText =
-            s"Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n %%UTG_DOMAIN%%\n Parolingiz: $password"
-          _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
+//          smsText =
+//            s"Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n %%UTG_DOMAIN%%\n Parolingiz: $password"
+//          _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
         } yield id
 
       override def update(
