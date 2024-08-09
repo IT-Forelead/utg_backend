@@ -55,14 +55,14 @@ lazy val `endpoints-runner` =
       LocalProject("support_database"),
     )
     .settings(
-      flywayUrl               := "jdbc:postgresql://localhost:5432/mydatabase",
-      flywayUser              := "postgres",
-      flywayPassword          := "postgres",
-      flywayBaselineOnMigrate := true,
+//      flywayUrl               := "jdbc:postgresql://localhost:5432/mydatabase",
+//      flywayUser              := "postgres",
+//      flywayPassword          := "postgres",
+//      flywayBaselineOnMigrate := true,
       libraryDependencies ++= Seq(),
     )
     .settings(DockerImagePlugin.serviceSetting("endpoints"))
-    .enablePlugins(DockerImagePlugin, JavaAppPackaging, DockerPlugin, FlywayPlugin)
+    .enablePlugins(DockerImagePlugin, JavaAppPackaging, DockerPlugin/*, FlywayPlugin*/)
 
 aggregateProjects(
   `endpoints-domain`,

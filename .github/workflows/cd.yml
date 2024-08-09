@@ -6,28 +6,11 @@ on:
 
 env:
   AWS_ECR_REPOSITORY: "${{ vars.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com"
-  S3_BUCKET: ${{ secrets.S3_BUCKET }}
-  S3_BACKUP_PATH: warehouse/
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: mydatabase
-        options: >-
-          --health-cmd "pg_isready -U postgres" 
-          --health-interval 10s 
-          --health-timeout 5s 
-          --health-retries 5
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -68,42 +51,6 @@ jobs:
             ~/AppData/Local/Coursier/Cache/v1
             ~/Library/Caches/Coursier/v1
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
-
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h 127.0.0.1 -p 5432 -U postgres; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 5
-          done
-
-      - name: Restore Database Backup
-        run: |
-          echo "Checking if PostgreSQL database backup exists in S3... "
-          aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql backup.sql || true
-          docker exec -i $(docker ps -q -f "ancestor=postgres:latest") psql -U postgres -d mydatabase < backup.sql || true
-
-      - name: Verify PostgreSQL Data
-        run: |
-          export PGPASSWORD=postgres
-          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;" || true
-
-      - name: Run Flyway migrations
-        run: sbt flywayMigrate
-
-      - name: Verify PostgreSQL Data
-        run: |
-          export PGPASSWORD=postgres
-          psql -h 127.0.0.1 -p 5432 -U postgres -d mydatabase -W -c "SELECT COUNT(*) FROM regions;"
-
-      - name: Create Database Backup
-        run: |
-          echo "Creating PostgreSQL database backup..."
-          docker exec -t $(docker ps -q -f "ancestor=postgres:latest") pg_dump -U postgres mydatabase > backup.sql
-
-      - name: Upload Database Backup to S3
-        run: |
-          echo "Uploading PostgreSQL database backup to S3..."
-          aws s3 cp backup.sql s3://${{ env.S3_BUCKET }}/${{ env.S3_BACKUP_PATH }}backup.sql
 
       - name: "Building base image 🏗"
         run: |
