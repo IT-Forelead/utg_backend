@@ -16,5 +16,6 @@ case class TripVehicleAcceptanceInput(
     conditionType: ConditionType,
     mechanicId: Option[UserId],
     mechanicSignature: Option[AssetId],
+    driverId: Option[UserId],
     driverSignature: Option[AssetId],
   )

@@ -2,12 +2,9 @@ package utg.algebras
 
 import cats.MonadThrow
 import cats.data.NonEmptyList
-import cats.implicits.catsSyntaxApplicativeId
-import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
-import cats.implicits.toTraverseOps
+import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps, toTraverseOps}
+import org.typelevel.log4cats.Logger
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg.domain.Branch
 import utg.domain.BranchId
 import utg.domain.Region
@@ -33,7 +30,8 @@ object BranchesAlgebra {
       branchesRepository: BranchesRepository[F],
       regionsRepository: RegionsRepository[F],
     )(implicit
-      F: MonadThrow[F]
+      F: MonadThrow[F],
+      logger: Logger[F],
     ): BranchesAlgebra[F] =
     new BranchesAlgebra[F] {
       override def create(input: BranchInput): F[BranchId] =
@@ -82,11 +80,15 @@ object BranchesAlgebra {
         }
 
       override def batch(branches: List[BranchInput]): F[List[Branch]] =
-        for {
+        (for {
           _ <- branches.traverse { branch =>
             create(branch)
           }
           branches <- getBranches
-        } yield branches
+        } yield branches)
+          .handleErrorWith { error =>
+            logger.error(error)("Error while creating branches")
+            F.raiseError(error)
+          }
     }
 }

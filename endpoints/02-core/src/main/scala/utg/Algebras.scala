@@ -50,6 +50,7 @@ object Algebras {
       vehicleCategories,
       vehicles,
       trips,
+      tripDrivers,
       tripVehicleIndicators,
       tripFuelExpenses,
       tripVehicleAcceptances,
@@ -67,7 +68,7 @@ object Algebras {
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
       vehicles = VehiclesAlgebra.make[F](vehicles),
-      trips = TripsAlgebra.make[F](trips, users, vehicles),
+      trips = TripsAlgebra.make[F](trips, tripDrivers, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
       tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](

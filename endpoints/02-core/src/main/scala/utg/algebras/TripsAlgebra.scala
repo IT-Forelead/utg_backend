@@ -5,17 +5,12 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.implicits._
 
-import utg.domain.AccompanyingPersonId
-import utg.domain.ResponseData
-import utg.domain.Trip
-import utg.domain.TripId
-import utg.domain.UserId
-import utg.domain.Vehicle
-import utg.domain.VehicleId
+import utg.domain._
 import utg.domain.args.trips._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
+import utg.repos.TripDriversRepository
 import utg.repos.TripsRepository
 import utg.repos.UsersRepository
 import utg.repos.VehiclesRepository
@@ -33,6 +28,7 @@ trait TripsAlgebra[F[_]] {
 object TripsAlgebra {
   def make[F[_]: MonadThrow: Calendar: GenUUID](
       tripsRepository: TripsRepository[F],
+      tripDriversRepository: TripDriversRepository[F],
       usersRepository: UsersRepository[F],
       vehicleRepository: VehiclesRepository[F],
     ): TripsAlgebra[F] =
@@ -54,6 +50,33 @@ object TripsAlgebra {
           _ <- tripsRepository.createAccompanyingPersons(list.toList)
         } yield ()
 
+      private def createDrivers(
+          tripId: TripId,
+          userIds: NonEmptyList[UserId],
+        ): F[Unit] =
+        for {
+          tripDrivers <- userIds.traverse { userId =>
+            for {
+              id <- ID.make[F, TripDriverId]
+              userById <- usersRepository.findByIds(userIds)
+              maybeDriverId = userById.get(userId).map(_.id)
+              maybeDrivingLicenseNumber = userById.get(userId).flatMap(_.drivingLicenseNumber)
+              tripDriver = (maybeDriverId, maybeDrivingLicenseNumber).mapN {
+                case driverId -> drivingLicenseNumber =>
+                  dto.TripDriver(
+                    id = id,
+                    tripId = tripId,
+                    driverId = driverId,
+                    drivingLicenseNumber = drivingLicenseNumber,
+                  )
+              }
+            } yield tripDriver
+          }
+          _ <- NonEmptyList.fromList(tripDrivers.toList.flatten).traverse { drivers =>
+            tripDriversRepository.create(drivers)
+          }
+        } yield ()
+
       override def create(input: TripInput): F[TripId] =
         for {
           id <- ID.make[F, TripId]
@@ -70,7 +93,6 @@ object TripsAlgebra {
             workingMode = input.workingMode,
             summation = input.summation,
             vehicleId = input.vehicleId,
-            driverId = input.driverId,
             trailerId = input.trailerId,
             semiTrailerId = input.semiTrailerId,
             doctorId = None,
@@ -81,6 +103,7 @@ object TripsAlgebra {
             notes = None,
           )
           _ <- tripsRepository.create(dtoTrip)
+          _ <- createDrivers(id, input.drivers)
           _ <- input.accompanyingPersons.traverse { userIds =>
             createAccompanyingPersons(id, userIds)
           }
@@ -94,10 +117,12 @@ object TripsAlgebra {
           )
           usersIds = dtoTrips
             .data
-            .flatMap(t => t.driverId.some ++ t.doctorId ++ t.chiefMechanicId)
+            .flatMap(t => t.doctorId ++ t.chiefMechanicId)
             .distinct
           accompanyingUsersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
-          userById <- usersRepository.findByIds(usersIds ++ accompanyingUsersIds)
+          userById <- usersRepository.findByIds(
+            NonEmptyList.fromList(usersIds ++ accompanyingUsersIds).get
+          )
           vehicleIds = dtoTrips
             .data
             .flatMap(tva => tva.vehicleId.some ++ tva.trailerId ++ tva.semiTrailerId)
@@ -125,7 +150,7 @@ object TripsAlgebra {
               workingMode = t.workingMode,
               summation = t.summation,
               vehicle = vehicles.get(t.vehicleId),
-              driver = userById.get(t.driverId),
+//              drivers = userById.get(t.driverId),
               trailer = t.trailerId.flatMap(vehicles.get),
               semiTrailer = t.semiTrailerId.flatMap(vehicles.get),
               accompanyingPersons = accompanyingUsers,
@@ -143,10 +168,10 @@ object TripsAlgebra {
         for {
           accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(List(dtoTrip.id))
           usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
-          doctorWithMechanicIds = (dtoTrip
-            .driverId
-            .some ++ dtoTrip.doctorId ++ dtoTrip.chiefMechanicId).toList.distinct
-          userById <- usersRepository.findByIds(usersIds ++ doctorWithMechanicIds)
+          doctorWithMechanicIds = (dtoTrip.doctorId ++ dtoTrip.chiefMechanicId).toList.distinct
+          userById <- usersRepository.findByIds(
+            NonEmptyList.fromList(usersIds ++ doctorWithMechanicIds).get
+          )
           vehicleIds = (dtoTrip.vehicleId.some ++ dtoTrip.trailerId ++ dtoTrip.semiTrailerId)
             .toList
             .distinct
@@ -168,7 +193,7 @@ object TripsAlgebra {
             workingMode = dtoTrip.workingMode,
             summation = dtoTrip.summation,
             vehicle = vehicles.get(dtoTrip.vehicleId),
-            driver = userById.get(dtoTrip.driverId),
+//            driver = userById.get(dtoTrip.driverId),
             trailer = dtoTrip.trailerId.flatMap(vehicles.get),
             semiTrailer = dtoTrip.semiTrailerId.flatMap(vehicles.get),
             accompanyingPersons = accompanyingUsers,

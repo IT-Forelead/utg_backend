@@ -58,7 +58,7 @@ object UsersAlgebra {
 
       override def findByIds(ids: List[UserId]): F[Map[UserId, User]] =
         NonEmptyList.fromList(ids).fold(Map.empty[UserId, User].pure[F]) { userIds =>
-          usersRepository.findByIds(userIds.toList)
+          usersRepository.findByIds(userIds)
         }
 
       override def create(userInput: UserInput): F[UserId] =
@@ -71,11 +71,12 @@ object UsersAlgebra {
             firstname = userInput.firstname,
             lastname = userInput.lastname,
             middleName = userInput.middleName,
+            personalNumber = userInput.personalNumber,
             roleId = userInput.roleId,
             phone = userInput.phone,
             assetId = None,
             branchCode = Option(userInput.branchCode),
-            licenseNumber = userInput.licenseNumber,
+            drivingLicenseNumber = userInput.drivingLicenseNumber,
             drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
           )
           password <- randomStr[F](8)
@@ -100,11 +101,12 @@ object UsersAlgebra {
               firstname = userInput.firstname,
               lastname = userInput.lastname,
               middleName = userInput.middleName,
+              personalNumber = userInput.personalNumber,
               phone = userInput.phone,
               branchCode = userInput.branchCode,
               roleId = userInput.roleId,
               assetId = assetId,
-              licenseNumber = userInput.licenseNumber,
+              drivingLicenseNumber = userInput.drivingLicenseNumber,
               drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
             )
           )
