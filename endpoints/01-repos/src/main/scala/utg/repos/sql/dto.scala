@@ -267,6 +267,43 @@ object dto {
       deleted: Boolean = false,
     )
 
+  case class  TripGivenFuel(
+      id: TripGivenFuelId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      fuelBrand: NonEmptyString,
+      brandCode: NonEmptyString,
+      fuelGiven: NonNegDouble,
+      refuelerId: UserId,
+      attendantSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
+  case class TripFuelInspection(
+      id: TripFuelInspectionId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      actionType: VehicleIndicatorActionType,
+      fuelInTank: NonNegDouble,
+      mechanicId: UserId,
+      mechanicSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
+  case class TripFuelRate(
+      id: TripFuelRateId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      normChangeCoefficient: NonNegDouble,
+      equipmentWorkingTime: NonNegDouble,
+      engineWorkingTime: NonNegDouble,
+      dispatcherId: UserId,
+      dispatcherSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
   case class TripDriverTask(
       id: TripDriverTaskId,
       createdAt: ZonedDateTime,
