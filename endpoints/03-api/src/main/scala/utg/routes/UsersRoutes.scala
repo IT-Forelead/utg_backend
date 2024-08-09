@@ -5,6 +5,7 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.implicits._
+import eu.timepit.refined.types.all.NonNegInt
 import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.Charset
@@ -56,7 +57,7 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
 
   private def uploadUsers(part: Part[F])(is: InputStream): F[Unit] =
     for {
-      roles <- roles.getAll.map(a => a.map(a => (a.name.value, a.id)))
+      roles <- roles.getAll.map(roles => roles.map(role => (role.name.value, role.id)))
       _ <- OptionT
         .fromOption[F](
           part
@@ -69,10 +70,10 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
             matrix
               .tail
               .traverse_ { row =>
-                val listCategories = if (row(7).trim.isEmpty) {
+                val listCategories = if (row(8).trim.isEmpty) {
                   List.empty[String]
                 } else {
-                  row(7).trim.split(",").map(_.trim).toList
+                  row(8).trim.split(",").map(_.trim).toList
                 }
                 val makePrettyLicense = NonEmptyList.fromList(
                   listCategories.map(DrivingLicenseCategory.withName)
@@ -87,9 +88,10 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
                       row(1),
                       row(2),
                       row.lift(3),
-                      row(4),
+                      NonNegInt.unsafeFrom(row(4).toInt),
                       row(5),
-                      row.lift(6),
+                      row(6),
+                      row.lift(7),
                       makePrettyLicense,
                     )
                   )
