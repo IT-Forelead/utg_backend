@@ -2,9 +2,12 @@ package utg.algebras
 
 import cats.MonadThrow
 import cats.data.NonEmptyList
-import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeId, toFlatMapOps, toFunctorOps, toTraverseOps}
-import org.typelevel.log4cats.Logger
+import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
+import cats.implicits.toTraverseOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
 import utg.domain.Branch
 import utg.domain.BranchId
 import utg.domain.Region
@@ -30,12 +33,11 @@ object BranchesAlgebra {
       branchesRepository: BranchesRepository[F],
       regionsRepository: RegionsRepository[F],
     )(implicit
-      F: MonadThrow[F],
-      logger: Logger[F],
+      F: MonadThrow[F]
     ): BranchesAlgebra[F] =
     new BranchesAlgebra[F] {
       override def create(input: BranchInput): F[BranchId] =
-        (for {
+        for {
           id <- ID.make[F, BranchId]
           dtoBranch = dto.Branch(
             id = id,
@@ -44,13 +46,10 @@ object BranchesAlgebra {
             regionId = input.regionId,
           )
           _ <- branchesRepository.create(dtoBranch)
-        } yield id).handleErrorWith { error =>
-          logger.error(error)("Error while creating branch")
-          F.raiseError(error)
-        }
+        } yield id
 
       override def getBranches: F[List[Branch]] =
-        (for {
+        for {
           branches <- branchesRepository.getBranches
           regions <- NonEmptyList
             .fromList(branches.map(_.regionId))
@@ -65,10 +64,7 @@ object BranchesAlgebra {
               region = regions.get(branch.regionId),
             )
           }
-        } yield roles).handleErrorWith { error =>
-          logger.error(error)("Error while getting branches")
-          F.raiseError(error)
-        }
+        } yield roles
 
       override def update(input: UpdateBranchInput): F[Unit] =
         branchesRepository.update(input.id)(
@@ -86,15 +82,11 @@ object BranchesAlgebra {
         }
 
       override def batch(branches: List[BranchInput]): F[List[Branch]] =
-        (for {
+        for {
           _ <- branches.traverse { branch =>
             create(branch)
           }
           branches <- getBranches
-        } yield branches)
-          .handleErrorWith { error =>
-            logger.error(error)("Error while creating branches")
-            F.raiseError(error)
-          }
+        } yield branches
     }
 }

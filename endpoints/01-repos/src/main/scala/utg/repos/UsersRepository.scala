@@ -4,15 +4,21 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
-import cats.implicits.{catsSyntaxApplicativeError, catsSyntaxApplicativeErrorId, catsSyntaxApplicativeId, catsSyntaxOptionId, toFlatMapOps, toFunctorOps, toTraverseOps}
+import cats.implicits.catsSyntaxApplicativeError
+import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.catsSyntaxApplicativeId
+import cats.implicits.catsSyntaxOptionId
+import cats.implicits.toFlatMapOps
+import cats.implicits.toFunctorOps
+import cats.implicits.toTraverseOps
 import eu.timepit.refined.types.string.NonEmptyString
-import org.typelevel.log4cats.Logger
 import skunk._
 import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
+
 import utg.Phone
 import utg.domain.AuthedUser.User
 import utg.domain.RegionId
@@ -51,7 +57,6 @@ object UsersRepository {
   def make[F[_]: Async](
       implicit
       session: Resource[F, Session[F]],
-      logger: Logger[F],
     ): UsersRepository[F] = new UsersRepository[F] {
     private def makeUser(userDto: dto.User): F[Option[User]] =
       for {
@@ -133,13 +138,7 @@ object UsersRepository {
       }.value
 
     override def findById(id: UserId): F[Option[User]] =
-      OptionT(
-        UsersSql.findById.queryOption(id)
-          .onError{ error =>
-            logger.error(s"Error while fetching user by id [$id]: ${error.getMessage}")
-            AError.Internal(s"User not found by id [$id]").raiseError[F, Unit]
-          }
-      ).flatMapF(makeUser).value
+      OptionT(UsersSql.findById.queryOption(id)).flatMapF(makeUser).value
 
     override def create(userAndHash: AccessCredentials[dto.User]): F[Unit] =
       UsersSql.insert.execute(userAndHash)

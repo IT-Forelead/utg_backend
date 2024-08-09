@@ -46,11 +46,10 @@ object dto {
         .withFieldConst(_.role, role)
         .withFieldConst(_.phone, phone)
         .withFieldConst(_.branch, branch)
-        .withFieldConst(_.personalNumber, personalNumber)
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .transform
 
-    def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
+    private def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
       date.format(DateTimeFormatter.ofPattern(format))
 
     private def toCSVField: List[String] =
@@ -87,7 +86,7 @@ object dto {
           .merge(report.map(_.toCSVField).map(writeAsCsv))
           .through(utf8.encode)
 
-    def writeAsCsv(rows: List[String]): String = {
+    private def writeAsCsv(rows: List[String]): String = {
       val writer = new StringWriter()
       val csvWriter = CSVWriter.open(writer)
       csvWriter.writeRow(rows)
