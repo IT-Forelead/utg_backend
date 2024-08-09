@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS users (
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   branch_code VARCHAR NULL,
   driving_license_number VARCHAR NULL UNIQUE,
-  driving_license_categories DRIVING_LICENSE_CATEGORY NULL,
+  driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
   password VARCHAR NOT NULL
 );
 
