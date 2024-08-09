@@ -5,10 +5,10 @@ import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
 import cats.implicits._
+import org.typelevel.log4cats.Logger
 import skunk._
 import uz.scala.skunk.syntax.all._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg.domain.Branch
 import utg.domain.BranchId
 import utg.domain.args.branches.BranchFilters
@@ -29,13 +29,20 @@ trait BranchesRepository[F[_]] {
 object BranchesRepository {
   def make[F[_]: Async](
       implicit
-      session: Resource[F, Session[F]]
+      session: Resource[F, Session[F]],
+      logger: Logger[F],
     ): BranchesRepository[F] = new BranchesRepository[F] {
     override def create(branch: dto.Branch): F[Unit] =
       BranchesSql.insert.execute(branch)
+        .onError { error =>
+          logger.error(error)("Error while creating branch")
+        }
 
     override def getBranches: F[List[dto.Branch]] =
       BranchesSql.selectBranches.queryList(Void)
+        .onError { error =>
+          logger.error(error)("Error while fetching branches")
+        }
 
     override def update(id: BranchId)(update: dto.Branch => dto.Branch): F[Unit] =
       OptionT(BranchesSql.findById.queryOption(id)).cataF(

@@ -35,7 +35,7 @@ object BranchesAlgebra {
     ): BranchesAlgebra[F] =
     new BranchesAlgebra[F] {
       override def create(input: BranchInput): F[BranchId] =
-        for {
+        (for {
           id <- ID.make[F, BranchId]
           dtoBranch = dto.Branch(
             id = id,
@@ -44,10 +44,13 @@ object BranchesAlgebra {
             regionId = input.regionId,
           )
           _ <- branchesRepository.create(dtoBranch)
-        } yield id
+        } yield id).handleErrorWith { error =>
+          logger.error(error)("Error while creating branch")
+          F.raiseError(error)
+        }
 
       override def getBranches: F[List[Branch]] =
-        for {
+        (for {
           branches <- branchesRepository.getBranches
           regions <- NonEmptyList
             .fromList(branches.map(_.regionId))
@@ -62,7 +65,10 @@ object BranchesAlgebra {
               region = regions.get(branch.regionId),
             )
           }
-        } yield roles
+        } yield roles).handleErrorWith { error =>
+          logger.error(error)("Error while getting branches")
+          F.raiseError(error)
+        }
 
       override def update(input: UpdateBranchInput): F[Unit] =
         branchesRepository.update(input.id)(
