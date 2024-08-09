@@ -2,8 +2,8 @@ package utg
 
 import cats.effect.Async
 import cats.effect.Resource
+import org.typelevel.log4cats.Logger
 import skunk.Session
-
 import utg.repos._
 
 case class Repositories[F[_]](
@@ -27,7 +27,8 @@ case class Repositories[F[_]](
 object Repositories {
   def make[F[_]: Async](
       implicit
-      session: Resource[F, Session[F]]
+      session: Resource[F, Session[F]],
+      logger: Logger[F],
     ): Repositories[F] =
     Repositories(
       users = UsersRepository.make[F],
