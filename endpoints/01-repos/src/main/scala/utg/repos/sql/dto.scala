@@ -46,7 +46,6 @@ object dto {
         .withFieldConst(_.role, role)
         .withFieldConst(_.phone, phone)
         .withFieldConst(_.branch, branch)
-        .withFieldConst(_.personalNumber, personalNumber)
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .transform
 

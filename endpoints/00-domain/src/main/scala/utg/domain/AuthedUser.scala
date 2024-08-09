@@ -19,6 +19,7 @@ sealed trait AuthedUser {
   val role: Role
   val firstname: NonEmptyString
   val lastname: NonEmptyString
+  val personalNumber: NonNegInt
   val phone: Phone
   val fullName: NonEmptyString
   val assetId: Option[AssetId]
