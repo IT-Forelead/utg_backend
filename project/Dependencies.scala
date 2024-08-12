@@ -179,6 +179,12 @@ object Dependencies {
     object openpdf {
       lazy val core = "org.xhtmlrenderer" % "flying-saucer-pdf-openpdf" % Versions.openpdf
     }
+
+    object apache {
+      lazy val poi = "org.apache.poi"     % "poi"          % "5.2.3"
+      lazy val ooxml = "org.apache.poi"     % "poi-ooxml"    % "5.2.3"
+      lazy val text = "org.apache.commons" % "commons-text" % "1.1"
+    }
   }
   object eu {
     object timepit {
