@@ -10,8 +10,6 @@ import utg.domain.args.vehicles.VehicleFilters
 import utg.domain.args.vehicles.VehicleInput
 import utg.effects.Calendar
 import utg.effects.GenUUID
-import utg.repos.BranchesRepository
-import utg.repos.VehicleCategoriesRepository
 import utg.repos.VehiclesRepository
 import utg.repos.sql.dto
 import utg.utils.ID
@@ -24,9 +22,7 @@ trait VehiclesAlgebra[F[_]] {
 
 object VehiclesAlgebra {
   def make[F[_]: Calendar: GenUUID](
-      vehiclesRepository: VehiclesRepository[F],
-      branchesRepository: BranchesRepository[F],
-      vehicleCategoriesRepository: VehicleCategoriesRepository[F],
+      vehiclesRepository: VehiclesRepository[F]
     )(implicit
       F: MonadThrow[F]
     ): VehiclesAlgebra[F] =
@@ -49,7 +45,7 @@ object VehiclesAlgebra {
             chassisNumber = vehicleInput.chassisNumber,
             engineNumber = vehicleInput.engineNumber,
             conditionType = vehicleInput.conditionType,
-            fuelType = vehicleInput.fuelType,
+            fuelTypes = vehicleInput.fuelTypes.map(_.toList),
             description = vehicleInput.description,
             gpsTracking = vehicleInput.gpsTracking,
             fuelLevelSensor = vehicleInput.fuelLevelSensor,

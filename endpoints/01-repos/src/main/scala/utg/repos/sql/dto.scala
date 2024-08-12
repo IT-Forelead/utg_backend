@@ -28,11 +28,12 @@ object dto {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
+      personalNumber: NonNegInt,
       phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],
       branchCode: Option[NonEmptyString],
-      licenseNumber: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
     ) {
     def toDomain(
@@ -48,7 +49,7 @@ object dto {
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .transform
 
-    def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
+    private def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
       date.format(DateTimeFormatter.ofPattern(format))
 
     private def toCSVField: List[String] =
@@ -85,7 +86,7 @@ object dto {
           .merge(report.map(_.toCSVField).map(writeAsCsv))
           .through(utf8.encode)
 
-    def writeAsCsv(rows: List[String]): String = {
+    private def writeAsCsv(rows: List[String]): String = {
       val writer = new StringWriter()
       val csvWriter = CSVWriter.open(writer)
       csvWriter.writeRow(rows)
@@ -121,7 +122,10 @@ object dto {
       name: NonEmptyString,
       vehicleType: VehicleType,
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain: domain.VehicleCategory =
+      this.transformInto[domain.VehicleCategory]
+  }
 
   case class Vehicle(
       id: VehicleId,
@@ -137,7 +141,7 @@ object dto {
       chassisNumber: Option[NonEmptyString],
       engineNumber: Option[NonEmptyString],
       conditionType: ConditionType,
-      fuelType: Option[FuelType],
+      fuelTypes: Option[List[FuelType]],
       description: Option[NonEmptyString],
       gpsTracking: Option[GpsTrackingType],
       fuelLevelSensor: Option[NonNegDouble],
@@ -147,11 +151,13 @@ object dto {
     def toDomain(
         branch: Option[domain.Branch],
         vehicleCategory: domain.VehicleCategory,
+        fuelTypes: Option[NonEmptyList[FuelType]],
       ): domain.Vehicle =
       this
         .into[domain.Vehicle]
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.vehicleCategory, vehicleCategory.some)
+        .withFieldConst(_.fuelTypes, fuelTypes)
         .transform
   }
 
@@ -167,7 +173,6 @@ object dto {
       workingMode: WorkingModeType,
       summation: Option[NonEmptyString],
       vehicleId: VehicleId,
-      driverId: UserId,
       trailerId: Option[VehicleId],
       semiTrailerId: Option[VehicleId],
       doctorId: Option[UserId],
@@ -180,7 +185,7 @@ object dto {
     ) {
     def toDomain(
         vehicle: Option[domain.Vehicle],
-        driver: Option[domain.AuthedUser.User],
+//        driver: Option[domain.AuthedUser.User],
         trailer: Option[domain.Vehicle],
         semiTrailer: Option[domain.Vehicle],
         accompanyingPersons: Option[List[AuthedUser.User]],
@@ -190,7 +195,7 @@ object dto {
       this
         .into[domain.Trip]
         .withFieldConst(_.vehicle, vehicle)
-        .withFieldConst(_.driver, driver)
+//        .withFieldConst(_.driver, driver)
         .withFieldConst(_.trailer, trailer)
         .withFieldConst(_.semiTrailer, semiTrailer)
         .withFieldConst(_.accompanyingPersons, accompanyingPersons)
@@ -198,6 +203,14 @@ object dto {
         .withFieldConst(_.chiefMechanic, chiefMechanic)
         .transform
   }
+
+  case class TripDriver(
+      id: TripDriverId,
+      tripId: TripId,
+      driverId: UserId,
+      drivingLicenseNumber: NonEmptyString,
+      deleted: Boolean = false,
+    )
 
   case class AccompanyingPerson(
       id: AccompanyingPersonId,
@@ -228,7 +241,7 @@ object dto {
       conditionType: ConditionType,
       mechanicId: Option[UserId],
       mechanicSignature: Option[AssetId],
-      driverId: UserId,
+      driverId: Option[UserId],
       driverSignature: Option[AssetId],
       deleted: Boolean = false,
     )
@@ -241,7 +254,7 @@ object dto {
       fuelBrand: Option[NonEmptyString],
       brandCode: Option[NonEmptyString],
       fuelGiven: Option[NonNegDouble],
-      fuelAttendant: Option[NonEmptyString],
+      refuelerId: Option[UserId],
       attendantSignature: Option[AssetId],
       fuelInTank: Option[NonNegDouble],
       fuelRemaining: Option[NonNegDouble],
@@ -303,4 +316,31 @@ object dto {
     def toDomain: domain.CompleteTask =
       this.transformInto[domain.CompleteTask]
   }
+
+  case class VehicleHistory(
+      id: VehicleHistoryId,
+      createdAt: ZonedDateTime,
+      vehicleId: VehicleId,
+      branchId: BranchId,
+      registeredNumber: Option[RegisteredNumber],
+    ) {
+    def toDomain(
+        vehicleCategory: domain.VehicleCategory,
+        branch: Option[domain.Branch],
+      ): domain.VehicleHistory =
+      this
+        .into[domain.VehicleHistory]
+        .withFieldConst(_.vehicleCategory, vehicleCategory)
+        .withFieldConst(_.branch, branch)
+        .transform
+  }
+
+  case class VehicleHistoryWithCategory(
+      id: VehicleHistoryId,
+      createdAt: ZonedDateTime,
+      vehicleCategoryId: VehicleCategoryId,
+      vehicleCategoryName: NonEmptyString,
+      vehicleCategoryType: VehicleType,
+      registeredNumber: Option[RegisteredNumber],
+    )
 }

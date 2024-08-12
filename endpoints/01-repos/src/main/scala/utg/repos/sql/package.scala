@@ -70,6 +70,11 @@ package object sql {
   val drivingLicenseCategories: Codec[List[DrivingLicenseCategory]] =
     _drivingLicenseCategory.imap(_.flattenTo(List))(Arr(_: _*))
 
+  private val _fuelType: Codec[Arr[FuelType]] =
+    `_enum`[FuelType](FuelType, Type("_fuel_type", List(Type("fuel_type"))))
+  val fuelTypes: Codec[List[FuelType]] =
+    _fuelType.imap(_.flattenTo(List))(Arr(_: _*))
+
   val passwordHash: Codec[PasswordHash[SCrypt]] =
     varchar.imap[PasswordHash[SCrypt]](PasswordHash[SCrypt])(identity)
 }
