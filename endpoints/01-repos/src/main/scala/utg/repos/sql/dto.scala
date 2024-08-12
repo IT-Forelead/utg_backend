@@ -182,17 +182,17 @@ object dto {
     ) {
     def toDomain(
         vehicle: Option[domain.Vehicle],
-//        driver: Option[domain.AuthedUser.User],
+        drivers: Option[List[AuthedUser.User]],
         trailer: Option[domain.Vehicle],
         semiTrailer: Option[domain.Vehicle],
         accompanyingPersons: Option[List[AuthedUser.User]],
-        doctor: Option[domain.AuthedUser.User],
-        chiefMechanic: Option[domain.AuthedUser.User],
+        doctor: Option[AuthedUser.User],
+        chiefMechanic: Option[AuthedUser.User],
       ): domain.Trip =
       this
         .into[domain.Trip]
         .withFieldConst(_.vehicle, vehicle)
-//        .withFieldConst(_.driver, driver)
+        .withFieldConst(_.drivers, drivers)
         .withFieldConst(_.trailer, trailer)
         .withFieldConst(_.semiTrailer, semiTrailer)
         .withFieldConst(_.accompanyingPersons, accompanyingPersons)
@@ -267,7 +267,7 @@ object dto {
       deleted: Boolean = false,
     )
 
-  case class  TripGivenFuel(
+  case class TripGivenFuel(
       id: TripGivenFuelId,
       createdAt: ZonedDateTime,
       tripId: TripId,

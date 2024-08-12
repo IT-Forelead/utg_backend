@@ -17,4 +17,8 @@ private[repos] object TripDriversSql extends Sql[TripDriverId] {
   val selectByTripId: Query[TripId, dto.TripDriver] =
     sql"""SELECT * FROM trip_drivers WHERE deleted = false AND trip_id = ${TripsSql.id}"""
       .query(codec)
+
+  def findByTripIds(ids: List[TripId]): Query[ids.type, dto.TripDriver] =
+    sql"""SELECT * FROM trip_drivers WHERE trip_id IN (${TripsSql.id.values.list(ids)})"""
+      .query(codec)
 }

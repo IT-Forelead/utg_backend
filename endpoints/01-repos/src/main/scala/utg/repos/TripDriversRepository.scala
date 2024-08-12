@@ -3,6 +3,7 @@ package utg.repos
 import cats.data.NonEmptyList
 import cats.effect.Async
 import cats.effect.Resource
+import cats.implicits.toFunctorOps
 import skunk._
 import uz.scala.skunk.syntax.all._
 
@@ -13,6 +14,9 @@ import utg.repos.sql.dto
 trait TripDriversRepository[F[_]] {
   def create(inputList: NonEmptyList[dto.TripDriver]): F[Unit]
   def getByTripId(tripId: TripId): F[List[dto.TripDriver]]
+  def findByTripIds(
+      ids: NonEmptyList[TripId]
+    ): F[Map[TripId, List[dto.TripDriver]]]
 }
 
 object TripDriversRepository {
@@ -27,5 +31,14 @@ object TripDriversRepository {
 
     override def getByTripId(tripId: TripId): F[List[dto.TripDriver]] =
       TripDriversSql.selectByTripId.queryList(tripId)
+
+    override def findByTripIds(
+        ids: NonEmptyList[TripId]
+      ): F[Map[TripId, List[dto.TripDriver]]] = {
+      val tripIds = ids.toList
+      TripDriversSql.findByTripIds(tripIds).queryList(tripIds).map {
+        _.groupBy(_.tripId)
+      }
+    }
   }
 }

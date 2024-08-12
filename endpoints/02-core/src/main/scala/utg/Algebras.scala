@@ -77,9 +77,10 @@ object Algebras {
       trips = TripsAlgebra.make[F](trips, tripDrivers, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
-      tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](tripGivenFuels, trips),
-      tripFuelInspectionsAlgebra = TripFuelInspectionsAlgebra.make[F](tripFuelInspections, trips),
-      tripFuelRatesAlgebra = TripFuelRatesAlgebra.make[F](tripFuelRates, trips),
+      tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](tripGivenFuels, trips, users),
+      tripFuelInspectionsAlgebra =
+        TripFuelInspectionsAlgebra.make[F](tripFuelInspections, trips, users),
+      tripFuelRatesAlgebra = TripFuelRatesAlgebra.make[F](tripFuelRates, trips, users),
       tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
         tripVehicleAcceptances,
         users,
