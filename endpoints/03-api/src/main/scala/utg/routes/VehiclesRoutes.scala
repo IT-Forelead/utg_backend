@@ -47,7 +47,7 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
   private def uploadVehicles(part: Part[F])(is: InputStream): F[Unit] =
     for {
       branches <- branchesAlgebra.getBranches.map(branches => branches.map(branch => (branch.name.value, branch.id)))
-      vehicleCategories <- vehicleCategoriesAlgebra.getBranches.map(branches => branches.map(branch => (branch.name.value, branch.id)))
+      vehicleCategories <- vehicleCategoriesAlgebra.getVehicleCategories.map(vcList => vcList.map(vc => (vc.name.value, vc.id)))
       _ <- OptionT
         .fromOption[F](
           part

@@ -54,19 +54,9 @@ object VehicleCategoriesAlgebra {
       override def getVehicleCategories: F[List[VehicleCategory]] =
         for {
           vehicleCategories <- vehicleCategoriesRepository.getVehicleCategories
-          regions <- NonEmptyList
-            .fromList(branches.map(_.regionId))
-            .fold(Map.empty[RegionId, Region].pure[F]) { regionIds =>
-              regionsRepository.findByIds(regionIds.toList)
-            }
-          roles = branches.map { branch =>
-            VehicleCategory(
-              id = branch.id,
-              name = branch.name,
-              code = branch.code,
-              region = regions.get(branch.regionId),
-            )
+          vc = vehicleCategories.map { vehicleCategory =>
+            vehicleCategory.toDomain
           }
-        } yield roles
+        } yield vc
     }
 }
