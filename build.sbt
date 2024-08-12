@@ -39,6 +39,7 @@ lazy val common =
             Dependencies.io.scalaland.chimney,
             Dependencies.io.estatico.newtype,
             Dependencies.io.github.jmcardon.`tsec-password`,
+            Dependencies.org.openpdf.core,
           ),
     )
     .dependsOn(LocalProject("support_logback"))

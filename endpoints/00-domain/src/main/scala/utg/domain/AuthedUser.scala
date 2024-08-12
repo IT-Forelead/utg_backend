@@ -3,6 +3,7 @@ package utg.domain
 import java.time.ZonedDateTime
 
 import cats.data.NonEmptyList
+import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -18,6 +19,7 @@ sealed trait AuthedUser {
   val role: Role
   val firstname: NonEmptyString
   val lastname: NonEmptyString
+  val personalNumber: NonNegInt
   val phone: Phone
   val fullName: NonEmptyString
   val assetId: Option[AssetId]
@@ -32,11 +34,12 @@ object AuthedUser {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
+      personalNumber: NonNegInt,
       role: Role,
       phone: Phone,
       assetId: Option[AssetId],
       branch: Option[Branch],
-      licenseNumber: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"

@@ -56,7 +56,8 @@ object VehiclesRepository {
             branch <- OptionT(BranchesSql.findById.queryOption(vehicleDto.branchId))
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
-      } yield vehicleDto.toDomain(branch, vehicleCategory)
+        fuelTypes = vehicleDto.fuelTypes.flatMap(NonEmptyList.fromList)
+      } yield vehicleDto.toDomain(branch, vehicleCategory, fuelTypes)
 
     private def makeVehicles(dtos: List[dto.Vehicle]): F[List[Vehicle]] = {
       val vehicleCategoryIds = NonEmptyList.fromList(dtos.map(_.vehicleCategoryId))
@@ -100,6 +101,8 @@ object VehiclesRepository {
           val maybeBranch = branchById
             .get(vehicleDto.branchId)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
+          val fuelTypes =
+            vehicleDto.fuelTypes.flatMap(NonEmptyList.fromList)
           vehicleDto.toDomain(
             maybeBranch,
             VehicleCategory(
@@ -107,6 +110,7 @@ object VehiclesRepository {
               name = vehicleCategory.name,
               vehicleType = vehicleCategory.vehicleType,
             ),
+            fuelTypes,
           )
         }
       }
@@ -147,7 +151,7 @@ object VehiclesRepository {
               chassisNumber = dto.chassisNumber,
               engineNumber = dto.engineNumber,
               conditionType = dto.conditionType,
-              fuelType = dto.fuelType,
+              fuelTypes = dto.fuelTypes.flatMap(NonEmptyList.fromList),
               description = dto.description,
               gpsTracking = dto.gpsTracking,
               fuelLevelSensor = dto.fuelLevelSensor,

@@ -42,8 +42,8 @@ CREATE TYPE STATUS_TYPE AS ENUM (
 );
 
 CREATE TYPE VEHICLE_INDICATOR_ACTION_TYPE AS ENUM (
-  'enter',
-  'exit'
+  'exit',
+  'back'
 );
 
 CREATE TYPE DRIVING_LICENSE_CATEGORY AS ENUM (
@@ -130,11 +130,12 @@ CREATE TABLE IF NOT EXISTS users (
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
   middle_name VARCHAR NULL,
-  phone VARCHAR NOT NULL,
+  personal_number INT NOT NULL UNIQUE,
+  phone VARCHAR NOT NULL UNIQUE,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   branch_code VARCHAR NULL,
-  license_number VARCHAR NULL,
+  driving_license_number VARCHAR NULL UNIQUE,
   driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
   password VARCHAR NOT NULL
 );
@@ -177,6 +178,7 @@ INSERT INTO
     "created_at",
     "firstname",
     "lastname",
+    "personal_number",
     "phone",
     "role_id",
     "branch_code",
@@ -188,6 +190,7 @@ VALUES
     '2022-11-07T06:43:01.089Z',
     'Admin',
     'Super Manager',
+    1,
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
     null,
@@ -246,7 +249,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   chassis_number VARCHAR NULL,
   engine_number VARCHAR NULL,
   condition CONDITION_TYPE NOT NULL,
-  fuel_type FUEL_TYPE NULL,
+  fuel_types _FUEL_TYPE NULL,
   description VARCHAR NULL,
   gps_tracking GPS_TRACKING_TYPE NULL,
   fuel_level_sensor DOUBLE PRECISION NULL,
@@ -267,8 +270,6 @@ CREATE TABLE IF NOT EXISTS trips (
   summation VARCHAR NULL,
   vehicle_id UUID NOT NULL
     CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  driver_id UUID NOT NULL
-    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   trailer_id UUID NULL
     CONSTRAINT fk_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   semi_trailer_id UUID NULL
@@ -285,6 +286,15 @@ CREATE TABLE IF NOT EXISTS trips (
   notes VARCHAR NULL,
   status STATUS_TYPE NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_drivers (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driving_license_number VARCHAR NOT NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false,
+  UNIQUE (trip_id, driver_id)
 );
 
 CREATE TABLE IF NOT EXISTS trip_accompanying_persons (
@@ -316,9 +326,10 @@ CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
   fuel_brand VARCHAR NULL,
   brand_code VARCHAR NULL,
   fuel_given DOUBLE PRECISION NULL,
-  fuel_attendant VARCHAR NULL,
-  attendant_signature UUID NULL
-    CONSTRAINT fk_attendant_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  refueler_id UUID NULL
+    CONSTRAINT fk_refueler_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  refueler_signature UUID NULL
+    CONSTRAINT fk_refueler_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   fuel_in_tank DOUBLE PRECISION NULL,
   fuel_remaining DOUBLE PRECISION NULL,
   norm_change_coeff DOUBLE PRECISION NULL,
@@ -378,7 +389,7 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_acceptances (
     CONSTRAINT fk_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   mechanic_signature UUID NULL
     CONSTRAINT fk_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  driver_id UUID NOT NULL
+  driver_id UUID NULL
     CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   driver_signature UUID NULL
     CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -395,5 +406,15 @@ CREATE TABLE IF NOT EXISTS comlpete_tasks (
   consignor_sign_id UUID NULL,
   document_id UUID NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS vehicle_histories (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  branch_id UUID NOT NULL
+    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  registered_number VARCHAR NULL UNIQUE
 );
 

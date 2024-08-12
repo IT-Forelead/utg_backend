@@ -8,7 +8,6 @@ import cats.implicits._
 import skunk._
 import uz.scala.skunk.syntax.all._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg.domain.Branch
 import utg.domain.BranchId
 import utg.domain.args.branches.BranchFilters

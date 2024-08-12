@@ -18,7 +18,7 @@ case class TripFuelExpense(
     fuelBrand: Option[NonEmptyString],
     brandCode: Option[NonEmptyString],
     fuelGiven: Option[NonNegDouble],
-    fuelAttendant: Option[NonEmptyString],
+    refueler: Option[User],
     attendantSignature: Option[AssetId],
     fuelInTank: Option[NonNegDouble],
     fuelRemaining: Option[NonNegDouble],

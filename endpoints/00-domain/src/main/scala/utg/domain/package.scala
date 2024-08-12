@@ -47,6 +47,8 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class TripFuelExpenseId(value: UUID)
   @derive(eqv, show, uuid)
+  @newtype case class TripDriverId(value: UUID)
+  @derive(eqv, show, uuid)
   @newtype case class TripVehicleAcceptanceId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class TripDriverTaskId(value: UUID)
@@ -63,6 +65,8 @@ package object domain {
   @newtype case class ConsignorSignId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class DocumentId(value: UUID)
+  @derive(eqv, show, uuid)
+  @newtype case class VehicleHistoryId(value: UUID)
 
   object JwtAccessTokenKey {
     implicit val reader: ConfigReader[JwtAccessTokenKey] =

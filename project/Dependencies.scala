@@ -35,6 +35,7 @@ object Dependencies {
     lazy val caliban = "2.5.1"
     lazy val mailer = "1.4.7"
     lazy val chimney = "0.8.5"
+    lazy val openpdf = "9.3.1"
   }
   trait LibGroup {
     def all: Seq[ModuleID]
@@ -173,6 +174,10 @@ object Dependencies {
       lazy val core = "org.flywaydb" % "flyway-core" % Versions.flyway
       lazy val postgresql =
         "org.flywaydb" % "flyway-database-postgresql" % Versions.flyway
+    }
+
+    object openpdf {
+      lazy val core = "org.xhtmlrenderer" % "flying-saucer-pdf-openpdf" % Versions.openpdf
     }
   }
   object eu {

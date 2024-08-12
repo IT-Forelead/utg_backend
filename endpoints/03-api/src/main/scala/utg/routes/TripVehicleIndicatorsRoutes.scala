@@ -13,7 +13,6 @@ import utg.algebras.TripVehicleIndicatorsAlgebra
 import utg.domain.AuthedUser
 import utg.domain.TripId
 import utg.domain.args.tripVehicleIndicators.TripVehicleIndicatorInput
-import utg.domain.enums.Privilege
 
 final case class TripVehicleIndicatorsRoutes[F[_]: JsonDecoder: MonadThrow](
     tripVehicleIndicatorsAlgebra: TripVehicleIndicatorsAlgebra[F]

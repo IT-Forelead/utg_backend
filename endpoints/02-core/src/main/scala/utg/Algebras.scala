@@ -30,6 +30,7 @@ case class Algebras[F[_]](
     tripDriverTasks: TripDriverTasksAlgebra[F],
     lineDelays: LineDelaysAlgebra[F],
     completeTasksAlgebra: CompleteTasksAlgebra[F],
+    vehicleHistoriesAlgebra: VehicleHistoriesAlgebra[F],
   )
 
 object Algebras {
@@ -50,12 +51,14 @@ object Algebras {
       vehicleCategories,
       vehicles,
       trips,
+      tripDrivers,
       tripVehicleIndicators,
       tripFuelExpenses,
       tripVehicleAcceptances,
       tripDriverTasks,
       lineDelays,
       completeTasks,
+      vehicleHistories,
     ) = repositories
     val assetsAlgebra = AssetsAlgebra.make[F](assets, s3Client)
     Algebras[F](
@@ -66,8 +69,8 @@ object Algebras {
       regions = RegionsAlgebra.make[F](regions),
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
-      vehicles = VehiclesAlgebra.make[F](vehicles, branches, vehicleCategories),
-      trips = TripsAlgebra.make[F](trips, users, vehicles),
+      vehicles = VehiclesAlgebra.make[F](vehicles),
+      trips = TripsAlgebra.make[F](trips, tripDrivers, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
       tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
@@ -78,6 +81,7 @@ object Algebras {
       tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks, trips),
       lineDelays = LineDelaysAlgebra.make[F](lineDelays, trips),
       completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
+      vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](vehicleHistories)
     )
   }
 }
