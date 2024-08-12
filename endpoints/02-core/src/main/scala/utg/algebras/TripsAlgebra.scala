@@ -50,27 +50,34 @@ object TripsAlgebra {
           _ <- tripsRepository.createAccompanyingPersons(list.toList)
         } yield ()
 
+      private def makeDrivers(
+          driverId: UserId,
+          tripId: TripId,
+          driverIds: NonEmptyList[UserId],
+        ): F[Option[dto.TripDriver]] =
+        for {
+          id <- ID.make[F, TripDriverId]
+          driverByIds <- usersRepository.findByIds(driverIds)
+          maybeDriverId = driverByIds.get(driverId).map(_.id)
+          maybeDrivingLicenseNumber = driverByIds.get(driverId).flatMap(_.drivingLicenseNumber)
+          tripDriver = (maybeDriverId, maybeDrivingLicenseNumber).mapN {
+            case dId -> dln =>
+              dto.TripDriver(
+                id = id,
+                tripId = tripId,
+                driverId = dId,
+                drivingLicenseNumber = dln,
+              )
+          }
+        } yield tripDriver
+
       private def createDrivers(
           tripId: TripId,
-          userIds: NonEmptyList[UserId],
+          driverIds: NonEmptyList[UserId],
         ): F[Unit] =
         for {
-          tripDrivers <- userIds.traverse { userId =>
-            for {
-              id <- ID.make[F, TripDriverId]
-              userById <- usersRepository.findByIds(userIds)
-              maybeDriverId = userById.get(userId).map(_.id)
-              maybeDrivingLicenseNumber = userById.get(userId).flatMap(_.drivingLicenseNumber)
-              tripDriver = (maybeDriverId, maybeDrivingLicenseNumber).mapN {
-                case driverId -> drivingLicenseNumber =>
-                  dto.TripDriver(
-                    id = id,
-                    tripId = tripId,
-                    driverId = driverId,
-                    drivingLicenseNumber = drivingLicenseNumber,
-                  )
-              }
-            } yield tripDriver
+          tripDrivers <- driverIds.traverse { driverId =>
+            makeDrivers(driverId, tripId, driverIds)
           }
           _ <- NonEmptyList.fromList(tripDrivers.toList.flatten).traverse { drivers =>
             tripDriversRepository.create(drivers)
