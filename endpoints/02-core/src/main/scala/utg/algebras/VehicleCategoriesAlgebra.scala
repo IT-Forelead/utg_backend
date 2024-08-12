@@ -1,9 +1,9 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.NonEmptyList
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
-
 import utg.domain.VehicleCategory
 import utg.domain.VehicleCategoryId
 import utg.domain.args.vehicleCategories._
@@ -16,6 +16,7 @@ trait VehicleCategoriesAlgebra[F[_]] {
   def create(input: VehicleCategoryInput): F[VehicleCategoryId]
   def get(filters: VehicleCategoryFilters): F[List[VehicleCategory]]
   def update(input: VehicleCategory): F[Unit]
+  def getVehicleCategories: F[List[VehicleCategory]]
 }
 
 object VehicleCategoriesAlgebra {
@@ -49,5 +50,23 @@ object VehicleCategoriesAlgebra {
 
       override def update(input: VehicleCategory): F[Unit] =
         vehicleCategoriesRepository.update(input.id)(_.copy(name = input.name))
+
+      override def getVehicleCategories: F[List[VehicleCategory]] =
+        for {
+          vehicleCategories <- vehicleCategoriesRepository.getVehicleCategories
+          regions <- NonEmptyList
+            .fromList(branches.map(_.regionId))
+            .fold(Map.empty[RegionId, Region].pure[F]) { regionIds =>
+              regionsRepository.findByIds(regionIds.toList)
+            }
+          roles = branches.map { branch =>
+            VehicleCategory(
+              id = branch.id,
+              name = branch.name,
+              code = branch.code,
+              region = regions.get(branch.regionId),
+            )
+          }
+        } yield roles
     }
 }
