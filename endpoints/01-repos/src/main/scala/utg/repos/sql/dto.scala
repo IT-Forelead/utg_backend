@@ -122,7 +122,10 @@ object dto {
       name: NonEmptyString,
       vehicleType: VehicleType,
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain: domain.VehicleCategory =
+      this.transformInto[domain.VehicleCategory]
+  }
 
   case class Vehicle(
       id: VehicleId,
@@ -313,4 +316,31 @@ object dto {
     def toDomain: domain.CompleteTask =
       this.transformInto[domain.CompleteTask]
   }
+
+  case class VehicleHistory(
+      id: VehicleHistoryId,
+      createdAt: ZonedDateTime,
+      vehicleId: VehicleId,
+      branchId: BranchId,
+      registeredNumber: Option[RegisteredNumber],
+    ) {
+    def toDomain(
+        vehicleCategory: domain.VehicleCategory,
+        branch: Option[domain.Branch],
+      ): domain.VehicleHistory =
+      this
+        .into[domain.VehicleHistory]
+        .withFieldConst(_.vehicleCategory, vehicleCategory)
+        .withFieldConst(_.branch, branch)
+        .transform
+  }
+
+  case class VehicleHistoryWithCategory(
+      id: VehicleHistoryId,
+      createdAt: ZonedDateTime,
+      vehicleCategoryId: VehicleCategoryId,
+      vehicleCategoryName: NonEmptyString,
+      vehicleCategoryType: VehicleType,
+      registeredNumber: Option[RegisteredNumber],
+    )
 }
