@@ -3,7 +3,6 @@ package utg
 import cats.effect.Async
 import cats.effect.Resource
 import skunk.Session
-
 import utg.repos._
 
 case class Repositories[F[_]](
@@ -15,6 +14,7 @@ case class Repositories[F[_]](
     vehicleCategories: VehicleCategoriesRepository[F],
     vehicles: VehiclesRepository[F],
     trips: TripsRepository[F],
+    tripDrivers: TripDriversRepository[F],
     tripVehicleIndicators: TripVehicleIndicatorsRepository[F],
     tripFuelExpenses: TripFuelExpensesRepository[F],
     tripVehicleAcceptances: TripVehicleAcceptancesRepository[F],
@@ -27,7 +27,7 @@ case class Repositories[F[_]](
 object Repositories {
   def make[F[_]: Async](
       implicit
-      session: Resource[F, Session[F]]
+      session: Resource[F, Session[F]],
     ): Repositories[F] =
     Repositories(
       users = UsersRepository.make[F],
@@ -38,6 +38,7 @@ object Repositories {
       vehicleCategories = VehicleCategoriesRepository.make[F],
       vehicles = VehiclesRepository.make[F],
       trips = TripsRepository.make[F],
+      tripDrivers = TripDriversRepository.make[F],
       tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
       tripFuelExpenses = TripFuelExpensesRepository.make[F],
       tripVehicleAcceptances = TripVehicleAcceptancesRepository.make[F],

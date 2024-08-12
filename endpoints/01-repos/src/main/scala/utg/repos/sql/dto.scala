@@ -28,11 +28,12 @@ object dto {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
+      personalNumber: NonNegInt,
       phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],
       branchCode: Option[NonEmptyString],
-      licenseNumber: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
     ) {
     def toDomain(
@@ -48,7 +49,7 @@ object dto {
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .transform
 
-    def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
+    private def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
       date.format(DateTimeFormatter.ofPattern(format))
 
     private def toCSVField: List[String] =
@@ -85,7 +86,7 @@ object dto {
           .merge(report.map(_.toCSVField).map(writeAsCsv))
           .through(utf8.encode)
 
-    def writeAsCsv(rows: List[String]): String = {
+    private def writeAsCsv(rows: List[String]): String = {
       val writer = new StringWriter()
       val csvWriter = CSVWriter.open(writer)
       csvWriter.writeRow(rows)
@@ -172,7 +173,6 @@ object dto {
       workingMode: WorkingModeType,
       summation: Option[NonEmptyString],
       vehicleId: VehicleId,
-      driverId: UserId,
       trailerId: Option[VehicleId],
       semiTrailerId: Option[VehicleId],
       doctorId: Option[UserId],
@@ -185,7 +185,7 @@ object dto {
     ) {
     def toDomain(
         vehicle: Option[domain.Vehicle],
-        driver: Option[domain.AuthedUser.User],
+//        driver: Option[domain.AuthedUser.User],
         trailer: Option[domain.Vehicle],
         semiTrailer: Option[domain.Vehicle],
         accompanyingPersons: Option[List[AuthedUser.User]],
@@ -195,7 +195,7 @@ object dto {
       this
         .into[domain.Trip]
         .withFieldConst(_.vehicle, vehicle)
-        .withFieldConst(_.driver, driver)
+//        .withFieldConst(_.driver, driver)
         .withFieldConst(_.trailer, trailer)
         .withFieldConst(_.semiTrailer, semiTrailer)
         .withFieldConst(_.accompanyingPersons, accompanyingPersons)
@@ -203,6 +203,14 @@ object dto {
         .withFieldConst(_.chiefMechanic, chiefMechanic)
         .transform
   }
+
+  case class TripDriver(
+      id: TripDriverId,
+      tripId: TripId,
+      driverId: UserId,
+      drivingLicenseNumber: NonEmptyString,
+      deleted: Boolean = false,
+    )
 
   case class AccompanyingPerson(
       id: AccompanyingPersonId,
@@ -233,7 +241,7 @@ object dto {
       conditionType: ConditionType,
       mechanicId: Option[UserId],
       mechanicSignature: Option[AssetId],
-      driverId: UserId,
+      driverId: Option[UserId],
       driverSignature: Option[AssetId],
       deleted: Boolean = false,
     )

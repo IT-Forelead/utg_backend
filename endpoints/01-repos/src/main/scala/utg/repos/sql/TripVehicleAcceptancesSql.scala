@@ -10,7 +10,7 @@ import utg.domain.TripVehicleAcceptanceId
 private[repos] object TripVehicleAcceptancesSql extends Sql[TripVehicleAcceptanceId] {
   private[repos] val codec: Codec[dto.TripVehicleAcceptance] =
     (id *: zonedDateTime *: TripsSql.id *: VehiclesSql.id *: vehicleIndicatorActionType *: conditionType
-      *: UsersSql.id.opt *: AssetsSql.id.opt *: UsersSql.id *: AssetsSql.id.opt *: bool)
+      *: UsersSql.id.opt *: AssetsSql.id.opt *: UsersSql.id.opt *: AssetsSql.id.opt *: bool)
       .to[dto.TripVehicleAcceptance]
 
   val insert: Command[dto.TripVehicleAcceptance] =
