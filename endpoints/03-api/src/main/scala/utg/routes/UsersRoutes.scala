@@ -148,7 +148,7 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
         roles.createRole(value.name).flatMap(Ok(_))
       }
 
-    case ar @ POST -> Root / "document" as _ =>
+    case ar @ POST -> Root / "batch-insert" as _ =>
       ar.req.decode[Multipart[F]] { multipart =>
         val allowedMediaTypes = List(
           MediaType.unsafeParse("text/csv"),
