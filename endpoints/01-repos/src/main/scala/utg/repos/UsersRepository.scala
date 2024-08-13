@@ -56,7 +56,7 @@ trait UsersRepository[F[_]] {
 object UsersRepository {
   def make[F[_]: Async](
       implicit
-      session: Resource[F, Session[F]],
+      session: Resource[F, Session[F]]
     ): UsersRepository[F] = new UsersRepository[F] {
     private def makeUser(userDto: dto.User): F[Option[User]] =
       for {

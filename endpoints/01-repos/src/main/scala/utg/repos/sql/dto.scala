@@ -185,17 +185,17 @@ object dto {
     ) {
     def toDomain(
         vehicle: Option[domain.Vehicle],
-//        driver: Option[domain.AuthedUser.User],
+        drivers: List[domain.TripDriver],
         trailer: Option[domain.Vehicle],
         semiTrailer: Option[domain.Vehicle],
         accompanyingPersons: Option[List[AuthedUser.User]],
-        doctor: Option[domain.AuthedUser.User],
-        chiefMechanic: Option[domain.AuthedUser.User],
+        doctor: Option[AuthedUser.User],
+        chiefMechanic: Option[AuthedUser.User],
       ): domain.Trip =
       this
         .into[domain.Trip]
         .withFieldConst(_.vehicle, vehicle)
-//        .withFieldConst(_.driver, driver)
+        .withFieldConst(_.drivers, drivers)
         .withFieldConst(_.trailer, trailer)
         .withFieldConst(_.semiTrailer, semiTrailer)
         .withFieldConst(_.accompanyingPersons, accompanyingPersons)
@@ -210,7 +210,13 @@ object dto {
       driverId: UserId,
       drivingLicenseNumber: NonEmptyString,
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain(user: Option[domain.AuthedUser.User]): domain.TripDriver =
+      this
+        .into[domain.TripDriver]
+        .withFieldConst(_.driver, user)
+        .transform
+  }
 
   case class AccompanyingPerson(
       id: AccompanyingPersonId,
@@ -246,27 +252,40 @@ object dto {
       deleted: Boolean = false,
     )
 
-  case class TripFuelExpense(
-      id: TripFuelExpenseId,
+  case class TripGivenFuel(
+      id: TripGivenFuelId,
       createdAt: ZonedDateTime,
       tripId: TripId,
       vehicleId: VehicleId,
-      fuelBrand: Option[NonEmptyString],
-      brandCode: Option[NonEmptyString],
-      fuelGiven: Option[NonNegDouble],
-      refuelerId: Option[UserId],
-      attendantSignature: Option[AssetId],
-      fuelInTank: Option[NonNegDouble],
-      fuelRemaining: Option[NonNegDouble],
-      normChangeCoefficient: Option[NonNegDouble],
-      equipmentWorkingTime: Option[NonNegDouble],
-      engineWorkingTime: Option[NonNegDouble],
-      tankCheckMechanicId: Option[UserId],
-      tankCheckMechanicSignature: Option[AssetId],
-      remainingCheckMechanicId: Option[UserId],
-      remainingCheckMechanicSignature: Option[AssetId],
-      dispatcherId: Option[UserId],
-      dispatcherSignature: Option[AssetId],
+      fuelBrand: NonEmptyString,
+      brandCode: NonEmptyString,
+      fuelGiven: NonNegDouble,
+      refuelerId: UserId,
+      attendantSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
+  case class TripFuelInspection(
+      id: TripFuelInspectionId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      actionType: VehicleIndicatorActionType,
+      fuelInTank: NonNegDouble,
+      mechanicId: UserId,
+      mechanicSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
+  case class TripFuelRate(
+      id: TripFuelRateId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      normChangeCoefficient: NonNegDouble,
+      equipmentWorkingTime: NonNegDouble,
+      engineWorkingTime: NonNegDouble,
+      dispatcherId: UserId,
+      dispatcherSignature: AssetId,
       deleted: Boolean = false,
     )
 

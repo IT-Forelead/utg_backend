@@ -50,27 +50,34 @@ object TripsAlgebra {
           _ <- tripsRepository.createAccompanyingPersons(list.toList)
         } yield ()
 
+      private def makeDrivers(
+          driverId: UserId,
+          tripId: TripId,
+          driverIds: NonEmptyList[UserId],
+        ): F[Option[dto.TripDriver]] =
+        for {
+          id <- ID.make[F, TripDriverId]
+          driverByIds <- usersRepository.findByIds(driverIds)
+          maybeDriverId = driverByIds.get(driverId).map(_.id)
+          maybeDrivingLicenseNumber = driverByIds.get(driverId).flatMap(_.drivingLicenseNumber)
+          tripDriver = (maybeDriverId, maybeDrivingLicenseNumber).mapN {
+            case dId -> dln =>
+              dto.TripDriver(
+                id = id,
+                tripId = tripId,
+                driverId = dId,
+                drivingLicenseNumber = dln,
+              )
+          }
+        } yield tripDriver
+
       private def createDrivers(
           tripId: TripId,
-          userIds: NonEmptyList[UserId],
+          driverIds: NonEmptyList[UserId],
         ): F[Unit] =
         for {
-          tripDrivers <- userIds.traverse { userId =>
-            for {
-              id <- ID.make[F, TripDriverId]
-              userById <- usersRepository.findByIds(userIds)
-              maybeDriverId = userById.get(userId).map(_.id)
-              maybeDrivingLicenseNumber = userById.get(userId).flatMap(_.drivingLicenseNumber)
-              tripDriver = (maybeDriverId, maybeDrivingLicenseNumber).mapN {
-                case driverId -> drivingLicenseNumber =>
-                  dto.TripDriver(
-                    id = id,
-                    tripId = tripId,
-                    driverId = driverId,
-                    drivingLicenseNumber = drivingLicenseNumber,
-                  )
-              }
-            } yield tripDriver
+          tripDrivers <- driverIds.traverse { driverId =>
+            makeDrivers(driverId, tripId, driverIds)
           }
           _ <- NonEmptyList.fromList(tripDrivers.toList.flatten).traverse { drivers =>
             tripDriversRepository.create(drivers)
@@ -115,6 +122,9 @@ object TripsAlgebra {
           accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(
             dtoTrips.data.map(_.id)
           )
+          drivers <- tripDriversRepository.findByTripIds(
+            NonEmptyList.fromList(dtoTrips.data.map(_.id)).get
+          )
           usersIds = dtoTrips
             .data
             .flatMap(t => t.doctorId ++ t.chiefMechanicId)
@@ -150,7 +160,7 @@ object TripsAlgebra {
               workingMode = t.workingMode,
               summation = t.summation,
               vehicle = vehicles.get(t.vehicleId),
-//              drivers = userById.get(t.driverId),
+              drivers = drivers.getOrElse(t.id, Nil),
               trailer = t.trailerId.flatMap(vehicles.get),
               semiTrailer = t.semiTrailerId.flatMap(vehicles.get),
               accompanyingPersons = accompanyingUsers,
@@ -167,10 +177,13 @@ object TripsAlgebra {
       private def makeTrip(dtoTrip: dto.Trip): F[Trip] =
         for {
           accompanyingByTripId <- tripsRepository.findAccompanyingPersonByIds(List(dtoTrip.id))
+          drivers <- tripDriversRepository.getByTripId(dtoTrip.id)
           usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
           doctorWithMechanicIds = (dtoTrip.doctorId ++ dtoTrip.chiefMechanicId).toList.distinct
           userById <- usersRepository.findByIds(
-            NonEmptyList.fromList(usersIds ++ doctorWithMechanicIds).get
+            NonEmptyList
+              .fromList(usersIds ++ doctorWithMechanicIds)
+              .get
           )
           vehicleIds = (dtoTrip.vehicleId.some ++ dtoTrip.trailerId ++ dtoTrip.semiTrailerId)
             .toList
@@ -193,7 +206,7 @@ object TripsAlgebra {
             workingMode = dtoTrip.workingMode,
             summation = dtoTrip.summation,
             vehicle = vehicles.get(dtoTrip.vehicleId),
-//            driver = userById.get(dtoTrip.driverId),
+            drivers = drivers,
             trailer = dtoTrip.trailerId.flatMap(vehicles.get),
             semiTrailer = dtoTrip.semiTrailerId.flatMap(vehicles.get),
             accompanyingPersons = accompanyingUsers,

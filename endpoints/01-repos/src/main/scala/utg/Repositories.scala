@@ -3,6 +3,7 @@ package utg
 import cats.effect.Async
 import cats.effect.Resource
 import skunk.Session
+
 import utg.repos._
 
 case class Repositories[F[_]](
@@ -16,7 +17,9 @@ case class Repositories[F[_]](
     trips: TripsRepository[F],
     tripDrivers: TripDriversRepository[F],
     tripVehicleIndicators: TripVehicleIndicatorsRepository[F],
-    tripFuelExpenses: TripFuelExpensesRepository[F],
+    tripGivenFuels: TripGivenFuelsRepository[F],
+    tripFuelInspections: TripFuelInspectionsRepository[F],
+    tripFuelRates: TripFuelRatesRepository[F],
     tripVehicleAcceptances: TripVehicleAcceptancesRepository[F],
     tripDriverTasks: TripDriverTasksRepository[F],
     lineDelays: LineDelaysRepository[F],
@@ -27,10 +30,11 @@ case class Repositories[F[_]](
 object Repositories {
   def make[F[_]: Async](
       implicit
-      session: Resource[F, Session[F]],
-    ): Repositories[F] =
+      session: Resource[F, Session[F]]
+    ): Repositories[F] = {
+    val usersRepo = UsersRepository.make[F]
     Repositories(
-      users = UsersRepository.make[F],
+      users = usersRepo,
       assets = AssetsRepository.make[F],
       roles = RolesRepository.make[F],
       regions = RegionsRepository.make[F],
@@ -38,13 +42,16 @@ object Repositories {
       vehicleCategories = VehicleCategoriesRepository.make[F],
       vehicles = VehiclesRepository.make[F],
       trips = TripsRepository.make[F],
-      tripDrivers = TripDriversRepository.make[F],
+      tripDrivers = TripDriversRepository.make[F](usersRepo),
       tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
-      tripFuelExpenses = TripFuelExpensesRepository.make[F],
+      tripGivenFuels = TripGivenFuelsRepository.make[F],
+      tripFuelInspections = TripFuelInspectionsRepository.make[F],
+      tripFuelRates = TripFuelRatesRepository.make[F],
       tripVehicleAcceptances = TripVehicleAcceptancesRepository.make[F],
       tripDriverTasks = TripDriverTasksRepository.make[F],
       lineDelays = LineDelaysRepository.make[F],
       completeTasks = CompleteTasksRepository.make[F],
       vehicleHistories = VehicleHistoriesRepository.make[F],
     )
+  }
 }
