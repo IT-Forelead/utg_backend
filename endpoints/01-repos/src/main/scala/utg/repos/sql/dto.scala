@@ -4,7 +4,6 @@ import java.io.StringWriter
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-
 import cats.data.NonEmptyList
 import cats.effect.Concurrent
 import cats.effect.Sync
@@ -15,10 +14,10 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import fs2.text.utf8
 import io.scalaland.chimney.dsl._
-
 import utg._
 import utg.domain
 import utg.domain._
+import utg.domain.args.trips.TripAccompanyingPerson
 import utg.domain.enums._
 
 object dto {
@@ -218,8 +217,8 @@ object dto {
         .transform
   }
 
-  case class AccompanyingPerson(
-      id: AccompanyingPersonId,
+  case class TripAccompanyingPerson(
+      id: TripAccompanyingPersonId,
       tripId: TripId,
       userId: UserId,
       deleted: Boolean = false,

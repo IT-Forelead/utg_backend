@@ -43,7 +43,7 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class TripId(value: UUID)
   @derive(eqv, show, uuid)
-  @newtype case class AccompanyingPersonId(value: UUID)
+  @newtype case class TripAccompanyingPersonId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class TripGivenFuelId(value: UUID)
   @derive(eqv, show, uuid)

@@ -54,6 +54,7 @@ object Algebras {
       vehicles,
       trips,
       tripDrivers,
+      tripAccompanyingPersons,
       tripVehicleIndicators,
       tripGivenFuels,
       tripFuelInspections,
@@ -74,7 +75,7 @@ object Algebras {
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
       vehicles = VehiclesAlgebra.make[F](vehicles),
-      trips = TripsAlgebra.make[F](trips, tripDrivers, users, vehicles),
+      trips = TripsAlgebra.make[F](trips, tripDrivers, tripAccompanyingPersons, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](tripGivenFuels, trips, users),
       tripFuelInspectionsAlgebra =
@@ -88,7 +89,7 @@ object Algebras {
       tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks, trips),
       lineDelays = LineDelaysAlgebra.make[F](lineDelays, trips),
       completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
-      vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](vehicleHistories)
+      vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](vehicleHistories),
     )
   }
 }
