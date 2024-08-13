@@ -30,9 +30,10 @@ object Repositories {
   def make[F[_]: Async](
       implicit
       session: Resource[F, Session[F]]
-    ): Repositories[F] =
+    ): Repositories[F] = {
+    val usersRepo = UsersRepository.make[F]
     Repositories(
-      users = UsersRepository.make[F],
+      users = usersRepo,
       assets = AssetsRepository.make[F],
       roles = RolesRepository.make[F],
       regions = RegionsRepository.make[F],
@@ -40,7 +41,7 @@ object Repositories {
       vehicleCategories = VehicleCategoriesRepository.make[F],
       vehicles = VehiclesRepository.make[F],
       trips = TripsRepository.make[F],
-      tripDrivers = TripDriversRepository.make[F],
+      tripDrivers = TripDriversRepository.make[F](usersRepo),
       tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
       tripGivenFuels = TripGivenFuelsRepository.make[F],
       tripFuelInspections = TripFuelInspectionsRepository.make[F],
@@ -50,4 +51,5 @@ object Repositories {
       lineDelays = LineDelaysRepository.make[F],
       completeTasks = CompleteTasksRepository.make[F],
     )
+  }
 }

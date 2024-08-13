@@ -24,7 +24,7 @@ case class Trip(
     workingMode: WorkingModeType,
     summation: Option[NonEmptyString],
     vehicle: Option[Vehicle],
-    drivers: Option[List[User]],
+    drivers: List[TripDriver],
     trailer: Option[Vehicle],
     semiTrailer: Option[Vehicle],
     accompanyingPersons: Option[List[User]],

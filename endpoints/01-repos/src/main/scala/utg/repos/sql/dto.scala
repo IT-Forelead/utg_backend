@@ -182,7 +182,7 @@ object dto {
     ) {
     def toDomain(
         vehicle: Option[domain.Vehicle],
-        drivers: Option[List[AuthedUser.User]],
+        drivers: List[domain.TripDriver],
         trailer: Option[domain.Vehicle],
         semiTrailer: Option[domain.Vehicle],
         accompanyingPersons: Option[List[AuthedUser.User]],
@@ -207,7 +207,13 @@ object dto {
       driverId: UserId,
       drivingLicenseNumber: NonEmptyString,
       deleted: Boolean = false,
-    )
+    ) {
+    def toDomain(user: Option[domain.AuthedUser.User]): domain.TripDriver =
+      this
+        .into[domain.TripDriver]
+        .withFieldConst(_.driver, user)
+        .transform
+  }
 
   case class AccompanyingPerson(
       id: AccompanyingPersonId,
