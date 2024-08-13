@@ -310,38 +310,6 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
-  id UUID PRIMARY KEY NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  fuel_brand VARCHAR NULL,
-  brand_code VARCHAR NULL,
-  fuel_given DOUBLE PRECISION NULL,
-  refueler_id UUID NULL
-    CONSTRAINT fk_refueler_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  refueler_signature UUID NULL
-    CONSTRAINT fk_refueler_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  fuel_in_tank DOUBLE PRECISION NULL,
-  fuel_remaining DOUBLE PRECISION NULL,
-  norm_change_coeff DOUBLE PRECISION NULL,
-  equipment_working_time DOUBLE PRECISION NULL,
-  engine_working_time DOUBLE PRECISION NULL,
-  tank_check_mechanic UUID NULL
-    CONSTRAINT fk_tank_check_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  tank_check_mechanic_signature UUID NULL
-    CONSTRAINT fk_tank_check_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  remaining_check_mechanic UUID NULL
-    CONSTRAINT fk_remaining_check_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  remaining_check_mechanic_signature UUID NULL
-    CONSTRAINT fk_remaining_check_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  dispatcher UUID NULL
-    CONSTRAINT fk_dispatcher_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  dispatcher_signature UUID NULL
-    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  deleted BOOLEAN NOT NULL DEFAULT false
-);
-
 CREATE TABLE IF NOT EXISTS trip_given_fuels (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
