@@ -1,7 +1,6 @@
 package utg.algebras
 
 import cats.MonadThrow
-import cats.data.NonEmptyList
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
 import utg.domain.VehicleCategory
