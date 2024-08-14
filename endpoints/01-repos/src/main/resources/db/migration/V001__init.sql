@@ -178,7 +178,7 @@ VALUES
   (
     '95fe6cba-7ea4-415e-8faf-500a3199dc14',
     'refueller'
-  )
+  );
 
 INSERT INTO
   "users" (
@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS trips (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   start_date DATE NOT NULL,
   end_date DATE NULL,
-  serial_number VARCHAR NOT NULL,
+  serial_number VARCHAR NULL,
   first_tab VARCHAR NULL,
   second_tab VARCHAR NULL,
   third_tab VARCHAR NULL,

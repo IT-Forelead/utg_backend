@@ -1,7 +1,8 @@
 package utg.domain.enums
 
-import enumeratum.EnumEntry.Snakecase
+import enumeratum.EnumEntry.{Snakecase, UpperSnakecase, UpperWords}
 import enumeratum._
+import eu.timepit.refined.char.UpperCase
 
 sealed trait VehicleType extends Snakecase
 

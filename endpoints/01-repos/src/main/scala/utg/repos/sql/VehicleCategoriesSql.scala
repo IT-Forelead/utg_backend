@@ -40,4 +40,8 @@ private[repos] object VehicleCategoriesSql extends Sql[VehicleCategoryId] {
         case vc: dto.VehicleCategory =>
           vc.name *: vc.id *: EmptyTuple
       }
+
+  val selectVehicleCategories: Query[Void, dto.VehicleCategory] =
+    sql"""SELECT * FROM vehicle_categories WHERE deleted = false ORDER BY name ASC"""
+      .query(codec)
 }
