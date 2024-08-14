@@ -121,6 +121,6 @@ private[repos] object UsersSql extends Sql[UserId] {
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)
   }
 
-  def delete: Command[UserId] =
-    sql"""DELETE FROM users u WHERE u.id = $id""".command
+  val delete: Command[UserId] =
+    sql"""DELETE FROM users WHERE id = $id""".command
 }

@@ -38,6 +38,36 @@ private[repos] object TripsSql extends Sql[TripId] {
     baseQuery.andOpt(searchFilters)
   }
 
+  val update: Command[dto.Trip] =
+    sql"""UPDATE trips
+       SET start_date = $date,
+       end_date = ${date.opt},
+       serial_number = ${nes.opt},
+       first_tab = ${nes.opt},
+       second_tab = ${nes.opt},
+       third_tab = ${nes.opt},
+       work_order = $workingModeType,
+       summation = ${nes.opt},
+       vehicle_id = ${VehiclesSql.id},
+       trailer_id = ${VehiclesSql.id.opt},
+       semi_trailer_id = ${VehiclesSql.id.opt},
+       doctor_id = ${UsersSql.id.opt},
+       doctor_signature = ${AssetsSql.id.opt},
+       fuel_supply = ${nonNegDouble.opt},
+       chief_mechanic_id = ${UsersSql.id.opt},
+       chief_mechanic_signature = ${AssetsSql.id.opt},
+       notes = ${nes.opt}
+       WHERE id = $id
+     """
+      .command
+      .contramap {
+        case trip: dto.Trip =>
+          trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *:
+            trip.thirdTab *: trip.workingMode *: trip.summation *: trip.vehicleId *: trip.trailerId *:
+            trip.semiTrailerId *: trip.doctorId *: trip.doctorSignature *: trip.fuelSupply *:
+            trip.chiefMechanicId *: trip.chiefMechanicSignature *: trip.notes *: trip.id *: EmptyTuple
+      }
+
   val updateDoctorApprovalSql: Command[TripDoctorApprovalInput] =
     sql"""UPDATE trips
        SET doctor_id = ${UsersSql.id.opt},

@@ -20,6 +20,7 @@ trait TripDriversRepository[F[_]] {
   def findByTripIds(
       ids: NonEmptyList[TripId]
     ): F[Map[TripId, List[TripDriver]]]
+  def deleteByTripId(tripId: TripId): F[Unit]
 }
 
 object TripDriversRepository {
@@ -65,5 +66,8 @@ object TripDriversRepository {
           .map(_.groupBy(_.tripId))
       }
     }
+
+    override def deleteByTripId(tripId: TripId): F[Unit] =
+      TripDriversSql.deleteByTripIdSql.execute(tripId)
   }
 }

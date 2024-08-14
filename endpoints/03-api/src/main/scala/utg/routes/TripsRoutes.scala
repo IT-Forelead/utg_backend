@@ -73,6 +73,11 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
         tripsAlgebra.create(create).flatMap(Created(_))
       }
 
+    case ar @ POST -> Root / "edit" as _ =>
+      ar.req.decodeR[UpdateTripInput] { input =>
+        tripsAlgebra.update(input) >> NoContent()
+      }
+
     case ar @ POST -> Root / "doctor-approval" as user =>
       ar.req.decodeR[TripDoctorApprovalInput] { create =>
         tripsAlgebra.updateDoctorApproval(

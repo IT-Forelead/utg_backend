@@ -23,6 +23,7 @@ trait TripsAlgebra[F[_]] {
   def create(input: TripInput): F[TripId]
   def get(filters: TripFilters): F[ResponseData[Trip]]
   def findById(id: TripId): F[Option[Trip]]
+  def update(input: UpdateTripInput): F[Unit]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
   def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
 }
@@ -36,20 +37,36 @@ object TripsAlgebra {
       vehicleRepository: VehiclesRepository[F],
     ): TripsAlgebra[F] =
     new TripsAlgebra[F] {
+      private def makeApproachingPersons(
+          tripId: TripId,
+          userIds: NonEmptyList[UserId],
+        ): F[NonEmptyList[dto.TripAccompanyingPerson]] =
+        userIds.traverse { userId =>
+          ID.make[F, TripAccompanyingPersonId].map { accId =>
+            dto.TripAccompanyingPerson(
+              id = accId,
+              tripId = tripId,
+              userId = userId,
+            )
+          }
+        }
+
       private def createAccompanyingPersons(
           tripId: TripId,
           userIds: NonEmptyList[UserId],
         ): F[Unit] =
         for {
-          list <- userIds.traverse { userId =>
-            ID.make[F, TripAccompanyingPersonId].map { accId =>
-              dto.TripAccompanyingPerson(
-                id = accId,
-                tripId = tripId,
-                userId = userId,
-              )
-            }
-          }
+          list <- makeApproachingPersons(tripId, userIds)
+          _ <- tripAccompanyingPersonsRepository.create(list)
+        } yield ()
+
+      private def updateAccompanyingPersons(
+          tripId: TripId,
+          userIds: NonEmptyList[UserId],
+        ): F[Unit] =
+        for {
+          list <- makeApproachingPersons(tripId, userIds)
+          _ <- tripAccompanyingPersonsRepository.deleteByTripId(tripId)
           _ <- tripAccompanyingPersonsRepository.create(list)
         } yield ()
 
@@ -82,6 +99,20 @@ object TripsAlgebra {
           tripDrivers <- driverIds.traverse { driverId =>
             makeDrivers(driverId, tripId, driverIds)
           }
+          _ <- NonEmptyList.fromList(tripDrivers.toList.flatten).traverse { drivers =>
+            tripDriversRepository.create(drivers)
+          }
+        } yield ()
+
+      private def updateDrivers(
+          tripId: TripId,
+          driverIds: NonEmptyList[UserId],
+        ): F[Unit] =
+        for {
+          tripDrivers <- driverIds.traverse { driverId =>
+            makeDrivers(driverId, tripId, driverIds)
+          }
+          _ <- tripDriversRepository.deleteByTripId(tripId)
           _ <- NonEmptyList.fromList(tripDrivers.toList.flatten).traverse { drivers =>
             tripDriversRepository.create(drivers)
           }
@@ -238,6 +269,31 @@ object TripsAlgebra {
           res <- OptionT.liftF(makeTrip(dtoTrip))
         } yield res).value
 
+      override def update(input: UpdateTripInput): F[Unit] =
+        for {
+          _ <- tripsRepository.update(input.id) { dtoTrip =>
+            dtoTrip.copy(
+              startDate = input.startDate.getOrElse(dtoTrip.startDate),
+              endDate = input.endDate,
+              serialNumber = input.serialNumber,
+              firstTab = input.firstTab,
+              secondTab = input.secondTab,
+              thirdTab = input.thirdTab,
+              workingMode = input.workingMode.getOrElse(dtoTrip.workingMode),
+              summation = input.summation,
+              vehicleId = input.vehicleId.getOrElse(dtoTrip.vehicleId),
+              trailerId = input.trailerId,
+              semiTrailerId = input.semiTrailerId,
+            )
+          }
+          _ <- input.drivers.traverse { driverIds =>
+            updateDrivers(input.id, driverIds)
+          }
+          _ <- input.accompanyingPersons.traverse { userIds =>
+            updateAccompanyingPersons(input.id, userIds)
+          }
+        } yield {}
+
       override def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit] =
         OptionT(tripsRepository.findById(input.tripId))
           .cataF(
@@ -246,11 +302,6 @@ object TripsAlgebra {
               .raiseError[F, Unit],
             _ => tripsRepository.updateDoctorApproval(input),
           )
-//          userById <- usersRepository.findByIds(
-//            NonEmptyList
-//              .fromList(usersIds ++ doctorWithMechanicIds)
-//              .get
-//          )
 
       override def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit] =
         OptionT(tripsRepository.findById(input.tripId))
