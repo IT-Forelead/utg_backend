@@ -11,7 +11,7 @@ import utg.domain.args.trips._
 
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: date *: date.opt *: nes *: nes.opt *: nes.opt *: nes.opt *: workingModeType
+    (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType
       *: nes.opt *: VehiclesSql.id *: VehiclesSql.id.opt *: VehiclesSql.id.opt
       *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt *: UsersSql.id.opt
       *: AssetsSql.id.opt *: nes.opt *: bool).to[dto.Trip]

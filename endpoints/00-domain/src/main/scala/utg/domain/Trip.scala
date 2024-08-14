@@ -17,7 +17,7 @@ case class Trip(
     createdAt: ZonedDateTime,
     startDate: LocalDate,
     endDate: Option[LocalDate],
-    serialNumber: NonEmptyString,
+    serialNumber: Option[NonEmptyString],
     firstTab: Option[NonEmptyString],
     secondTab: Option[NonEmptyString],
     thirdTab: Option[NonEmptyString],
