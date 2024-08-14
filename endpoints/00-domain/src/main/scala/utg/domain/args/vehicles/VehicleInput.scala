@@ -19,7 +19,7 @@ case class VehicleInput(
     vehicleCategoryId: VehicleCategoryId,
     vehicleType: VehicleType,
     brand: NonEmptyString,
-    registeredNumber: Option[RegisteredNumber],
+    registeredNumber: Option[NonEmptyString],
     inventoryNumber: InventoryNumber,
     yearOfRelease: NonNegInt,
     bodyNumber: Option[NonEmptyString],

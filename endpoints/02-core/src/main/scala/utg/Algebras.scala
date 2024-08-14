@@ -25,7 +25,9 @@ case class Algebras[F[_]](
     vehicles: VehiclesAlgebra[F],
     trips: TripsAlgebra[F],
     tripVehicleIndicators: TripVehicleIndicatorsAlgebra[F],
-    tripFuelExpensesAlgebra: TripFuelExpensesAlgebra[F],
+    tripGivenFuelsAlgebra: TripGivenFuelsAlgebra[F],
+    tripFuelInspectionsAlgebra: TripFuelInspectionsAlgebra[F],
+    tripFuelRatesAlgebra: TripFuelRatesAlgebra[F],
     tripVehicleAcceptancesAlgebra: TripVehicleAcceptancesAlgebra[F],
     tripDriverTasks: TripDriverTasksAlgebra[F],
     lineDelays: LineDelaysAlgebra[F],
@@ -52,8 +54,11 @@ object Algebras {
       vehicles,
       trips,
       tripDrivers,
+      tripAccompanyingPersons,
       tripVehicleIndicators,
-      tripFuelExpenses,
+      tripGivenFuels,
+      tripFuelInspections,
+      tripFuelRates,
       tripVehicleAcceptances,
       tripDriverTasks,
       lineDelays,
@@ -70,9 +75,12 @@ object Algebras {
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
       vehicles = VehiclesAlgebra.make[F](vehicles),
-      trips = TripsAlgebra.make[F](trips, tripDrivers, users, vehicles),
+      trips = TripsAlgebra.make[F](trips, tripDrivers, tripAccompanyingPersons, users, vehicles),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
-      tripFuelExpensesAlgebra = TripFuelExpensesAlgebra.make[F](tripFuelExpenses, users, trips),
+      tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](tripGivenFuels, trips, users),
+      tripFuelInspectionsAlgebra =
+        TripFuelInspectionsAlgebra.make[F](tripFuelInspections, trips, users),
+      tripFuelRatesAlgebra = TripFuelRatesAlgebra.make[F](tripFuelRates, trips, users),
       tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
         tripVehicleAcceptances,
         users,
@@ -81,7 +89,7 @@ object Algebras {
       tripDriverTasks = TripDriverTasksAlgebra.make[F](tripDriverTasks, trips),
       lineDelays = LineDelaysAlgebra.make[F](lineDelays, trips),
       completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
-      vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](vehicleHistories)
+      vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](vehicleHistories),
     )
   }
 }

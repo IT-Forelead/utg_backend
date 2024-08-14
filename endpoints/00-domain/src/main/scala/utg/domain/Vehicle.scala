@@ -10,7 +10,6 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import utg.InventoryNumber
-import utg.RegisteredNumber
 import utg.domain.enums._
 
 @JsonCodec
@@ -21,7 +20,7 @@ case class Vehicle(
     branch: Option[Branch],
     vehicleCategory: Option[VehicleCategory],
     brand: NonEmptyString,
-    registeredNumber: Option[RegisteredNumber],
+    registeredNumber: Option[NonEmptyString],
     inventoryNumber: InventoryNumber,
     yearOfRelease: NonNegInt,
     bodyNumber: Option[NonEmptyString],

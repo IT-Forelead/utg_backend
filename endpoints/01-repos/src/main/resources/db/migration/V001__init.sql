@@ -170,7 +170,15 @@ VALUES
   (
     '847f4f8f-0856-4e2a-8838-caab6816f69c',
     'viewer'
-  );
+  ),
+  (
+    'cdffe4e0-ac3b-474a-a4fd-144a5f832943',
+    'main_mechanic'
+  ),
+  (
+    '95fe6cba-7ea4-415e-8faf-500a3199dc14',
+    'refueller'
+  )
 
 INSERT INTO
   "users" (
@@ -318,7 +326,7 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
+CREATE TABLE IF NOT EXISTS trip_given_fuels (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -330,20 +338,31 @@ CREATE TABLE IF NOT EXISTS trip_fuel_expenses (
     CONSTRAINT fk_refueler_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   refueler_signature UUID NULL
     CONSTRAINT fk_refueler_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  fuel_in_tank DOUBLE PRECISION NULL,
-  fuel_remaining DOUBLE PRECISION NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_fuel_inspections (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  action_type VEHICLE_INDICATOR_ACTION_TYPE NOT NULL,
+  fuel_in_tank DOUBLE PRECISION NOT NULL,
+  mechanic_id UUID NOT NULL
+    CONSTRAINT fk_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  mechanic_signature UUID NOT NULL
+    CONSTRAINT fk_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_fuel_rates (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
   norm_change_coeff DOUBLE PRECISION NULL,
   equipment_working_time DOUBLE PRECISION NULL,
   engine_working_time DOUBLE PRECISION NULL,
-  tank_check_mechanic UUID NULL
-    CONSTRAINT fk_tank_check_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  tank_check_mechanic_signature UUID NULL
-    CONSTRAINT fk_tank_check_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  remaining_check_mechanic UUID NULL
-    CONSTRAINT fk_remaining_check_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  remaining_check_mechanic_signature UUID NULL
-    CONSTRAINT fk_remaining_check_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  dispatcher UUID NULL
+  dispatcher_id UUID NULL
     CONSTRAINT fk_dispatcher_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   dispatcher_signature UUID NULL
     CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -417,4 +436,5 @@ CREATE TABLE IF NOT EXISTS vehicle_histories (
     CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
   registered_number VARCHAR NULL UNIQUE
 );
+
 
