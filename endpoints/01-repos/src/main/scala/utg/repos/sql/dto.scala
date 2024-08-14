@@ -17,7 +17,6 @@ import io.scalaland.chimney.dsl._
 import utg._
 import utg.domain
 import utg.domain._
-import utg.domain.args.trips.TripAccompanyingPerson
 import utg.domain.enums._
 
 object dto {
@@ -165,7 +164,7 @@ object dto {
       createdAt: ZonedDateTime,
       startDate: LocalDate,
       endDate: Option[LocalDate],
-      serialNumber: NonEmptyString,
+      serialNumber: Option[NonEmptyString],
       firstTab: Option[NonEmptyString],
       secondTab: Option[NonEmptyString],
       thirdTab: Option[NonEmptyString],

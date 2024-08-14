@@ -20,6 +20,7 @@ trait VehicleCategoriesRepository[F[_]] {
   def get(filters: VehicleCategoryFilters): F[List[dto.VehicleCategory]]
   def update(id: VehicleCategoryId)(update: dto.VehicleCategory => dto.VehicleCategory): F[Unit]
   def findByIds(ids: List[VehicleCategoryId]): F[Map[VehicleCategoryId, VehicleCategory]]
+  def getVehicleCategories: F[List[dto.VehicleCategory]]
 }
 
 object VehicleCategoriesRepository {
@@ -63,5 +64,8 @@ object VehicleCategoriesRepository {
             }.toMap
           }
       }
+
+    override def getVehicleCategories: F[List[dto.VehicleCategory]] =
+      VehicleCategoriesSql.selectVehicleCategories.queryList(Void)
   }
 }
