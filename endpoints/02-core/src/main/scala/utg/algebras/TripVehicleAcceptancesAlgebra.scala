@@ -67,7 +67,7 @@ object TripVehicleAcceptancesAlgebra {
             nonEmptyUserIds =>
               usersRepository.findByIds(nonEmptyUserIds)
           }
-          tripFuelExpenses = dtoTripVehicleAcceptances.map { fe =>
+          tripVehicleAcceptances = dtoTripVehicleAcceptances.map { fe =>
             TripVehicleAcceptance(
               id = fe.id,
               createdAt = fe.createdAt,
@@ -81,6 +81,6 @@ object TripVehicleAcceptancesAlgebra {
               driverSignature = fe.driverSignature,
             )
           }
-        } yield tripFuelExpenses
+        } yield tripVehicleAcceptances
     }
 }
