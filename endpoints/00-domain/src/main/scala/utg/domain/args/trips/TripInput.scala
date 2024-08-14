@@ -15,7 +15,7 @@ import utg.domain.enums.WorkingModeType
 case class TripInput(
     startDate: LocalDate,
     endDate: Option[LocalDate],
-    serialNumber: NonEmptyString,
+    serialNumber: Option[NonEmptyString],
     firstTab: Option[NonEmptyString],
     secondTab: Option[NonEmptyString],
     thirdTab: Option[NonEmptyString],
