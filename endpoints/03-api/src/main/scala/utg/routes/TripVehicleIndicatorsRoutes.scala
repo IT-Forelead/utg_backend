@@ -2,6 +2,7 @@ package utg.routes
 
 import cats.MonadThrow
 import cats.implicits.toFlatMapOps
+import io.circe.refined._
 import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.circe.JsonDecoder
@@ -12,6 +13,7 @@ import uz.scala.http4s.utils.Routes
 import utg.algebras.TripVehicleIndicatorsAlgebra
 import utg.domain.AuthedUser
 import utg.domain.TripId
+import utg.domain.VehicleId
 import utg.domain.args.tripVehicleIndicators.TripVehicleIndicatorInput
 
 final case class TripVehicleIndicatorsRoutes[F[_]: JsonDecoder: MonadThrow](
@@ -27,5 +29,10 @@ final case class TripVehicleIndicatorsRoutes[F[_]: JsonDecoder: MonadThrow](
 
     case GET -> Root / UUIDVar(id) as _ =>
       tripVehicleIndicatorsAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
+
+    case GET -> Root / "last" / UUIDVar(id) as _ =>
+      tripVehicleIndicatorsAlgebra
+        .getLastOdometerIndicatorByVehicleId(id.coerce[VehicleId])
+        .flatMap(Ok(_))
   }
 }

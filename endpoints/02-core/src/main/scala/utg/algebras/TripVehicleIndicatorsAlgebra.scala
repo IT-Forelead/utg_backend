@@ -8,6 +8,7 @@ import eu.timepit.refined.types.numeric.NonNegDouble
 import utg.domain.TripId
 import utg.domain.TripVehicleIndicator
 import utg.domain.TripVehicleIndicatorId
+import utg.domain.VehicleId
 import utg.domain.args.tripVehicleIndicators.TripVehicleIndicatorInput
 import utg.domain.enums.VehicleIndicatorActionType
 import utg.effects.Calendar
@@ -21,6 +22,7 @@ import utg.utils.ID
 trait TripVehicleIndicatorsAlgebra[F[_]] {
   def create(input: TripVehicleIndicatorInput): F[TripVehicleIndicatorId]
   def getByTripId(tripId: TripId): F[List[TripVehicleIndicator]]
+  def getLastOdometerIndicatorByVehicleId(vehicleId: VehicleId): F[Option[NonNegDouble]]
 }
 
 object TripVehicleIndicatorsAlgebra {
@@ -78,5 +80,10 @@ object TripVehicleIndicatorsAlgebra {
             )
           }
         } yield tripVehicleIndicators
+
+      override def getLastOdometerIndicatorByVehicleId(
+          vehicleId: VehicleId
+        ): F[Option[NonNegDouble]] =
+        tripVehicleIndicatorsRepository.getLastOdometerIndicatorByVehicleId(vehicleId)
     }
 }

@@ -1,11 +1,13 @@
 package utg.repos.sql
 
+import eu.timepit.refined.types.all.NonNegDouble
 import skunk._
 import skunk.codec.all.bool
 import skunk.implicits._
 
 import utg.domain.TripId
 import utg.domain.TripVehicleIndicatorId
+import utg.domain.VehicleId
 
 private[repos] object TripVehicleIndicatorsSql extends Sql[TripVehicleIndicatorId] {
   private[repos] val codec: Codec[dto.TripVehicleIndicator] =
@@ -19,4 +21,10 @@ private[repos] object TripVehicleIndicatorsSql extends Sql[TripVehicleIndicatorI
     sql"""SELECT * FROM trip_vehicle_indicators
          WHERE deleted = false AND trip_id = ${TripsSql.id}
          ORDER BY created_at DESC""".query(codec)
+
+  val selectLastOdometerIndicatorByVehicleId: Query[VehicleId, NonNegDouble] =
+    sql"""SELECT odometer_indicator FROM trip_vehicle_indicators
+         WHERE deleted = false AND action_type = 'back'
+         AND deleted = false AND vehicle_id = ${VehiclesSql.id}
+         ORDER BY created_at DESC LIMIT 1""".query(nonNegDouble)
 }
