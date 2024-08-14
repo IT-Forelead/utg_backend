@@ -171,7 +171,7 @@ VALUES
   (
     '95fe6cba-7ea4-415e-8faf-500a3199dc14',
     'refueller'
-  )
+  );
 
 INSERT INTO
   "users" (
