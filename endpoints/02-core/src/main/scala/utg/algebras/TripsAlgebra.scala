@@ -111,6 +111,7 @@ object TripsAlgebra {
             chiefMechanicId = None,
             chiefMechanicSignature = None,
             notes = None,
+            status = input.statusType,
           )
           _ <- tripsRepository.create(dtoTrip)
           _ <- createDrivers(id, input.drivers)
@@ -179,6 +180,7 @@ object TripsAlgebra {
               chiefMechanic = t.chiefMechanicId.flatMap(userById.get),
               chiefMechanicSignature = t.chiefMechanicSignature,
               notes = t.notes,
+              status = t.status,
             )
           }
         } yield dtoTrips.copy(data = trip)
@@ -229,6 +231,7 @@ object TripsAlgebra {
             chiefMechanic = dtoTrip.chiefMechanicId.flatMap(userById.get),
             chiefMechanicSignature = dtoTrip.chiefMechanicSignature,
             notes = dtoTrip.notes,
+            status = dtoTrip.status,
           )
         } yield trip
 

@@ -179,6 +179,7 @@ object dto {
       chiefMechanicId: Option[UserId],
       chiefMechanicSignature: Option[AssetId],
       notes: Option[NonEmptyString],
+      status: StatusType,
       deleted: Boolean = false,
     ) {
     def toDomain(

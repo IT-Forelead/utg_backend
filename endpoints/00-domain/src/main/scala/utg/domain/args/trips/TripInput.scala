@@ -1,15 +1,13 @@
 package utg.domain.args.trips
 
 import java.time.LocalDate
-
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
-
 import utg.domain.UserId
 import utg.domain.VehicleId
-import utg.domain.enums.WorkingModeType
+import utg.domain.enums.{StatusType, WorkingModeType}
 
 @JsonCodec
 case class TripInput(
@@ -26,4 +24,5 @@ case class TripInput(
     trailerId: Option[VehicleId],
     semiTrailerId: Option[VehicleId],
     accompanyingPersons: Option[NonEmptyList[UserId]],
+    statusType: StatusType,
   )
