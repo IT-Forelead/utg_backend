@@ -163,7 +163,15 @@ VALUES
   (
     '847f4f8f-0856-4e2a-8838-caab6816f69c',
     'viewer'
-  );
+  ),
+  (
+    'cdffe4e0-ac3b-474a-a4fd-144a5f832943',
+    'main_mechanic'
+  ),
+  (
+    '95fe6cba-7ea4-415e-8faf-500a3199dc14',
+    'refueller'
+  )
 
 INSERT INTO
   "users" (
@@ -420,4 +428,5 @@ CREATE TABLE IF NOT EXISTS vehicle_histories (
     CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
   registered_number VARCHAR NULL UNIQUE
 );
+
 
