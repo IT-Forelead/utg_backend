@@ -232,6 +232,7 @@ object dto {
       scheduledTime: ZonedDateTime,
       currentDateTime: ZonedDateTime,
       odometerIndicator: NonNegDouble,
+      spentHours: Option[NonNegDouble],
       paidDistance: NonNegDouble,
       deleted: Boolean = false,
     )

@@ -314,6 +314,7 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
   scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
   current_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
   odometer_indicator DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+  spent_hours DOUBLE PRECISION NULL,
   paid_distance DOUBLE PRECISION NOT NULL DEFAULT 0.0,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
