@@ -49,6 +49,7 @@ object TripVehicleIndicatorsAlgebra {
                 scheduledTime = input.scheduledTime,
                 currentDateTime = input.currentDateTime,
                 odometerIndicator = input.odometerIndicator,
+                spentHours = input.spentHours,
                 paidDistance = input.paidDistance.getOrElse(NonNegDouble.unsafeFrom(0d)),
               )
               _ <- tripVehicleIndicatorsRepository.create(dtoTripVehicleIndicator)
@@ -74,6 +75,7 @@ object TripVehicleIndicatorsAlgebra {
               scheduledTime = vi.scheduledTime,
               currentDateTime = vi.currentDateTime,
               odometerIndicator = vi.odometerIndicator,
+              spentHours = vi.spentHours,
               paidDistance = vi.paidDistance,
               isFulledExitAction = isFulledExitAction,
               isFulledBackAction = isFulledBackAction,
