@@ -7,9 +7,7 @@ import cats.implicits._
 import skunk._
 import skunk.codec.all.int8
 import uz.scala.skunk.syntax.all._
-
-import utg.domain.ResponseData
-import utg.domain.TripId
+import utg.domain.{BranchId, ResponseData, TripId}
 import utg.domain.args.trips._
 import utg.exception.AError
 import utg.repos.sql.TripsSql
@@ -17,7 +15,7 @@ import utg.repos.sql.dto
 
 trait TripsRepository[F[_]] {
   def create(trip: dto.Trip): F[Unit]
-  def get(filters: TripFilters): F[ResponseData[dto.Trip]]
+  def get(filters: TripFilters, branchId: BranchId): F[ResponseData[dto.Trip]]
   def findById(id: TripId): F[Option[dto.Trip]]
   def update(id: TripId)(update: dto.Trip => dto.Trip): F[Unit]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
@@ -32,8 +30,8 @@ object TripsRepository {
     override def create(trip: dto.Trip): F[Unit] =
       TripsSql.insert.execute(trip)
 
-    override def get(filters: TripFilters): F[ResponseData[dto.Trip]] = {
-      val af = TripsSql.get(filters).paginateOpt(filters.limit, filters.offset)
+    override def get(filters: TripFilters, branchId: BranchId): F[ResponseData[dto.Trip]] = {
+      val af = TripsSql.get(filters, branchId).paginateOpt(filters.limit, filters.offset)
       af.fragment
         .query(TripsSql.codec *: int8)
         .queryList(af.argument)

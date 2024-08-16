@@ -75,7 +75,7 @@ object Algebras {
       branches = BranchesAlgebra.make[F](branches, regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](vehicleCategories),
       vehicles = VehiclesAlgebra.make[F](vehicles),
-      trips = TripsAlgebra.make[F](trips, tripDrivers, tripAccompanyingPersons, users, vehicles),
+      trips = TripsAlgebra.make[F](trips, tripDrivers, tripAccompanyingPersons, users, vehicles, branches),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](tripVehicleIndicators, trips),
       tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](tripGivenFuels, trips, users),
       tripFuelInspectionsAlgebra =

@@ -4,24 +4,19 @@ import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.implicits._
-
 import utg.domain.AuthedUser.User
 import utg.domain._
 import utg.domain.args.trips._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
-import utg.repos.TripAccompanyingPersonsRepository
-import utg.repos.TripDriversRepository
-import utg.repos.TripsRepository
-import utg.repos.UsersRepository
-import utg.repos.VehiclesRepository
+import utg.repos.{BranchesRepository, TripAccompanyingPersonsRepository, TripDriversRepository, TripsRepository, UsersRepository, VehiclesRepository}
 import utg.repos.sql.dto
 import utg.utils.ID
 
 trait TripsAlgebra[F[_]] {
-  def create(input: TripInput): F[TripId]
-  def get(filters: TripFilters): F[ResponseData[Trip]]
+  def create(input: TripInput, branchId: BranchId): F[TripId]
+  def get(filters: TripFilters, branch: Branch): F[ResponseData[Trip]]
   def findById(id: TripId): F[Option[Trip]]
   def update(input: UpdateTripInput): F[Unit]
   def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
@@ -35,6 +30,7 @@ object TripsAlgebra {
       tripAccompanyingPersonsRepository: TripAccompanyingPersonsRepository[F],
       usersRepository: UsersRepository[F],
       vehicleRepository: VehiclesRepository[F],
+      branchesRepository: BranchesRepository[F],
     ): TripsAlgebra[F] =
     new TripsAlgebra[F] {
       private def makeApproachingPersons(
@@ -118,7 +114,7 @@ object TripsAlgebra {
           }
         } yield ()
 
-      override def create(input: TripInput): F[TripId] =
+      override def create(input: TripInput, branchId: BranchId): F[TripId] =
         for {
           id <- ID.make[F, TripId]
           now <- Calendar[F].currentZonedDateTime
@@ -142,6 +138,7 @@ object TripsAlgebra {
             chiefMechanicId = None,
             chiefMechanicSignature = None,
             notes = None,
+            branchId = branchId,
           )
           _ <- tripsRepository.create(dtoTrip)
           _ <- createDrivers(id, input.drivers)
@@ -150,9 +147,9 @@ object TripsAlgebra {
           }
         } yield id
 
-      override def get(filters: TripFilters): F[ResponseData[Trip]] =
+      override def get(filters: TripFilters, branch: Branch): F[ResponseData[Trip]] =
         for {
-          dtoTrips <- tripsRepository.get(filters)
+          dtoTrips <- tripsRepository.get(filters, branch.id)
           accompanyingByTripId <- NonEmptyList
             .fromList(dtoTrips.data.map(_.id))
             .fold(Map.empty[TripId, List[dto.TripAccompanyingPerson]].pure[F]) { vehicleIds =>
@@ -210,6 +207,7 @@ object TripsAlgebra {
               chiefMechanic = t.chiefMechanicId.flatMap(userById.get),
               chiefMechanicSignature = t.chiefMechanicSignature,
               notes = t.notes,
+              branch = branch,
             )
           }
         } yield dtoTrips.copy(data = trip)
@@ -233,6 +231,7 @@ object TripsAlgebra {
             .toList
             .distinct
           vehicles <- vehicleRepository.findByIds(vehicleIds)
+          branches <- branchesRepository.findByIds(List(dtoTrip.branchId))
           accompanyingUsers = accompanyingByTripId
             .get(dtoTrip.id)
             .map(_.flatMap { ap =>
@@ -260,6 +259,7 @@ object TripsAlgebra {
             chiefMechanic = dtoTrip.chiefMechanicId.flatMap(userById.get),
             chiefMechanicSignature = dtoTrip.chiefMechanicSignature,
             notes = dtoTrip.notes,
+            branch = branches(dtoTrip.branchId)
           )
         } yield trip
 

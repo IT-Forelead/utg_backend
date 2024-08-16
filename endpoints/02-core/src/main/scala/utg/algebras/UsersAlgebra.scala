@@ -75,7 +75,7 @@ object UsersAlgebra {
             roleId = userInput.roleId,
             phone = userInput.phone,
             assetId = None,
-            branchCode = Option(userInput.branchCode),
+            branchCode = userInput.branchCode,
             drivingLicenseNumber = userInput.drivingLicenseNumber,
             drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
           )

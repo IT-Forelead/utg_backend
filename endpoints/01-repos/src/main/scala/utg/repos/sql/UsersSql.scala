@@ -15,7 +15,7 @@ import utg.domain.auth.AccessCredentials
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
     (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt *: phone *: RolesSql.id
-      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt)
+      *: AssetsSql.id.opt *: nes *: nes.opt *: drivingLicenseCategories.opt)
       .to[dto.User]
 
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
@@ -43,7 +43,7 @@ private[repos] object UsersSql extends Sql[UserId] {
   val insert: Command[AccessCredentials[dto.User]] =
     sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, ${nes.opt}, $nonNegInt, $phone, ${RolesSql.id}, ${AssetsSql
         .id
-        .opt}, ${nes.opt}, ${nes.opt}, ${drivingLicenseCategories.opt}, $passwordHash)"""
+        .opt}, $nes, ${nes.opt}, ${drivingLicenseCategories.opt}, $passwordHash)"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
@@ -61,7 +61,7 @@ private[repos] object UsersSql extends Sql[UserId] {
        phone = $phone,
        role_id = ${RolesSql.id},
        asset_id = ${AssetsSql.id.opt},
-       branch_code = ${nes.opt},
+       branch_code = $nes,
        driving_license_number = ${nes.opt},
        driving_license_categories = ${drivingLicenseCategories.opt}
        WHERE id = $id

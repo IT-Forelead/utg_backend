@@ -1,12 +1,12 @@
 package utg.repos.sql
 
+import cats.implicits.catsSyntaxOptionId
 import skunk._
 import skunk.codec.all.bool
 import skunk.codec.all.date
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
-
-import utg.domain.TripId
+import utg.domain.{BranchId, TripId}
 import utg.domain.args.trips._
 
 private[repos] object TripsSql extends Sql[TripId] {
@@ -14,7 +14,7 @@ private[repos] object TripsSql extends Sql[TripId] {
     (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType
       *: nes.opt *: VehiclesSql.id *: VehiclesSql.id.opt *: VehiclesSql.id.opt
       *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt *: UsersSql.id.opt
-      *: AssetsSql.id.opt *: nes.opt *: bool).to[dto.Trip]
+      *: AssetsSql.id.opt *: nes.opt *: BranchesSql.id *: bool).to[dto.Trip]
 
   val insert: Command[dto.Trip] =
     sql"""INSERT INTO trips VALUES ($codec)""".command
@@ -22,8 +22,9 @@ private[repos] object TripsSql extends Sql[TripId] {
   val findById: Query[TripId, dto.Trip] =
     sql"""SELECT * FROM trips WHERE deleted = false AND id = $id""".query(codec)
 
-  def get(filters: TripFilters): AppliedFragment = {
+  def get(filters: TripFilters, branchId: BranchId): AppliedFragment = {
     val searchFilters = List(
+      branchId.some.map(sql"branch_id = ${BranchesSql.id}"),
       filters.workingMode.map(sql"working_mode = $workingModeType"),
       filters.vehicleId.map(sql"vehicle_id = ${VehiclesSql.id}"),
       filters.driverId.map(sql"driver_id = ${UsersSql.id}"),
@@ -56,7 +57,8 @@ private[repos] object TripsSql extends Sql[TripId] {
        fuel_supply = ${nonNegDouble.opt},
        chief_mechanic_id = ${UsersSql.id.opt},
        chief_mechanic_signature = ${AssetsSql.id.opt},
-       notes = ${nes.opt}
+       notes = ${nes.opt},
+       branch_id = ${BranchesSql.id}
        WHERE id = $id
      """
       .command
@@ -65,7 +67,7 @@ private[repos] object TripsSql extends Sql[TripId] {
           trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *:
             trip.thirdTab *: trip.workingMode *: trip.summation *: trip.vehicleId *: trip.trailerId *:
             trip.semiTrailerId *: trip.doctorId *: trip.doctorSignature *: trip.fuelSupply *:
-            trip.chiefMechanicId *: trip.chiefMechanicSignature *: trip.notes *: trip.id *: EmptyTuple
+            trip.chiefMechanicId *: trip.chiefMechanicSignature *: trip.notes *: trip.branchId *: trip.id *: EmptyTuple
       }
 
   val updateDoctorApprovalSql: Command[TripDoctorApprovalInput] =

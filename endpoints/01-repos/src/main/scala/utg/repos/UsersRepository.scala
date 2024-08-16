@@ -69,16 +69,16 @@ object UsersRepository {
             )
           }
         }
-        branch <- userDto.branchCode.flatTraverse { branchCode =>
+        branch <-
           (for {
-            branch <- OptionT(BranchesSql.findByCode.queryOption(branchCode))
+            branch <- OptionT(BranchesSql.findByCode.queryOption(userDto.branchCode))
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
-        }
+
         drivingLicenseCategories =
           userDto.drivingLicenseCategories.flatMap(NonEmptyList.fromList)
       } yield optRole.map { role =>
-        userDto.toDomain(role, branch, drivingLicenseCategories)
+        userDto.toDomain(role, branch.get, drivingLicenseCategories)
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
@@ -93,7 +93,7 @@ object UsersRepository {
             .queryList(rIds)
             .map(_.map(r => r.head -> r.tail).toMap)
         }
-        codes = NonEmptyList.fromList(dtos.flatMap(_.branchCode))
+        codes = NonEmptyList.fromList(dtos.map(_.branchCode))
         branchByCode <- codes.fold(Map.empty[NonEmptyString, dto.Branch].pure[F]) { branches =>
           val branchesList = branches.toList
           BranchesSql
@@ -112,9 +112,8 @@ object UsersRepository {
       } yield dtos.flatMap { userDto =>
         val roleOpt = roles.get(userDto.roleId)
         roleOpt.map { role =>
-          val maybeBranch = userDto
-            .branchCode
-            .flatMap(branchByCode.get)
+          val maybeBranch = branchByCode.get(userDto
+            .branchCode)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
           val privelegies = roleOpt.flatMap(_.tail.head).toList
           val drivingLicenseCategories =
@@ -125,7 +124,7 @@ object UsersRepository {
               name = role.head,
               privileges = privelegies,
             ),
-            maybeBranch,
+            maybeBranch.get,
             drivingLicenseCategories,
           )
         }

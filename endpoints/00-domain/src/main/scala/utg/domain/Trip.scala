@@ -34,4 +34,5 @@ case class Trip(
     chiefMechanic: Option[User],
     chiefMechanicSignature: Option[AssetId],
     notes: Option[NonEmptyString],
+    branch: Branch,
   )

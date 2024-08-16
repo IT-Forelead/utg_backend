@@ -30,13 +30,13 @@ object dto {
       phone: Phone,
       roleId: RoleId,
       assetId: Option[AssetId],
-      branchCode: Option[NonEmptyString],
+      branchCode: NonEmptyString,
       drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
     ) {
     def toDomain(
         role: domain.Role,
-        branch: Option[utg.domain.Branch],
+        branch: utg.domain.Branch,
         drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
       ): AuthedUser.User =
       this
@@ -64,7 +64,7 @@ object dto {
       user
         .into[User]
         .withFieldConst(_.roleId, user.role.id)
-        .withFieldConst(_.branchCode, user.branch.map(_.code))
+        .withFieldConst(_.branchCode, user.branch.code)
         .withFieldConst(_.drivingLicenseCategories, user.drivingLicenseCategories.map(_.toList))
         .transform
 
@@ -179,6 +179,7 @@ object dto {
       chiefMechanicId: Option[UserId],
       chiefMechanicSignature: Option[AssetId],
       notes: Option[NonEmptyString],
+      branchId: BranchId,
       deleted: Boolean = false,
     ) {
     def toDomain(
@@ -189,10 +190,12 @@ object dto {
         accompanyingPersons: Option[List[AuthedUser.User]],
         doctor: Option[AuthedUser.User],
         chiefMechanic: Option[AuthedUser.User],
+        branch: domain.Branch,
       ): domain.Trip =
       this
         .into[domain.Trip]
         .withFieldConst(_.vehicle, vehicle)
+        .withFieldConst(_.branch, branch)
         .withFieldConst(_.drivers, drivers)
         .withFieldConst(_.trailer, trailer)
         .withFieldConst(_.semiTrailer, semiTrailer)

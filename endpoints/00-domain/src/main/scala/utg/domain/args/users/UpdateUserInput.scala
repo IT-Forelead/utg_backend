@@ -19,7 +19,7 @@ case class UpdateUserInput(
     middleName: Option[NonEmptyString],
     personalNumber: NonNegInt,
     phone: Phone,
-    branchCode: Option[String],
+    branchCode: String,
     roleId: RoleId,
     drivingLicenseNumber: Option[NonEmptyString],
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],

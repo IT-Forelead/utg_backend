@@ -68,9 +68,9 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
       |""".stripMargin
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
-    case ar @ POST -> Root / "create" as _ =>
+    case ar @ POST -> Root / "create" as user =>
       ar.req.decodeR[TripInput] { create =>
-        tripsAlgebra.create(create).flatMap(Created(_))
+        tripsAlgebra.create(create, user.branch.id).flatMap(Created(_))
       }
 
     case ar @ POST -> Root / "edit" as _ =>
@@ -92,9 +92,9 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
         ) >> NoContent()
       }
 
-    case ar @ POST -> Root as _ =>
+    case ar @ POST -> Root as user =>
       ar.req.decodeR[TripFilters] { filters =>
-        tripsAlgebra.get(filters).flatMap(Ok(_))
+        tripsAlgebra.get(filters, user.branch).flatMap(Ok(_))
       }
   }
 

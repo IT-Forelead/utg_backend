@@ -24,6 +24,7 @@ sealed trait AuthedUser {
   val fullName: NonEmptyString
   val assetId: Option[AssetId]
   def access(privilege: Privilege): Boolean
+  val branch: Branch
 }
 
 object AuthedUser {
@@ -38,7 +39,7 @@ object AuthedUser {
       role: Role,
       phone: Phone,
       assetId: Option[AssetId],
-      branch: Option[Branch],
+      branch: Branch,
       drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
     ) extends AuthedUser {

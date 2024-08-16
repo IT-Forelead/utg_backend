@@ -117,6 +117,9 @@ CREATE TABLE IF NOT EXISTS branches (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
+INSERT INTO "branches" ("id", "name", "code", "region_id")
+VALUES ('4eefbd63-71c3-4a33-9f04-709ec5d8dd2c', 'Ургенчское УМГ', '3bblyb', 'ad514b71-3096-4be5-a455-d87abbb081b2');
+
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -127,7 +130,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone VARCHAR NOT NULL UNIQUE,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  branch_code VARCHAR NULL,
+  branch_code VARCHAR NOT NULL,
   driving_license_number VARCHAR NULL UNIQUE,
   driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
   password VARCHAR NOT NULL
@@ -194,7 +197,7 @@ VALUES
     1,
     '+998901234567',
     '7aa5ba51-5f32-4123-b88c-aca7c8e7b033',
-    null,
+    '3bblyb',
     '$s0$e0801$5JK3Ogs35C2h5htbXQoeEQ==$N7HgNieSnOajn1FuEB7l4PhC6puBSq+e1E8WUaSJcGY='
   );
 
@@ -285,6 +288,8 @@ CREATE TABLE IF NOT EXISTS trips (
   chief_mechanic_signature UUID NULL
     CONSTRAINT fk_chief_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   notes VARCHAR NULL,
+  branch_id UUID NULL
+    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
