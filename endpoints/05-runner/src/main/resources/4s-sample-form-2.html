@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4S namuna oldi</title>
+    <style>
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+          font-size: 14px;
+        }
+
+        .text-xs {
+          font-size: 12px;
+        }
+
+        .inline-block {
+          display: inline-block;
+        }
+
+        .w-10 {
+          width: 10%;
+        }
+
+        .w-15 {
+          width: 15%;
+        }
+
+        .w-20 {
+          width: 20%;
+        }
+
+        .w-25 {
+          width: 25%;
+        }
+
+        .w-30 {
+          width: 30%;
+        }
+
+        .w-35 {
+          width: 35%;
+        }
+
+        .w-40 {
+          width: 40%;
+        }
+
+        .w-45 {
+          width: 45%;
+        }
+
+        .w-50 {
+          width: 50%;
+        }
+
+        .w-55 {
+          width: 55%;
+        }
+
+        .w-60 {
+          width: 60%;
+        }
+
+        .w-65 {
+          width: 65%;
+        }
+
+        .w-70 {
+          width: 70%;
+        }
+
+        .w-75 {
+          width: 75%;
+        }
+
+        .w-80 {
+          width: 80%;
+        }
+
+        .w-85 {
+          width: 85%;
+        }
+
+        .w-90 {
+          width: 90%;
+        }
+
+        .w-95 {
+          width: 95%;
+        }
+
+        .w-full {
+          width: 100%;
+        }
+
+        .h-24 {
+          height: 24px;
+        }
+
+        .h-32 {
+          height: 32px;
+        }
+
+        .grid {
+          display: grid;
+        }
+
+        .grid-rows-3 {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .grid-rows-6 {
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+
+        .grid-rows-12 {
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .gap-10 {
+          gap: 10px;
+        }
+
+        .gap-20 {
+          gap: 20px;
+        }
+
+        .gap-x-10 {
+          column-gap: 10px;
+        }
+
+        .gap-y-20 {
+          row-gap: 20px;
+        }
+
+        .col-span-1 {
+          grid-column: span 1 / span 1;
+        }
+
+        .col-span-2 {
+          grid-column: span 2 / span 2;
+        }
+
+        .col-span-3 {
+          grid-column: span 3 / span 3;
+        }
+
+        .col-span-4 {
+          grid-column: span 4 / span 4;
+        }
+
+        .col-span-5 {
+          grid-column: span 5 / span 5;
+        }
+
+        .col-span-6 {
+          grid-column: span 6 / span 6;
+        }
+
+        .col-span-7 {
+          grid-column: span 7 / span 7;
+        }
+
+        .col-span-8 {
+          grid-column: span 8 / span 8;
+        }
+
+        .col-span-9 {
+          grid-column: span 9 / span 9;
+        }
+
+        .col-span-10 {
+          grid-column: span 10 / span 10;
+        }
+
+        .col-span-11 {
+          grid-column: span 11 / span 11;
+        }
+
+        .col-span-12 {
+          grid-column: span 12 / span 12;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        td {
+          border: 1px solid black;
+          text-align: center;
+          padding: 2px;
+        }
+
+        .td-h-default {
+          height: 16px;
+        }
+
+        .font-bold {
+          font-weight: bold;
+        }
+
+        .text-right {
+          text-align: right;
+        }
+
+        .border-none {
+          border: none;
+        }
+
+        .letter-spacing-2 {
+          letter-spacing: 2px;
+        }
+
+        .mt-2 {
+          margin-top: 2px;
+        }
+
+        .mt-4 {
+          margin-top: 4px;
+        }
+
+        .mt-10 {
+          margin-top: 10px;
+        }
+
+        .mt-16 {
+          margin-top: 16px;
+        }
+
+        .mt-20 {
+          margin-top: 20px;
+        }
+
+        .a4-page {
+          width: 297mm;
+          height: 210mm;
+          background-color: white;
+          padding: 5mm;
+          box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+          box-sizing: border-box;
+        }
+
+        /* Print uchun maxsus o'lchamlar */
+        @media print {
+          body {
+            padding: 0;
+            margin: 0;
+            display: block;
+          }
+
+          .a4-page {
+            width: 297mm;
+            height: 210mm;
+            box-shadow: none;
+            margin: 0;
+            page-break-before: always;
+          }
+        }
+
+        .text-center {
+          text-align: center;
+        }
+
+        .flex {
+          display: flex;
+        }
+
+        .items-center {
+          align-items: center;
+        }
+
+        .items-end {
+          align-items: flex-end;
+        }
+
+        .justify-start {
+          justify-content: start;
+        }
+
+        .justify-center {
+          justify-content: center;
+        }
+
+        .justify-end {
+          justify-content: flex-end;
+        }
+
+        .justify-between {
+          justify-content: space-between;
+        }
+
+        .justify-around {
+          justify-content: space-around;
+        }
+
+        .border-line {
+          border-bottom: 1px solid #000;
+        }
+
+        .px-4 {
+          padding-left: 4px;
+          padding-right: 4px;
+        }
+
+        .px-20 {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        .mr-4 {
+          margin-right: 4px;
+        }
+
+        .uppercase {
+          text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+<div class="a4-page">
+    <div class="grid grid-rows-12 gap-20">
+        <div class="col-span-6">
+            <table>
+                <thead>
+                <tr>
+                    <td colspan="4" class="letter-spacing-2 uppercase">Topshiriqni bajarish izchilligi</td>
+                </tr>
+                <tr>
+                    <td>Qatnovlar raqamlari</td>
+                    <td class="w-40">Ilova qilingan tovar-transport yukxatlari raqamlari</td>
+                    <td>Kelish vaqti, soat, daqiqa</td>
+                    <td>Yuk jo'natuvchining imzosi va muhri</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="text-xs">
+                    <td>23</td>
+                    <td>24</td>
+                    <td>25</td>
+                    <td>26</td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="h-32"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="grid grid-rows-6 gap-10 mt-10">
+                <div class="col-span-2">
+                    <div class="flex items-center justify-center h-24  w-40" style="border: 2px solid black;"></div>
+                </div>
+                <div class="col-span-2 flex items-center">
+                    <div class="inline-block mr-4">Yukxati soni</div>
+                    <div class="flex items-center justify-center h-24  w-50" style="border: 2px solid black;"></div>
+                </div>
+                <div class="col-span-2">
+                    <div class="flex items-end">
+                        <div class="border-line w-70 mr-4"></div>
+                        <div class="inline-block">ta</div>
+                    </div>
+                    <div class="flex items-center justify-around">
+                        <div class="text-xs text-center">(yozuv bilan)</div>
+                        <div></div>
+                    </div>
+                </div>
+                <div class="col-span-3">
+                    <div class="flex w-full">
+                        <div class="inline-block mr-4">Topshirdim haydovchi</div>
+                        <div class="border-line w-50"></div>
+                    </div>
+                    <div class="flex items-center justify-around text-xs">
+                        <div></div>
+                        <div>imzo</div>
+                    </div>
+                </div>
+                <div class="col-span-3">
+                    <div class="flex w-full">
+                        <div class="inline-block mr-4">Qabul qildim dispecher</div>
+                        <div class="border-line w-45"></div>
+                    </div>
+                    <div class="flex items-center justify-around text-xs">
+                        <div></div>
+                        <div>imzo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-6">
+            <table>
+                <thead>
+                <tr>
+                    <td colspan="5" class="letter-spacing-2 uppercase">Yo'nalishda turib qolishlar</td>
+                </tr>
+                <tr>
+                    <td rowspan="2" class="w-40">Nomi</td>
+                    <td colspan="2">Sana va vaqti</td>
+                    <td rowspan="2" class="w-20">Masul hodim imzosi va muxri</td>
+                </tr>
+                <tr>
+                    <td>Boshlanish</td>
+                    <td>Tugallash</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="text-xs">
+                    <td>27</td>
+                    <td>28</td>
+                    <td>29</td>
+                    <td>30</td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="mt-10">
+                <div class="flex w-full">
+                    <div class="inline-block mr-4">Taksirovka</div>
+                    <div class="border-line w-90"></div>
+                </div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-full td-h-default mt-2"></div>
+                <div class="border-line w-60 td-h-default mt-2"></div>
+            </div>
+        </div>
+        <div class="col-span-12">
+            <table>
+                <thead>
+                <tr>
+                    <td colspan="15" class="letter-spacing-2 uppercase">Avtobomilning ish natijalari</td>
+                    <td colspan="2">Ish haqi</td>
+                </tr>
+                <tr>
+                    <td rowspan="2" colspan="2">Yonilg'i sarfi (litr, m.kub)</td>
+                    <td colspan="6">Naryaddagi vaqt, soat, daqiqa</td>
+                    <td rowspan="4">Yuk bilan qatnashlar soni</td>
+                    <td rowspan="2" colspan="2">Bosib o'tilgan masofa, km</td>
+                    <td rowspan="2" colspan="2">Tashilgan yuk hajmi, tonnada</td>
+                    <td rowspan="2" colspan="2">Bajarilgan tkm</td>
+                    <td rowspan="2">Kod</td>
+                    <td rowspan="2">Summa</td>
+                </tr>
+                <tr>
+                    <td rowspan="3">jami</td>
+                    <td rowspan="3">harakatda</td>
+                    <td colspan="4">Turib qolish</td>
+                </tr>
+                <tr>
+                    <td rowspan="2">norma bo'yicha</td>
+                    <td rowspan="2">amalda</td>
+                    <td rowspan="2">jami</td>
+                    <td colspan="2">ortish va tushirishda</td>
+                    <td rowspan="2">texnik nosozlik bo'yicha</td>
+                    <td rowspan="2">jami</td>
+                    <td rowspan="2">shu jumladan yuk bilan</td>
+                    <td rowspan="2">jami</td>
+                    <td rowspan="2">shu jumladan tirkama bilan</td>
+                    <td rowspan="2">jami</td>
+                    <td rowspan="2">shu jumladan tirkama bilan</td>
+                    <td>46</td>
+                    <td>47</td>
+                </tr>
+                <tr>
+                    <td>jami</td>
+                    <td>normativdan ortiqcha</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="text-xs">
+                    <td>31</td>
+                    <td>32</td>
+                    <td>33</td>
+                    <td>34</td>
+                    <td>35</td>
+                    <td>36</td>
+                    <td>37</td>
+                    <td>38</td>
+                    <td>39</td>
+                    <td>40</td>
+                    <td>41</td>
+                    <td>42</td>
+                    <td>43</td>
+                    <td>44</td>
+                    <td>45</td>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td rowspan="3"></td>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="td-h-default"></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-span-12 flex items-center">
+            <div class="inline-block w-10">Rusmlar kodi:</div>
+            <div class="flex items-center justify-around w-90">
+                <div class="flex items-center w-20">
+                    <div class="inline-block mr-4">Avtomobil</div>
+                    <div class="flex items-center justify-center h-24 w-50" style="border: 2px solid black;"></div>
+                </div>
+                <div class="flex items-center w-20">
+                    <div class="inline-block mr-4">Tirkama</div>
+                    <div class="flex items-center justify-center h-24 w-50" style="border: 2px solid black;"></div>
+                </div>
+                <div class="flex items-center w-20">
+                    <div class="inline-block mr-4">Yarim tirkama</div>
+                    <div class="flex items-center justify-center h-24 w-50" style="border: 2px solid black;"></div>
+                </div>
+                <div class="flex items-center w-30">
+                    <div class="inline-block mr-4">Avtomobil - kun ichida</div>
+                    <div class="flex items-center justify-center h-24 w-50" style="border: 2px solid black;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
