@@ -308,20 +308,6 @@ object dto {
       this.transformInto[domain.TripDriverTask]
   }
 
-  case class LineDelay(
-      id: LineDelayId,
-      createdAt: ZonedDateTime,
-      tripId: TripId,
-      name: NonEmptyString,
-      startTime: ZonedDateTime,
-      endTime: ZonedDateTime,
-      signId: SignId,
-      deleted: Boolean = false,
-    ) {
-    def toDomain: domain.LineDelay =
-      this.transformInto[domain.LineDelay]
-  }
-
   case class TripRouteDelay(
       id: TripRouteDelayId,
       createdAt: ZonedDateTime,
