@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="uz">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4S namuna oldi</title>
+    <title>4S namunaviy shakl (oldi)</title>
     <style>
         body {
           display: flex;
@@ -226,32 +225,6 @@
           margin-top: 20px;
         }
 
-        .a4-page {
-          width: 297mm;
-          height: 210mm;
-          background-color: white;
-          padding: 5mm;
-          box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
-          box-sizing: border-box;
-        }
-
-        /* Print uchun maxsus o'lchamlar */
-        @media print {
-          body {
-            padding: 0;
-            margin: 0;
-            display: block;
-          }
-
-          .a4-page {
-            width: 297mm;
-            height: 210mm;
-            box-shadow: none;
-            margin: 0;
-            page-break-before: always;
-          }
-        }
-
         .text-center {
           text-align: center;
         }
@@ -308,6 +281,32 @@
 
         .uppercase {
           text-transform: uppercase;
+        }
+
+        .a4-page {
+          width: 297mm;
+          height: 210mm;
+          background-color: white;
+          padding: 5mm;
+          box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+          box-sizing: border-box;
+        }
+
+        /* Print uchun maxsus o'lchamlar */
+        @media print {
+          body {
+            padding: 0;
+            margin: 0;
+            display: block;
+          }
+
+          .a4-page {
+            width: 297mm;
+            height: 210mm;
+            box-shadow: none;
+            margin: 0;
+            page-break-before: always;
+          }
         }
     </style>
 </head>
@@ -458,14 +457,14 @@
             <table class="mb-10">
                 <tr>
                     <td rowspan="2">Operatsiya</td>
-                    <td colspan="2">Жадвал бўйича вақт</td>
-                    <td rowspan="2">Нольик масофа, км</td>
-                    <td rowspan="2">Спидометр кўрсатгичлари</td>
-                    <td rowspan="2">Амалга оширилган вақт (кун, ой, соат, дақиқа..)</td>
+                    <td colspan="2">Jadval bo'yicha vaqt</td>
+                    <td rowspan="2">Nollik masofa, km</td>
+                    <td rowspan="2">Spidometr ko‘rsatgichlari</td>
+                    <td rowspan="2">Amalga oshirilgan vaqt (kun, oy, soat, daqiqa)</td>
                 </tr>
                 <tr>
-                    <td>Соат</td>
-                    <td>Дақиқа</td>
+                    <td>Soat</td>
+                    <td>Daqiqa</td>
                 </tr>
                 <tr class="text-xs">
                     <td>1</td>
@@ -476,7 +475,7 @@
                     <td>6</td>
                 </tr>
                 <tr>
-                    <td>Гараждан чиқиш</td>
+                    <td>Garajdan chiqish</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -484,7 +483,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td>Гаражга қайтиш</td>
+                    <td>Garajga qaytish</td>
                     <td></td>
                     <td></td>
                     <td></td>
