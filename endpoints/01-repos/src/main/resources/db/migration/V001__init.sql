@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   branch_id UUID NOT NULL
     CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
   vehicle_category_id UUID NOT NULL
-    CONSTRAINT fk_vehicle_category REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_vehicle_category_id REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
   vehicle_type VEHICLE_TYPE NOT NULL,
   brand VARCHAR NOT NULL,
   registered_number VARCHAR NULL UNIQUE,
@@ -309,7 +309,7 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   action_type VEHICLE_INDICATOR_ACTION_TYPE NOT NULL,
   scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
   current_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -377,14 +377,17 @@ CREATE TABLE IF NOT EXISTS trip_driver_tasks (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE TABLE IF NOT EXISTS trip_line_delays (
+CREATE TABLE IF NOT EXISTS trip_route_delays (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
   name VARCHAR NOT NULL,
   start_time TIMESTAMP WITH TIME ZONE NOT NULL,
   end_time TIMESTAMP WITH TIME ZONE NOT NULL,
-  sign_id UUID NOT NULL,
+  user_id UUID NOT NULL
+    CONSTRAINT fk_user_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  user_signature UUID NOT NULL
+    CONSTRAINT fk_user_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
@@ -404,7 +407,7 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_acceptances (
   driver_id UUID NULL
     CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   driver_signature UUID NULL
-    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_driver_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 

@@ -4,6 +4,7 @@ import java.io.StringWriter
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
 import cats.data.NonEmptyList
 import cats.effect.Concurrent
 import cats.effect.Sync
@@ -14,6 +15,7 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import fs2.text.utf8
 import io.scalaland.chimney.dsl._
+
 import utg._
 import utg.domain
 import utg.domain._
@@ -319,6 +321,18 @@ object dto {
     def toDomain: domain.LineDelay =
       this.transformInto[domain.LineDelay]
   }
+
+  case class TripRouteDelay(
+      id: TripRouteDelayId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      name: NonEmptyString,
+      startTime: ZonedDateTime,
+      endTime: ZonedDateTime,
+      userId: UserId,
+      userSignature: AssetId,
+      deleted: Boolean = false,
+    )
 
   case class CompleteTask(
       id: CompleteTaskId,
