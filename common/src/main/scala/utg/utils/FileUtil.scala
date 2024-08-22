@@ -1,14 +1,16 @@
 package utg.utils
 
-import java.io.{InputStream, InputStreamReader}
+import java.io.InputStream
+import java.io.InputStreamReader
+
 import scala.jdk.CollectionConverters._
+
 import com.github.tototoshi.csv.CSVReader
 import com.github.tototoshi.csv.DefaultCSVFormat
 import org.apache.poi.EncryptedDocumentException
 import org.apache.poi.ss.usermodel._
 
 object FileUtil {
-
   def parseCsvOrXlsInputStream(
       is: InputStream,
       fileName: String,

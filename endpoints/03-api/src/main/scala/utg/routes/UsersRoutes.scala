@@ -1,6 +1,7 @@
 package utg.routes
 
 import java.io.InputStream
+
 import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
@@ -24,9 +25,11 @@ import uz.scala.http4s.syntax.all.http4SyntaxPartOps
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
 import uz.scala.syntax.refined._
+
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
-import utg.domain.{AuthedUser, UserId}
+import utg.domain.AuthedUser
+import utg.domain.UserId
 import utg.domain.args.users.CreateRoleInput
 import utg.domain.args.users.UpdateUserInput
 import utg.domain.args.users.UserFilters
@@ -70,11 +73,11 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
             matrix
               .tail
               .traverse_ { row =>
-                val listCategories = if (row(8).trim.isEmpty) {
-                  List.empty[String]
-                } else {
-                  row(8).trim.split(",").map(_.trim).toList
-                }
+                val listCategories =
+                  if (row(8).trim.isEmpty)
+                    List.empty[String]
+                  else
+                    row(8).trim.split(",").map(_.trim).toList
                 val makePrettyLicense = NonEmptyList.fromList(
                   listCategories.map(DrivingLicenseCategory.withName)
                 )

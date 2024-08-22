@@ -33,7 +33,6 @@ case class Algebras[F[_]](
     tripRouteDelaysAlgebra: TripRouteDelaysAlgebra[F],
     tripCompleteTasksAlgebra: TripCompleteTasksAlgebra[F],
     tripCompleteTaskAcceptancesAlgebra: TripCompleteTaskAcceptancesAlgebra[F],
-    completeTasksAlgebra: CompleteTasksAlgebra[F],
     vehicleHistoriesAlgebra: VehicleHistoriesAlgebra[F],
   )
 
@@ -66,7 +65,6 @@ object Algebras {
       tripRouteDelays,
       tripCompleteTasks,
       tripCompleteTaskAcceptances,
-      completeTasks,
       vehicleHistories,
     ) = repositories
     val assetsAlgebra = AssetsAlgebra.make[F](assets, s3Client)
@@ -95,7 +93,6 @@ object Algebras {
       tripCompleteTasksAlgebra = TripCompleteTasksAlgebra.make[F](tripCompleteTasks, trips, users),
       tripCompleteTaskAcceptancesAlgebra =
         TripCompleteTaskAcceptancesAlgebra.make[F](tripCompleteTaskAcceptances, trips, users),
-      completeTasksAlgebra = CompleteTasksAlgebra.make[F](completeTasks, trips),
       vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](vehicleHistories),
     )
   }

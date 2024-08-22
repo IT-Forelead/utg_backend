@@ -348,21 +348,6 @@ object dto {
       deleted: Boolean = false,
     )
 
-  case class CompleteTask(
-      id: CompleteTaskId,
-      createdAt: ZonedDateTime,
-      tripId: TripId,
-      tripNumber: Option[NonEmptyString],
-      invoiceNumber: Option[NonEmptyString],
-      arrivalTime: Option[ZonedDateTime],
-      consignorSignId: Option[ConsignorSignId],
-      documentId: Option[DocumentId],
-      deleted: Boolean = false,
-    ) {
-    def toDomain: domain.CompleteTask =
-      this.transformInto[domain.CompleteTask]
-  }
-
   case class VehicleHistory(
       id: VehicleHistoryId,
       createdAt: ZonedDateTime,

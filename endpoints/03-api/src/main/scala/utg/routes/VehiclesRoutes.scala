@@ -90,8 +90,9 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
         )
         .cataF(
           AError.Internal("Can't parse file").raiseError[F, Unit],
-          matrix => {
-            matrix.filter(_.exists(_.nonEmpty))
+          matrix =>
+            matrix
+              .filter(_.exists(_.nonEmpty))
               .tail
               .traverse_ { row =>
                 val branchIdOpt = branches.toMap.get(row.head)
@@ -153,8 +154,7 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
                     )
                   }
                 }
-              }
-          },
+              },
         )
     } yield ()
 

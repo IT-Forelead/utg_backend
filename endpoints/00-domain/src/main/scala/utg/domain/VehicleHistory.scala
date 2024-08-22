@@ -1,10 +1,11 @@
 package utg.domain
 
+import java.time.ZonedDateTime
+
 import io.circe.generic.JsonCodec
 import io.circe.refined._
-import utg.RegisteredNumber
 
-import java.time.ZonedDateTime
+import utg.RegisteredNumber
 
 @JsonCodec
 case class VehicleHistory(

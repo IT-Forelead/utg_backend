@@ -15,7 +15,6 @@ import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg._
-import utg.domain.ConsignorSignId
 import utg.domain.DocumentId
 import utg.domain.enums._
 import utg.effects.IsUUID
@@ -56,8 +55,6 @@ package object sql {
       VehicleIndicatorActionType,
       Type("vehicle_indicator_action_type"),
     )
-  val consignorSignId: Codec[ConsignorSignId] =
-    uuid.imap[ConsignorSignId](uuid => ConsignorSignId(uuid))(_.value)
   val documentId: Codec[DocumentId] = uuid.imap[DocumentId](uuid => DocumentId(uuid))(_.value)
 
   private val _drivingLicenseCategory: Codec[Arr[DrivingLicenseCategory]] =

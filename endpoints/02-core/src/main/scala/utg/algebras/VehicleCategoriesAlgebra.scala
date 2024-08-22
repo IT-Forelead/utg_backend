@@ -3,6 +3,7 @@ package utg.algebras
 import cats.MonadThrow
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
+
 import utg.domain.VehicleCategory
 import utg.domain.VehicleCategoryId
 import utg.domain.args.vehicleCategories._
