@@ -320,6 +320,34 @@ object dto {
       deleted: Boolean = false,
     )
 
+  case class TripCompleteTask(
+      id: TripCompleteTaskId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      commuteNumber: NonNegInt,
+      loadNumbers: NonEmptyString,
+      arrivalTime: ZonedDateTime,
+      consignorFullName: NonEmptyString,
+      consignorSignature: AssetId,
+      driverId: UserId,
+      deleted: Boolean = false,
+    )
+
+  case class TripCompleteTaskAcceptance(
+      id: TripCompleteTaskAcceptanceId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      commuteNumberTotal: NonNegInt,
+      loadNumberTotal: NonNegInt,
+      loadNumberTotalStr: NonEmptyString,
+      documentId: Option[AssetId],
+      driverId: Option[UserId],
+      driverSignature: Option[AssetId],
+      dispatcherId: Option[UserId],
+      dispatcherSignature: Option[AssetId],
+      deleted: Boolean = false,
+    )
+
   case class CompleteTask(
       id: CompleteTaskId,
       createdAt: ZonedDateTime,

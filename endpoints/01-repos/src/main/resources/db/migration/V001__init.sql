@@ -411,6 +411,43 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_acceptances (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
+CREATE TABLE IF NOT EXISTS trip_complete_tasks (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  commute_number INT NOT NULL,
+  load_numbers VARCHAR NOT NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  consignor_full_name VARCHAR NOT NULL,
+  consignor_signature UUID NOT NULL
+    CONSTRAINT fk_consignor_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL
+    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_complete_task_acceptances (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  commute_number_total INT NOT NULL,
+  load_number_total INT NOT NULL,
+  load_number_total_str VARCHAR NOT NULL,
+  document_id UUID NULL
+    CONSTRAINT fk_document_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NULL
+    CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_signature UUID NULL
+    CONSTRAINT fk_driver_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  dispatcher_id UUID NULL
+    CONSTRAINT fk_dispatcher_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  dispatcher_signature UUID NULL
+    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
 CREATE TABLE IF NOT EXISTS comlpete_tasks (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,

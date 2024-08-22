@@ -28,7 +28,11 @@ object HttpModule {
         new AuthRoutes[F](env.algebras.auth),
         new UsersRoutes[F](env.algebras.users, env.algebras.roles),
         new VehicleCategoriesRoutes[F](env.algebras.vehicleCategories),
-        new VehiclesRoutes[F](env.algebras.vehicles, env.algebras.branches, env.algebras.vehicleCategories),
+        new VehiclesRoutes[F](
+          env.algebras.vehicles,
+          env.algebras.branches,
+          env.algebras.vehicleCategories,
+        ),
         new RegionsRoutes[F](env.algebras.regions),
         new BranchesRoutes[F](env.algebras.branches),
         new TripsRoutes[F](env.algebras.trips),
@@ -40,6 +44,8 @@ object HttpModule {
         new TripVehicleAcceptancesRoutes[F](env.algebras.tripVehicleAcceptancesAlgebra),
         new TripDriverTasksRoutes[F](env.algebras.tripDriverTasks),
         new TripRouteDelaysRoutes[F](env.algebras.tripRouteDelaysAlgebra),
+        new TripCompleteTasksRoutes[F](env.algebras.tripCompleteTasksAlgebra),
+        new TripCompleteTaskAcceptancesRoutes[F](env.algebras.tripCompleteTaskAcceptancesAlgebra),
       )
       .map { r =>
         Router(
