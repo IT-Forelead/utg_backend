@@ -37,9 +37,9 @@ object TripDriverTaskCsvGenerator {
       tripDriverTask.pickupLocation.value,
       tripDriverTask.deliveryLocation.value,
       tripDriverTask.freightName.value,
-      tripDriverTask.numberOfInteractions.value.toString,
-      tripDriverTask.distance.value.toString,
-      tripDriverTask.freightVolume.value.toString,
+      tripDriverTask.numberOfInteractions.map(_.value.toString).getOrElse(""),
+      tripDriverTask.distance.map(_.value.toString).getOrElse(""),
+      tripDriverTask.freightVolume.map(_.value.toString).getOrElse(""),
     )
 
   def makeCsv[F[_]: Concurrent: Sync]: fs2.Pipe[F, TripDriverTask, Byte] =

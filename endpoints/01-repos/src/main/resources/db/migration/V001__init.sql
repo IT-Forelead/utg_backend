@@ -371,7 +371,7 @@ CREATE TABLE IF NOT EXISTS trip_driver_tasks (
   pickup_location VARCHAR NOT NULL,
   delivery_location VARCHAR NOT NULL,
   freight_name VARCHAR NOT NULL,
-  number_of_interactions INT NOT NULL,
+  number_of_interactions INT NULL,
   distance DOUBLE PRECISION NULL,
   freight_volume DOUBLE PRECISION NULL,
   deleted BOOLEAN NOT NULL DEFAULT false

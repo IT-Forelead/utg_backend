@@ -299,9 +299,9 @@ object dto {
       pickupLocation: NonEmptyString,
       deliveryLocation: NonEmptyString,
       freightName: NonEmptyString,
-      numberOfInteractions: NonNegInt,
-      distance: NonNegDouble,
-      freightVolume: NonNegDouble,
+      numberOfInteractions: Option[NonNegInt],
+      distance: Option[NonNegDouble],
+      freightVolume: Option[NonNegDouble],
       deleted: Boolean = false,
     ) {
     def toDomain: domain.TripDriverTask =

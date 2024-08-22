@@ -18,7 +18,7 @@ case class TripDriverTask(
     pickupLocation: NonEmptyString,
     deliveryLocation: NonEmptyString,
     freightName: NonEmptyString,
-    numberOfInteractions: NonNegInt,
-    distance: NonNegDouble,
-    freightVolume: NonNegDouble,
+    numberOfInteractions: Option[NonNegInt],
+    distance: Option[NonNegDouble],
+    freightVolume: Option[NonNegDouble],
   )

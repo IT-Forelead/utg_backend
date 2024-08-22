@@ -8,11 +8,9 @@ import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 
-import utg.domain.ResponseData
 import utg.domain.TripDriverTask
 import utg.domain.TripDriverTaskId
 import utg.domain.TripId
-import utg.domain.args.tripDriverTasks.TripDriverTaskFilters
 import utg.domain.args.tripDriverTasks.TripDriverTaskInput
 import utg.domain.args.tripDriverTasks.UpdateTripDriverTaskInput
 import utg.effects.Calendar
@@ -24,9 +22,7 @@ import utg.repos.sql.dto
 import utg.utils.ID
 
 trait TripDriverTasksAlgebra[F[_]] {
-  def get(filters: TripDriverTaskFilters): F[ResponseData[TripDriverTask]]
   def getByTripId(tripId: TripId): F[List[TripDriverTask]]
-  def getAsStream(filters: TripDriverTaskFilters): F[fs2.Stream[F, TripDriverTask]]
   def findById(id: TripDriverTaskId): F[Option[TripDriverTask]]
   def create(tripDriverTaskInput: TripDriverTaskInput): F[TripDriverTaskId]
   def update(
@@ -45,9 +41,6 @@ object TripDriverTasksAlgebra {
       logger: Logger[F],
     ): TripDriverTasksAlgebra[F] =
     new TripDriverTasksAlgebra[F] {
-      override def get(filters: TripDriverTaskFilters): F[ResponseData[TripDriverTask]] =
-        tripDriverTasksRepository.get(filters)
-
       override def getByTripId(tripId: TripId): F[List[TripDriverTask]] =
         for {
           dtoTripDriverTasks <- tripDriverTasksRepository.getByTripId(tripId)
@@ -102,13 +95,16 @@ object TripDriverTasksAlgebra {
           tripDriverTaskInput: UpdateTripDriverTaskInput,
         ): F[Unit] =
         for {
-          _ <- tripDriverTasksRepository.update(id)(
-            _.copy(
-              whoseDiscretion = tripDriverTaskInput.whoseDiscretion,
-              arrivalTime = tripDriverTaskInput.arrivalTime,
-              pickupLocation = tripDriverTaskInput.pickupLocation,
-              deliveryLocation = tripDriverTaskInput.deliveryLocation,
-              freightName = tripDriverTaskInput.freightName,
+          _ <- tripDriverTasksRepository.update(id)(tripDriverTask =>
+            tripDriverTask.copy(
+              whoseDiscretion =
+                tripDriverTaskInput.whoseDiscretion.getOrElse(tripDriverTask.whoseDiscretion),
+              arrivalTime = tripDriverTaskInput.arrivalTime.getOrElse(tripDriverTask.arrivalTime),
+              pickupLocation =
+                tripDriverTaskInput.pickupLocation.getOrElse(tripDriverTask.pickupLocation),
+              deliveryLocation =
+                tripDriverTaskInput.deliveryLocation.getOrElse(tripDriverTask.deliveryLocation),
+              freightName = tripDriverTaskInput.freightName.getOrElse(tripDriverTask.freightName),
               numberOfInteractions = tripDriverTaskInput.numberOfInteractions,
               distance = tripDriverTaskInput.distance,
               freightVolume = tripDriverTaskInput.freightVolume,
@@ -118,14 +114,5 @@ object TripDriverTasksAlgebra {
 
       override def delete(id: TripDriverTaskId): F[Unit] =
         tripDriverTasksRepository.delete(id)
-
-      override def getAsStream(filters: TripDriverTaskFilters): F[fs2.Stream[F, TripDriverTask]] =
-        F.pure {
-          tripDriverTasksRepository.getAsStream(filters).evalMap { tripDriverTask =>
-            F.pure {
-              tripDriverTasksRepository.makeTripDriverTask(tripDriverTask)
-            }
-          }
-        }
     }
 }
