@@ -50,7 +50,7 @@ object TripGivenFuelsAlgebra {
                 brandCode = input.brandCode,
                 fuelGiven = input.fuelGiven,
                 refuelerId = refuelerId,
-                attendantSignature = input.attendantSignature,
+                refuelerSignature = input.refuelerSignature,
               )
               _ <- tripGivenFuelsRepository.create(dtoTripGivenFuel)
             } yield id,
@@ -74,7 +74,7 @@ object TripGivenFuelsAlgebra {
               brandCode = tgf.brandCode,
               fuelGiven = tgf.fuelGiven,
               refueler = refuelers.get(tgf.refuelerId),
-              attendantSignature = tgf.attendantSignature,
+              refuelerSignature = tgf.refuelerSignature,
             )
           )
         } yield tripGivenFuels

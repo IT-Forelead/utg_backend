@@ -262,7 +262,7 @@ object dto {
       brandCode: NonEmptyString,
       fuelGiven: NonNegDouble,
       refuelerId: UserId,
-      attendantSignature: AssetId,
+      refuelerSignature: AssetId,
       deleted: Boolean = false,
     )
 

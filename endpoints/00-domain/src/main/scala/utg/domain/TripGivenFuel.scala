@@ -19,5 +19,5 @@ case class TripGivenFuel(
     brandCode: NonEmptyString,
     fuelGiven: NonNegDouble,
     refueler: Option[User],
-    attendantSignature: AssetId,
+    refuelerSignature: AssetId,
   )
