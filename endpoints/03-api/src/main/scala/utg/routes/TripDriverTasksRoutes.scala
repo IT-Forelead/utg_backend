@@ -5,14 +5,7 @@ import cats.effect.Async
 import cats.implicits.toFlatMapOps
 import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
-import org.http4s.Charset
-import org.http4s.Headers
-import org.http4s.MediaType
-import org.http4s.Response
 import org.http4s.circe.JsonDecoder
-import org.http4s.headers.`Content-Disposition`
-import org.http4s.headers.`Content-Type`
-import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
@@ -29,18 +22,6 @@ final case class TripDriverTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
   ) extends Routes[F, AuthedUser] {
   override val path = "/driver-tasks"
 
-  private def csvResponse(body: fs2.Stream[F, Byte], filename: String): Response[F] =
-    Response(
-      body = body,
-      headers = Headers(
-        `Content-Disposition`(
-          "attachment",
-          Map(ci"filename" -> filename),
-        ),
-        `Content-Type`(MediaType.text.csv, Charset.`UTF-8`),
-      ),
-    )
-
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[TripDriverTaskInput] { create =>
@@ -55,7 +36,7 @@ final case class TripDriverTasksRoutes[F[_]: JsonDecoder: MonadThrow: Async](
 
     case ar @ POST -> Root / "update" as _ =>
       ar.req.decodeR[UpdateTripDriverTaskInput] { update =>
-        tripDriverTasks.update(update.tripDriverTaskId, update).flatMap(Ok(_))
+        tripDriverTasks.update(update).flatMap(Ok(_))
       }
   }
 }

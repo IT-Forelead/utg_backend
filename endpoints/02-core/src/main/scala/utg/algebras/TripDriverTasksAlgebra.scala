@@ -25,10 +25,7 @@ trait TripDriverTasksAlgebra[F[_]] {
   def getByTripId(tripId: TripId): F[List[TripDriverTask]]
   def findById(id: TripDriverTaskId): F[Option[TripDriverTask]]
   def create(tripDriverTaskInput: TripDriverTaskInput): F[TripDriverTaskId]
-  def update(
-      id: TripDriverTaskId,
-      tripDriverTaskInput: UpdateTripDriverTaskInput,
-    ): F[Unit]
+  def update(input: UpdateTripDriverTaskInput): F[Unit]
   def delete(id: TripDriverTaskId): F[Unit]
 }
 object TripDriverTasksAlgebra {
@@ -90,24 +87,18 @@ object TripDriverTasksAlgebra {
             } yield id,
         )
 
-      override def update(
-          id: TripDriverTaskId,
-          tripDriverTaskInput: UpdateTripDriverTaskInput,
-        ): F[Unit] =
+      override def update(input: UpdateTripDriverTaskInput): F[Unit] =
         for {
-          _ <- tripDriverTasksRepository.update(id)(tripDriverTask =>
+          _ <- tripDriverTasksRepository.update(input.id)(tripDriverTask =>
             tripDriverTask.copy(
-              whoseDiscretion =
-                tripDriverTaskInput.whoseDiscretion.getOrElse(tripDriverTask.whoseDiscretion),
-              arrivalTime = tripDriverTaskInput.arrivalTime.getOrElse(tripDriverTask.arrivalTime),
-              pickupLocation =
-                tripDriverTaskInput.pickupLocation.getOrElse(tripDriverTask.pickupLocation),
-              deliveryLocation =
-                tripDriverTaskInput.deliveryLocation.getOrElse(tripDriverTask.deliveryLocation),
-              freightName = tripDriverTaskInput.freightName.getOrElse(tripDriverTask.freightName),
-              numberOfInteractions = tripDriverTaskInput.numberOfInteractions,
-              distance = tripDriverTaskInput.distance,
-              freightVolume = tripDriverTaskInput.freightVolume,
+              whoseDiscretion = input.whoseDiscretion.getOrElse(tripDriverTask.whoseDiscretion),
+              arrivalTime = input.arrivalTime.getOrElse(tripDriverTask.arrivalTime),
+              pickupLocation = input.pickupLocation.getOrElse(tripDriverTask.pickupLocation),
+              deliveryLocation = input.deliveryLocation.getOrElse(tripDriverTask.deliveryLocation),
+              freightName = input.freightName.getOrElse(tripDriverTask.freightName),
+              numberOfInteractions = input.numberOfInteractions,
+              distance = input.distance,
+              freightVolume = input.freightVolume,
             )
           )
         } yield {}

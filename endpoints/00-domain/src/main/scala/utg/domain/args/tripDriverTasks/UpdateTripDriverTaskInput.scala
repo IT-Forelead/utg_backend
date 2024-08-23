@@ -12,7 +12,7 @@ import utg.domain.TripDriverTaskId
 
 @JsonCodec
 case class UpdateTripDriverTaskInput(
-    tripDriverTaskId: TripDriverTaskId,
+    id: TripDriverTaskId,
     whoseDiscretion: Option[NonEmptyString],
     arrivalTime: Option[ZonedDateTime],
     pickupLocation: Option[NonEmptyString],
