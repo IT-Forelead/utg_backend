@@ -1,9 +1,9 @@
 package utg.domain.enums
 
-import enumeratum.EnumEntry.UpperWords
+import enumeratum.EnumEntry.Uppercase
 import enumeratum._
 
-sealed trait DrivingLicenseCategory extends UpperWords
+sealed trait DrivingLicenseCategory extends Uppercase
 
 object DrivingLicenseCategory
     extends CirceEnum[DrivingLicenseCategory]

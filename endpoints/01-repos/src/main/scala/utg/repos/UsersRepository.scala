@@ -4,7 +4,6 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
-import cats.implicits.catsSyntaxApplicativeError
 import cats.implicits.catsSyntaxApplicativeErrorId
 import cats.implicits.catsSyntaxApplicativeId
 import cats.implicits.catsSyntaxOptionId
