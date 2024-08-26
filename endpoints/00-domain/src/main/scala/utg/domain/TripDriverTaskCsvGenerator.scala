@@ -33,7 +33,7 @@ object TripDriverTaskCsvGenerator {
   private def toCSVField(tripDriverTask: TripDriverTask): List[String] =
     List[String](
       tripDriverTask.whoseDiscretion.value,
-      ldtToString(tripDriverTask.arrivalTime),
+      tripDriverTask.arrivalTime.map( zdt => ldtToString(zdt)).getOrElse(""),
       tripDriverTask.pickupLocation.value,
       tripDriverTask.deliveryLocation.value,
       tripDriverTask.freightName.value,

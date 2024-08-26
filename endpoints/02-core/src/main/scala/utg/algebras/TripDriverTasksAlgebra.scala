@@ -92,7 +92,7 @@ object TripDriverTasksAlgebra {
           _ <- tripDriverTasksRepository.update(input.id)(tripDriverTask =>
             tripDriverTask.copy(
               whoseDiscretion = input.whoseDiscretion.getOrElse(tripDriverTask.whoseDiscretion),
-              arrivalTime = input.arrivalTime.getOrElse(tripDriverTask.arrivalTime),
+              arrivalTime = input.arrivalTime,
               pickupLocation = input.pickupLocation.getOrElse(tripDriverTask.pickupLocation),
               deliveryLocation = input.deliveryLocation.getOrElse(tripDriverTask.deliveryLocation),
               freightName = input.freightName.getOrElse(tripDriverTask.freightName),

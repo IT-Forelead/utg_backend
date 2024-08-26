@@ -14,7 +14,7 @@ import utg.domain.TripId
 case class TripDriverTaskInput(
     tripId: TripId,
     whoseDiscretion: NonEmptyString,
-    arrivalTime: ZonedDateTime,
+    arrivalTime: Option[ZonedDateTime],
     pickupLocation: NonEmptyString,
     deliveryLocation: NonEmptyString,
     freightName: NonEmptyString,

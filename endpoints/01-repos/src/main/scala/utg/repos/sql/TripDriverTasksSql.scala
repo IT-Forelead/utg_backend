@@ -9,7 +9,7 @@ import utg.domain.TripId
 
 private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
   private[repos] val codec: Codec[dto.TripDriverTask] =
-    (id *: zonedDateTime *: TripsSql.id *: nes *: zonedDateTime *: nes *: nes *: nes *: nonNegInt.opt
+    (id *: zonedDateTime *: TripsSql.id *: nes *: zonedDateTime.opt *: nes *: nes *: nes *: nonNegInt.opt
       *: nonNegDouble.opt *: nonNegDouble.opt *: bool)
       .to[dto.TripDriverTask]
 
@@ -24,7 +24,7 @@ private[repos] object TripDriverTasksSql extends Sql[TripDriverTaskId] {
   val update: Command[dto.TripDriverTask] =
     sql"""UPDATE trip_driver_tasks
        SET whose_discretion = $nes,
-        arrival_time = $zonedDateTime,
+        arrival_time = ${zonedDateTime.opt},
         pickup_location = $nes,
         delivery_location = $nes,
         freight_name = $nes,

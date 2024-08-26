@@ -295,7 +295,7 @@ object dto {
       createdAt: ZonedDateTime,
       tripId: TripId,
       whoseDiscretion: NonEmptyString,
-      arrivalTime: ZonedDateTime,
+      arrivalTime: Option[ZonedDateTime],
       pickupLocation: NonEmptyString,
       deliveryLocation: NonEmptyString,
       freightName: NonEmptyString,

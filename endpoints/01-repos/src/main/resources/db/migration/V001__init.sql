@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS trip_driver_tasks (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
   whose_discretion VARCHAR NOT NULL,
-  arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
+  arrival_time TIMESTAMP WITH TIME ZONE NULL,
   pickup_location VARCHAR NOT NULL,
   delivery_location VARCHAR NOT NULL,
   freight_name VARCHAR NOT NULL,
