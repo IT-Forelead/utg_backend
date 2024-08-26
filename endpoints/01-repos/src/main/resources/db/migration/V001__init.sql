@@ -31,7 +31,12 @@ CREATE TYPE GPS_TRACKING_TYPE AS ENUM (
 CREATE TYPE WORKING_MODE_TYPE AS ENUM (
   'daily',
   'business_trip',
-  'mixed'
+  'itinerary',
+  'duty',
+  'cleaning_day',
+  'work_on_weekend',
+  'work_on_holiday',
+  'accidental'
 );
 
 CREATE TYPE VEHICLE_INDICATOR_ACTION_TYPE AS ENUM (

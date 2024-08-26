@@ -66,7 +66,6 @@ object Environment {
       }
       redis <- Redis[F].utf8(config.redis.uri.toString).map(RedisClient[F](_, config.redis.prefix))
       implicit0(random: Random[F]) <- Resource.eval(Random.scalaUtilRandom[F])
-      _ = println((DrivingLicenseCategory.A: DrivingLicenseCategory).asJson)
       middleware = LiveMiddleware.make[F](config.auth, redis)
       auth = Auth.make[F](config.auth, findUser(repositories), redis)
       s3Client <- S3Client.resource(config.awsConfig)
