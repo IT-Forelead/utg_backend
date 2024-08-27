@@ -276,10 +276,6 @@ CREATE TABLE IF NOT EXISTS trips (
   summation VARCHAR NULL,
   vehicle_id UUID NOT NULL
     CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  trailer_id UUID NULL
-    CONSTRAINT fk_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  semi_trailer_id UUID NULL
-    CONSTRAINT fk_semi_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   doctor_id UUID NULL
     CONSTRAINT fk_doctor_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   doctor_signature UUID NULL
@@ -300,6 +296,22 @@ CREATE TABLE IF NOT EXISTS trip_drivers (
   driving_license_number VARCHAR NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false,
   UNIQUE (trip_id, driver_id)
+);
+
+CREATE TABLE IF NOT EXISTS trip_trailers (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  trailer_id UUID NOT NULL CONSTRAINT fk_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false,
+  UNIQUE (trip_id, trailer_id)
+);
+
+CREATE TABLE IF NOT EXISTS trip_semi_trailers (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  semi_trailer_id UUID NOT NULL CONSTRAINT fk_semi_trailer_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false,
+  UNIQUE (trip_id, semi_trailer_id)
 );
 
 CREATE TABLE IF NOT EXISTS trip_accompanying_persons (

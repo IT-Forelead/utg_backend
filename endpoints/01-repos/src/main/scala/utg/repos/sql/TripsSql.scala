@@ -12,9 +12,8 @@ import utg.domain.args.trips._
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
     (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType
-      *: nes.opt *: VehiclesSql.id *: VehiclesSql.id.opt *: VehiclesSql.id.opt
-      *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt *: UsersSql.id.opt
-      *: AssetsSql.id.opt *: nes.opt *: bool).to[dto.Trip]
+      *: nes.opt *: VehiclesSql.id *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt
+      *: UsersSql.id.opt *: AssetsSql.id.opt *: nes.opt *: bool).to[dto.Trip]
 
   val insert: Command[dto.Trip] =
     sql"""INSERT INTO trips VALUES ($codec)""".command
@@ -49,8 +48,6 @@ private[repos] object TripsSql extends Sql[TripId] {
        work_order = $workingModeType,
        summation = ${nes.opt},
        vehicle_id = ${VehiclesSql.id},
-       trailer_id = ${VehiclesSql.id.opt},
-       semi_trailer_id = ${VehiclesSql.id.opt},
        doctor_id = ${UsersSql.id.opt},
        doctor_signature = ${AssetsSql.id.opt},
        fuel_supply = ${nonNegDouble.opt},
@@ -63,9 +60,9 @@ private[repos] object TripsSql extends Sql[TripId] {
       .contramap {
         case trip: dto.Trip =>
           trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *:
-            trip.thirdTab *: trip.workingMode *: trip.summation *: trip.vehicleId *: trip.trailerId *:
-            trip.semiTrailerId *: trip.doctorId *: trip.doctorSignature *: trip.fuelSupply *:
-            trip.chiefMechanicId *: trip.chiefMechanicSignature *: trip.notes *: trip.id *: EmptyTuple
+            trip.thirdTab *: trip.workingMode *: trip.summation *: trip.vehicleId *: trip.doctorId *:
+            trip.doctorSignature *: trip.fuelSupply *: trip.chiefMechanicId *: trip.chiefMechanicSignature *:
+            trip.notes *: trip.id *: EmptyTuple
       }
 
   val updateDoctorApprovalSql: Command[TripDoctorApprovalInput] =

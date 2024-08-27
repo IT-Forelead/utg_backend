@@ -3,7 +3,6 @@ package utg.repos
 import cats.data.NonEmptyList
 import cats.effect.Async
 import cats.effect.Resource
-import cats.implicits.catsSyntaxApplicativeId
 import cats.implicits.toFunctorOps
 import skunk._
 import uz.scala.skunk.syntax.all._

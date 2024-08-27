@@ -22,8 +22,8 @@ case class TripInput(
     workingMode: WorkingModeType,
     summation: Option[NonEmptyString],
     vehicleId: VehicleId,
-    drivers: NonEmptyList[UserId],
-    trailerId: Option[VehicleId],
-    semiTrailerId: Option[VehicleId],
-    accompanyingPersons: Option[NonEmptyList[UserId]],
+    driverIds: NonEmptyList[UserId],
+    trailerIds: Option[NonEmptyList[VehicleId]],
+    semiTrailerIds: Option[NonEmptyList[VehicleId]],
+    accompanyingPersonIds: Option[NonEmptyList[UserId]],
   )

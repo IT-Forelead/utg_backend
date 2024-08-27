@@ -173,8 +173,6 @@ object dto {
       workingMode: WorkingModeType,
       summation: Option[NonEmptyString],
       vehicleId: VehicleId,
-      trailerId: Option[VehicleId],
-      semiTrailerId: Option[VehicleId],
       doctorId: Option[UserId],
       doctorSignature: Option[AssetId],
       fuelSupply: Option[NonNegDouble],
@@ -186,8 +184,8 @@ object dto {
     def toDomain(
         vehicle: Option[domain.Vehicle],
         drivers: List[domain.TripDriver],
-        trailer: Option[domain.Vehicle],
-        semiTrailer: Option[domain.Vehicle],
+        trailer: Option[List[domain.Vehicle]],
+        semiTrailer: Option[List[domain.Vehicle]],
         accompanyingPersons: Option[List[AuthedUser.User]],
         doctor: Option[AuthedUser.User],
         chiefMechanic: Option[AuthedUser.User],
@@ -222,6 +220,20 @@ object dto {
       id: TripAccompanyingPersonId,
       tripId: TripId,
       userId: UserId,
+      deleted: Boolean = false,
+    )
+
+  case class TripTrailer(
+      id: TripTrailerId,
+      tripId: TripId,
+      trailerId: VehicleId,
+      deleted: Boolean = false,
+    )
+
+  case class TripSemiTrailer(
+      id: TripSemiTrailerId,
+      tripId: TripId,
+      semiTrailerId: VehicleId,
       deleted: Boolean = false,
     )
 

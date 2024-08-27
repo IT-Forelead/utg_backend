@@ -104,24 +104,26 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
                     List.empty[String]
                   else
                     row(5).trim.split(",").map(_.trim).toList
+
                 val makePrettyFuelType = NonEmptyList.fromList(
                   listFuelTypes.map(FuelType.withName)
                 )
+
                 val conditionType =
-                  try
-                    ConditionType.withName(row(8))
-                  catch {
-                    case _ => conditionMap(row(8).toLowerCase())
-                  }
+                  ConditionType
+                    .withNameOption(row(8))
+                    .getOrElse(
+                      conditionMap(row(8).toLowerCase())
+                    )
 
                 val gpsTrackingType = row
                   .lift(13)
-                  .map(gps =>
-                    try
-                      GpsTrackingType.withName(gps)
-                    catch {
-                      case _ => gpsMap(gps.toLowerCase())
-                    }
+                  .flatMap(gps =>
+                    GpsTrackingType
+                      .withNameOption(gps)
+                      .orElse(
+                        gpsMap.get(gps.toLowerCase())
+                      )
                   )
 
                 branchIdOpt.fold(
