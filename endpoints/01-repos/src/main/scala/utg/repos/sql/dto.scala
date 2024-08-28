@@ -161,6 +161,23 @@ object dto {
         .transform
   }
 
+  case class MedicalExamination(
+      id: MedicalExaminationId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      driverId: UserId,
+      driverPersonalNumber: NonNegInt,
+      complaint: Option[NonEmptyString],
+      pulse: NonNegInt,
+      bodyTemperature: NonNegDouble,
+      bloodPressure: NonEmptyString,
+      alcoholConcentration: NonNegDouble,
+      driverHealth: HealthType,
+      doctorId: UserId,
+      doctorSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
   case class Trip(
       id: TripId,
       createdAt: ZonedDateTime,

@@ -44,6 +44,11 @@ CREATE TYPE VEHICLE_INDICATOR_ACTION_TYPE AS ENUM (
   'back'
 );
 
+CREATE TYPE HEALTH_TYPE AS ENUM (
+  'healthy',
+  'unhealthy'
+);
+
 CREATE TYPE DRIVING_LICENSE_CATEGORY AS ENUM (
   'A',
   'B',
@@ -286,6 +291,25 @@ CREATE TABLE IF NOT EXISTS trips (
   chief_mechanic_signature UUID NULL
     CONSTRAINT fk_chief_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   notes VARCHAR NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS medical_examinations (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_id UUID NOT NULL CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  driver_personal_number INT NOT NULL,
+  complaint VARCHAR NULL,
+  pulse INT NOT NULL,
+  body_temperature DOUBLE PRECISION NOT NULL,
+  blood_pressure VARCHAR NOT NULL,
+  alcohol_concentration DOUBLE PRECISION NOT NULL,
+  driver_health HEALTH_TYPE NOT NULL,
+  doctor_id UUID NOT NULL
+    CONSTRAINT fk_doctor_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  doctor_signature UUID NOT NULL
+    CONSTRAINT fk_doctor_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 

@@ -50,6 +50,8 @@ package object sql {
     `enum`[GpsTrackingType](GpsTrackingType, Type("gps_tracking_type"))
   val workingModeType: Codec[WorkingModeType] =
     `enum`[WorkingModeType](WorkingModeType, Type("working_mode_type"))
+  val healthType: Codec[HealthType] =
+    `enum`[HealthType](HealthType, Type("health_type"))
   val vehicleIndicatorActionType: Codec[VehicleIndicatorActionType] =
     `enum`[VehicleIndicatorActionType](
       VehicleIndicatorActionType,

@@ -18,7 +18,7 @@ case class Repositories[F[_]](
     tripDrivers: TripDriversRepository[F],
     tripTrailers: TripTrailersRepository[F],
     tripSemiTrailers: TripSemiTrailersRepository[F],
-    tripAccompanyingPersonsRepository: TripAccompanyingPersonsRepository[F],
+    tripAccompanyingPersons: TripAccompanyingPersonsRepository[F],
     tripVehicleIndicators: TripVehicleIndicatorsRepository[F],
     tripGivenFuels: TripGivenFuelsRepository[F],
     tripFuelInspections: TripFuelInspectionsRepository[F],
@@ -28,6 +28,7 @@ case class Repositories[F[_]](
     tripRouteDelays: TripRouteDelaysRepository[F],
     tripCompleteTasks: TripCompleteTasksRepository[F],
     tripCompleteTaskAcceptances: TripCompleteTaskAcceptancesRepository[F],
+    medicalExaminations: MedicalExaminationsRepository[F],
     vehicleHistories: VehicleHistoriesRepository[F],
   )
 
@@ -49,7 +50,7 @@ object Repositories {
       tripDrivers = TripDriversRepository.make[F](usersRepo),
       tripTrailers = TripTrailersRepository.make[F],
       tripSemiTrailers = TripSemiTrailersRepository.make[F],
-      tripAccompanyingPersonsRepository = TripAccompanyingPersonsRepository.make[F],
+      tripAccompanyingPersons = TripAccompanyingPersonsRepository.make[F],
       tripVehicleIndicators = TripVehicleIndicatorsRepository.make[F],
       tripGivenFuels = TripGivenFuelsRepository.make[F],
       tripFuelInspections = TripFuelInspectionsRepository.make[F],
@@ -59,6 +60,7 @@ object Repositories {
       tripRouteDelays = TripRouteDelaysRepository.make[F],
       tripCompleteTasks = TripCompleteTasksRepository.make[F],
       tripCompleteTaskAcceptances = TripCompleteTaskAcceptancesRepository.make[F],
+      medicalExaminations = MedicalExaminationsRepository.make[F],
       vehicleHistories = VehicleHistoriesRepository.make[F],
     )
   }

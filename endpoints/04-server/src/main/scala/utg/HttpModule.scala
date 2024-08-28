@@ -46,6 +46,7 @@ object HttpModule {
         new TripRouteDelaysRoutes[F](env.algebras.tripRouteDelaysAlgebra),
         new TripCompleteTasksRoutes[F](env.algebras.tripCompleteTasksAlgebra),
         new TripCompleteTaskAcceptancesRoutes[F](env.algebras.tripCompleteTaskAcceptancesAlgebra),
+        new MedicalExaminationsRoutes[F](env.algebras.medicalExaminationsAlgebra),
       )
       .map { r =>
         Router(
