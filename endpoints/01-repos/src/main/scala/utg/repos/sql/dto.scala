@@ -224,12 +224,20 @@ object dto {
       tripId: TripId,
       driverId: UserId,
       drivingLicenseNumber: NonEmptyString,
+      driverHealth: Option[HealthType] = None,
+      doctorId: Option[UserId] = None,
+      doctorSignature: Option[AssetId] = None,
+      medicalExaminationId: Option[MedicalExaminationId] = None,
       deleted: Boolean = false,
     ) {
-    def toDomain(user: Option[domain.AuthedUser.User]): domain.TripDriver =
+    def toDomain(
+        driver: Option[domain.AuthedUser.User] = None,
+        doctor: Option[domain.AuthedUser.User] = None,
+      ): domain.TripDriver =
       this
         .into[domain.TripDriver]
-        .withFieldConst(_.driver, user)
+        .withFieldConst(_.driver, driver)
+        .withFieldConst(_.doctor, doctor)
         .transform
   }
 

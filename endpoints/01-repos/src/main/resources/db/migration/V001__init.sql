@@ -318,6 +318,13 @@ CREATE TABLE IF NOT EXISTS trip_drivers (
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
   driver_id UUID NOT NULL CONSTRAINT fk_driver_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   driving_license_number VARCHAR NOT NULL,
+  driver_health HEALTH_TYPE NULL,
+  doctor_id UUID NULL
+    CONSTRAINT fk_doctor_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  doctor_signature UUID NULL
+    CONSTRAINT fk_doctor_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  medical_examination_id UUID NULL
+    CONSTRAINT fk_medical_examination_id REFERENCES medical_examinations (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false,
   UNIQUE (trip_id, driver_id)
 );

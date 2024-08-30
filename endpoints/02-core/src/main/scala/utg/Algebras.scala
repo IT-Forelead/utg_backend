@@ -24,6 +24,7 @@ case class Algebras[F[_]](
     vehicleCategories: VehicleCategoriesAlgebra[F],
     vehicles: VehiclesAlgebra[F],
     trips: TripsAlgebra[F],
+    tripDrivers: TripDriversAlgebra[F],
     tripVehicleIndicators: TripVehicleIndicatorsAlgebra[F],
     tripGivenFuelsAlgebra: TripGivenFuelsAlgebra[F],
     tripFuelInspectionsAlgebra: TripFuelInspectionsAlgebra[F],
@@ -65,6 +66,7 @@ object Algebras {
         repositories.users,
         repositories.vehicles,
       ),
+      tripDrivers = TripDriversAlgebra.make[F](repositories.tripDrivers),
       tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](
         repositories.tripVehicleIndicators,
         repositories.trips,

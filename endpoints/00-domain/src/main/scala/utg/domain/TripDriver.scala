@@ -5,6 +5,7 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import utg.domain.AuthedUser.User
+import utg.domain.enums.HealthType
 
 @JsonCodec
 case class TripDriver(
@@ -12,4 +13,8 @@ case class TripDriver(
     tripId: TripId,
     driver: Option[User],
     drivingLicenseNumber: NonEmptyString,
+    driverHealth: Option[HealthType] = None,
+    doctor: Option[User] = None,
+    doctorSignature: Option[AssetId] = None,
+    medicalExaminationId: Option[MedicalExaminationId] = None,
   )

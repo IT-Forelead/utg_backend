@@ -11,6 +11,7 @@ import utg.domain.MedicalExaminationId
 import utg.domain.ResponseData
 import utg.domain.UserId
 import utg.domain.args.medicalExaminations._
+import utg.domain.args.tripDrivers.UpdateDriverExamination
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
@@ -66,6 +67,16 @@ object MedicalExaminationsAlgebra {
             doctorSignature = input.doctorSignature,
           )
           _ <- medicalExaminationsRepository.create(dtoData)
+          _ <- tripDriversRepository.updateDriverExamination(
+            UpdateDriverExamination(
+              tripId = trip.id,
+              driverId = input.driverId,
+              driverHealth = input.driverHealth.some,
+              doctorId = doctorId.some,
+              doctorSignature = input.doctorSignature.some,
+              medicalExaminationId = id.some,
+            )
+          )
         } yield id
 
       override def get(filters: MedicalExaminationFilters): F[ResponseData[MedicalExamination]] =
