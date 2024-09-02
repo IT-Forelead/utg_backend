@@ -295,8 +295,8 @@ object dto {
       createdAt: ZonedDateTime,
       tripId: TripId,
       vehicleId: VehicleId,
-      fuelBrand: NonEmptyString,
-      brandCode: NonEmptyString,
+      fuelBrand: FuelType,
+      brandCode: Option[NonEmptyString],
       fuelGiven: NonNegDouble,
       refuelerId: UserId,
       refuelerSignature: AssetId,
@@ -309,11 +309,23 @@ object dto {
       tripId: TripId,
       vehicleId: VehicleId,
       actionType: VehicleIndicatorActionType,
-      fuelInTank: NonNegDouble,
       mechanicId: UserId,
       mechanicSignature: AssetId,
       deleted: Boolean = false,
     )
+
+  case class TripFuelInspectionItem(
+      id: TripFuelInspectionItemId,
+      tripFuelInspectionId: TripFuelInspectionId,
+      fuelType: FuelType,
+      fuelInTank: NonNegDouble,
+      deleted: Boolean = false,
+    ) {
+    def toDomain: domain.TripFuelInspectionItem =
+      this
+        .into[domain.TripFuelInspectionItem]
+        .transform
+  }
 
   case class TripFuelRate(
       id: TripFuelRateId,

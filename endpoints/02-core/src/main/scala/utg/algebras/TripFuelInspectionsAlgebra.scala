@@ -14,6 +14,7 @@ import utg.domain.args.tripFuelExpenses._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
+import utg.repos.TripFuelInspectionItemsRepository
 import utg.repos.TripFuelInspectionsRepository
 import utg.repos.TripsRepository
 import utg.repos.UsersRepository
@@ -28,6 +29,7 @@ trait TripFuelInspectionsAlgebra[F[_]] {
 object TripFuelInspectionsAlgebra {
   def make[F[_]: MonadThrow: Calendar: GenUUID](
       tripFuelInspectionsRepository: TripFuelInspectionsRepository[F],
+      tripFuelInspectionItemsRepository: TripFuelInspectionItemsRepository[F],
       tripsRepository: TripsRepository[F],
       usersRepository: UsersRepository[F],
     ): TripFuelInspectionsAlgebra[F] =
@@ -50,11 +52,12 @@ object TripFuelInspectionsAlgebra {
                 tripId = trip.id,
                 vehicleId = trip.vehicleId,
                 actionType = input.actionType,
-                fuelInTank = input.fuelInTank,
+//                fuelInTank = input.fuelInTank,
                 mechanicId = mechanicId,
                 mechanicSignature = input.mechanicSignature,
               )
               _ <- tripFuelInspectionsRepository.create(dtoTripFuelInspection)
+              _ <- tripFuelInspectionItemsRepository.create(id, input.fuels)
             } yield id,
         )
 
@@ -66,18 +69,23 @@ object TripFuelInspectionsAlgebra {
             .fold(Map.empty[UserId, User].pure[F]) { userIds =>
               usersRepository.findByIds(userIds)
             }
-          tripFuelInspections = dtoTripFuelInspections.map(tfi =>
-            TripFuelInspection(
-              id = tfi.id,
-              createdAt = tfi.createdAt,
-              tripId = tfi.tripId,
-              vehicleId = tfi.vehicleId,
-              actionType = tfi.actionType,
-              fuelInTank = tfi.fuelInTank,
-              mechanic = mechanics.get(tfi.mechanicId),
-              mechanicSignature = tfi.mechanicSignature,
-            )
-          )
+          tripFuelInspections <- dtoTripFuelInspections.traverse { tfi =>
+            for {
+              fuels <- tripFuelInspectionItemsRepository
+                .getByTripFuelInspectionId(tfi.id)
+                .map(_.map(_.toDomain))
+              data = TripFuelInspection(
+                id = tfi.id,
+                createdAt = tfi.createdAt,
+                tripId = tfi.tripId,
+                vehicleId = tfi.vehicleId,
+                actionType = tfi.actionType,
+                fuels = fuels,
+                mechanic = mechanics.get(tfi.mechanicId),
+                mechanicSignature = tfi.mechanicSignature,
+              )
+            } yield data
+          }
         } yield tripFuelInspections
     }
 }

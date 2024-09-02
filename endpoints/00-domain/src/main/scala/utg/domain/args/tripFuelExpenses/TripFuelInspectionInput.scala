@@ -1,10 +1,10 @@
 package utg.domain.args.tripFuelExpenses
 
-import eu.timepit.refined.types.all.NonNegDouble
+import cats.data.NonEmptyList
 import io.circe.generic.JsonCodec
-import io.circe.refined._
 
 import utg.domain.AssetId
+import utg.domain.FuelTypeAndQuantity
 import utg.domain.TripId
 import utg.domain.enums.VehicleIndicatorActionType
 
@@ -12,6 +12,6 @@ import utg.domain.enums.VehicleIndicatorActionType
 case class TripFuelInspectionInput(
     tripId: TripId,
     actionType: VehicleIndicatorActionType,
-    fuelInTank: NonNegDouble,
+    fuels: NonEmptyList[FuelTypeAndQuantity],
     mechanicSignature: AssetId,
   )

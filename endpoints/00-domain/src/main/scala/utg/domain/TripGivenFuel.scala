@@ -8,6 +8,7 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import utg.domain.AuthedUser.User
+import utg.domain.enums.FuelType
 
 @JsonCodec
 case class TripGivenFuel(
@@ -15,8 +16,8 @@ case class TripGivenFuel(
     createdAt: ZonedDateTime,
     tripId: TripId,
     vehicleId: VehicleId,
-    fuelBrand: NonEmptyString,
-    brandCode: NonEmptyString,
+    fuelBrand: FuelType,
+    brandCode: Option[NonEmptyString],
     fuelGiven: NonNegDouble,
     refueler: Option[User],
     refuelerSignature: AssetId,

@@ -78,6 +78,7 @@ object Algebras {
       ),
       tripFuelInspectionsAlgebra = TripFuelInspectionsAlgebra.make[F](
         repositories.tripFuelInspections,
+        repositories.tripFuelInspectionItems,
         repositories.trips,
         repositories.users,
       ),

@@ -53,6 +53,8 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class TripFuelInspectionId(value: UUID)
   @derive(eqv, show, uuid)
+  @newtype case class TripFuelInspectionItemId(value: UUID)
+  @derive(eqv, show, uuid)
   @newtype case class TripFuelRateId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class TripRouteDelayId(value: UUID)

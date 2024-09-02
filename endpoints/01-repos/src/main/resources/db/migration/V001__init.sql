@@ -370,14 +370,16 @@ CREATE TABLE IF NOT EXISTS trip_vehicle_indicators (
 CREATE TABLE IF NOT EXISTS trip_given_fuels (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  fuel_brand VARCHAR NULL,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_brand FUEL_TYPE NOT NULL,
   brand_code VARCHAR NULL,
-  fuel_given DOUBLE PRECISION NULL,
-  refueler_id UUID NULL
+  fuel_given DOUBLE PRECISION NOT NULL,
+  refueler_id UUID NOT NULL
     CONSTRAINT fk_refueler_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  refueler_signature UUID NULL
+  refueler_signature UUID NOT NULL
     CONSTRAINT fk_refueler_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
@@ -385,14 +387,24 @@ CREATE TABLE IF NOT EXISTS trip_given_fuels (
 CREATE TABLE IF NOT EXISTS trip_fuel_inspections (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  vehicle_id UUID NOT NULL CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_trip_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
   action_type VEHICLE_INDICATOR_ACTION_TYPE NOT NULL,
-  fuel_in_tank DOUBLE PRECISION NOT NULL,
   mechanic_id UUID NOT NULL
     CONSTRAINT fk_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   mechanic_signature UUID NOT NULL
     CONSTRAINT fk_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_fuel_inspection_items (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_fuel_inspection_id UUID NOT NULL
+    CONSTRAINT fk_trip_fuel_inspection_id REFERENCES trip_fuel_inspections (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_type FUEL_TYPE NOT NULL,
+  fuel_in_tank DOUBLE PRECISION NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
