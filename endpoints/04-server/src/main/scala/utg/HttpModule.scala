@@ -37,6 +37,7 @@ object HttpModule {
         new BranchesRoutes[F](env.algebras.branches),
         new TripsRoutes[F](env.algebras.trips),
         new TripDriversRoutes[F](env.algebras.tripDrivers),
+        new TripFuelSuppliesRoutes[F](env.algebras.tripFuelSuppliesAlgebra),
         new TripVehicleIndicatorsRoutes[F](env.algebras.tripVehicleIndicators),
         new TripGivenFuelsRoutes[F](env.algebras.tripGivenFuelsAlgebra),
         new TripFuelInspectionsRoutes[F](env.algebras.tripFuelInspectionsAlgebra),

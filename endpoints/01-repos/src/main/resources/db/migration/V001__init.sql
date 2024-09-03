@@ -294,6 +294,29 @@ CREATE TABLE IF NOT EXISTS trips (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
+CREATE TABLE IF NOT EXISTS trip_fuel_supplies (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  trip_id UUID NOT NULL
+    CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  dispatcher_id UUID NOT NULL
+    CONSTRAINT fk_dispatcher_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  dispatcher_signature UUID NOT NULL
+    CONSTRAINT fk_dispatcher_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS trip_fuel_supply_items (
+  id UUID PRIMARY KEY NOT NULL,
+  trip_fuel_supply_id UUID NOT NULL
+    CONSTRAINT fk_trip_fuel_supply_id REFERENCES trip_fuel_supplies (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_type FUEL_TYPE NOT NULL,
+  fuel_supply DOUBLE PRECISION NOT NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
 CREATE TABLE IF NOT EXISTS medical_examinations (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,

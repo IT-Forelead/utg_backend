@@ -327,6 +327,29 @@ object dto {
         .transform
   }
 
+  case class TripFuelSupply(
+      id: TripFuelSupplyId,
+      createdAt: ZonedDateTime,
+      tripId: TripId,
+      vehicleId: VehicleId,
+      dispatcherId: UserId,
+      dispatcherSignature: AssetId,
+      deleted: Boolean = false,
+    )
+
+  case class TripFuelSupplyItem(
+      id: TripFuelSupplyItemId,
+      tripFuelSupplyId: TripFuelSupplyId,
+      fuelType: FuelType,
+      fuelSupply: NonNegDouble,
+      deleted: Boolean = false,
+    ) {
+    def toDomain: domain.TripFuelSupplyItem =
+      this
+        .into[domain.TripFuelSupplyItem]
+        .transform
+  }
+
   case class TripFuelRate(
       id: TripFuelRateId,
       createdAt: ZonedDateTime,

@@ -1,0 +1,31 @@
+package utg.routes
+
+import cats.MonadThrow
+import cats.implicits.toFlatMapOps
+import io.estatico.newtype.ops.toCoercibleIdOps
+import org.http4s.AuthedRoutes
+import org.http4s.circe.JsonDecoder
+import uz.scala.http4s.syntax.all.deriveEntityEncoder
+import uz.scala.http4s.syntax.all.http4SyntaxReqOps
+import uz.scala.http4s.utils.Routes
+
+import utg.algebras.TripFuelSuppliesAlgebra
+import utg.domain.AuthedUser
+import utg.domain.TripId
+import utg.domain.args.tripFuelSupplies.TripFuelSupplyInput
+
+final case class TripFuelSuppliesRoutes[F[_]: JsonDecoder: MonadThrow](
+    tripFuelSuppliesAlgebra: TripFuelSuppliesAlgebra[F]
+  ) extends Routes[F, AuthedUser] {
+  override val path = "/fuel-supplies"
+
+  override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
+    case ar @ POST -> Root / "create" as user =>
+      ar.req.decodeR[TripFuelSupplyInput] { create =>
+        tripFuelSuppliesAlgebra.create(create, user.id).flatMap(Created(_))
+      }
+
+    case GET -> Root / UUIDVar(id) as _ =>
+      tripFuelSuppliesAlgebra.getByTripId(id.coerce[TripId]).flatMap(Ok(_))
+  }
+}

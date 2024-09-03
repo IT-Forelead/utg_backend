@@ -52,7 +52,6 @@ object TripFuelInspectionsAlgebra {
                 tripId = trip.id,
                 vehicleId = trip.vehicleId,
                 actionType = input.actionType,
-//                fuelInTank = input.fuelInTank,
                 mechanicId = mechanicId,
                 mechanicSignature = input.mechanicSignature,
               )

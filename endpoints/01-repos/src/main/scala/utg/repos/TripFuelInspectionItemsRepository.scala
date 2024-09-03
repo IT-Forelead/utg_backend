@@ -40,7 +40,7 @@ object TripFuelInspectionItemsRepository {
             id = id,
             tripFuelInspectionId = tripFuelInspectionId,
             fuelType = item.fuelType,
-            fuelInTank = item.fuelInTank,
+            fuelInTank = item.quantity,
           )
           _ <- TripFuelInspectionItemsSql.insert.execute(dtoData)
         } yield ()

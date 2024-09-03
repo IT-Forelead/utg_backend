@@ -7,7 +7,9 @@ import io.circe.refined._
 import utg.domain.enums.FuelType
 
 @JsonCodec
-case class FuelTypeAndQuantity(
+case class TripFuelSupplyItem(
+    id: TripFuelSupplyItemId,
+    tripFuelSupplyId: TripFuelSupplyId,
     fuelType: FuelType,
-    quantity: NonNegDouble,
+    fuelSupply: NonNegDouble,
   )
