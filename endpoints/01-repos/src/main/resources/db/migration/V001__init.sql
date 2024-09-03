@@ -281,15 +281,6 @@ CREATE TABLE IF NOT EXISTS trips (
   summation VARCHAR NULL,
   vehicle_id UUID NOT NULL
     CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  doctor_id UUID NULL
-    CONSTRAINT fk_doctor_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  doctor_signature UUID NULL
-    CONSTRAINT fk_doctor_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  fuel_supply DOUBLE PRECISION NULL,
-  chief_mechanic_id UUID NULL
-    CONSTRAINT fk_chief_mechanic_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  chief_mechanic_signature UUID NULL
-    CONSTRAINT fk_chief_mechanic_signature_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   notes VARCHAR NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );

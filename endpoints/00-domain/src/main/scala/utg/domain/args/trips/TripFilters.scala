@@ -7,7 +7,6 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 
-import utg.domain.UserId
 import utg.domain.VehicleId
 import utg.domain.enums.WorkingModeType
 
@@ -17,7 +16,6 @@ case class TripFilters(
     startDate: Option[LocalDate] = None,
     endDate: Option[LocalDate] = None,
     vehicleId: Option[VehicleId] = None,
-    driverId: Option[UserId] = None,
     from: Option[ZonedDateTime] = None,
     to: Option[ZonedDateTime] = None,
     limit: Option[NonNegInt] = None,

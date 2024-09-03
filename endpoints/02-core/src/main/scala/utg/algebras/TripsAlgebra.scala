@@ -10,7 +10,6 @@ import utg.domain._
 import utg.domain.args.trips._
 import utg.effects.Calendar
 import utg.effects.GenUUID
-import utg.exception.AError
 import utg.repos.TripAccompanyingPersonsRepository
 import utg.repos.TripDriversRepository
 import utg.repos.TripSemiTrailersRepository
@@ -26,8 +25,6 @@ trait TripsAlgebra[F[_]] {
   def get(filters: TripFilters): F[ResponseData[Trip]]
   def findById(id: TripId): F[Option[Trip]]
   def update(input: UpdateTripInput): F[Unit]
-  def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
-  def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
 }
 
 object TripsAlgebra {
@@ -204,11 +201,6 @@ object TripsAlgebra {
             workingMode = input.workingMode,
             summation = input.summation,
             vehicleId = input.vehicleId,
-            doctorId = None,
-            doctorSignature = None,
-            fuelSupply = None,
-            chiefMechanicId = None,
-            chiefMechanicSignature = None,
             notes = None,
           )
           _ <- tripsRepository.create(dtoTrip)
@@ -247,16 +239,12 @@ object TripsAlgebra {
             .fold(Map.empty[TripId, List[TripDriver]].pure[F]) { driverIds =>
               tripDriversRepository.findByTripIds(driverIds)
             }
-          usersIds = dtoTrips
-            .data
-            .flatMap(t => t.doctorId ++ t.chiefMechanicId)
-            .distinct
           accompanyingUsersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
           vehicleIds = dtoTrips.data.map(_.vehicleId)
           trailersByTripIds = trailersByTripId.values.toList.flatMap(_.map(_.trailerId))
           semiTrailersByTripIds = semiTrailersByTripId.values.toList.flatMap(_.map(_.semiTrailerId))
           userById <- NonEmptyList
-            .fromList(usersIds ++ accompanyingUsersIds)
+            .fromList(accompanyingUsersIds)
             .fold(Map.empty[UserId, User].pure[F]) { userIds =>
               usersRepository.findByIds(userIds)
             }
@@ -297,11 +285,6 @@ object TripsAlgebra {
               trailer = trailers,
               semiTrailer = semiTrailers,
               accompanyingPersons = accompanyingUsers,
-              doctor = t.doctorId.flatMap(userById.get),
-              doctorSignature = t.doctorSignature,
-              fuelSupply = t.fuelSupply,
-              chiefMechanic = t.chiefMechanicId.flatMap(userById.get),
-              chiefMechanicSignature = t.chiefMechanicSignature,
               notes = t.notes,
             )
           }
@@ -328,9 +311,8 @@ object TripsAlgebra {
           usersIds = accompanyingByTripId.values.toList.flatMap(_.map(_.userId))
           trailersByTripIds = trailerByTripId.values.toList.flatMap(_.map(_.trailerId))
           semiTrailersByTripIds = semiTrailerByTripId.values.toList.flatMap(_.map(_.semiTrailerId))
-          doctorWithMechanicIds = (dtoTrip.doctorId ++ dtoTrip.chiefMechanicId).toList.distinct
           userById <- NonEmptyList
-            .fromList(usersIds ++ doctorWithMechanicIds)
+            .fromList(usersIds)
             .fold(Map.empty[UserId, User].pure[F]) { userIds =>
               usersRepository.findByIds(userIds)
             }
@@ -368,11 +350,6 @@ object TripsAlgebra {
             trailer = trailers,
             semiTrailer = semiTrailers,
             accompanyingPersons = accompanyingUsers,
-            doctor = dtoTrip.doctorId.flatMap(userById.get),
-            doctorSignature = dtoTrip.doctorSignature,
-            fuelSupply = dtoTrip.fuelSupply,
-            chiefMechanic = dtoTrip.chiefMechanicId.flatMap(userById.get),
-            chiefMechanicSignature = dtoTrip.chiefMechanicSignature,
             notes = dtoTrip.notes,
           )
         } yield trip
@@ -411,23 +388,5 @@ object TripsAlgebra {
             updateAccompanyingPersons(input.id, userIds)
           }
         } yield {}
-
-      override def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit] =
-        OptionT(tripsRepository.findById(input.tripId))
-          .cataF(
-            AError
-              .Internal(s"Trip not found by id [$input.tripId]")
-              .raiseError[F, Unit],
-            _ => tripsRepository.updateDoctorApproval(input),
-          )
-
-      override def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit] =
-        OptionT(tripsRepository.findById(input.tripId))
-          .cataF(
-            AError
-              .Internal(s"Trip not found by id [$input.tripId]")
-              .raiseError[F, Unit],
-            _ => tripsRepository.updateChiefMechanicApproval(input),
-          )
     }
 }

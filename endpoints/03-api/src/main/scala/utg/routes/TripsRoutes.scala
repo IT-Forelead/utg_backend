@@ -78,20 +78,6 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
         tripsAlgebra.update(input) >> NoContent()
       }
 
-    case ar @ POST -> Root / "doctor-approval" as user =>
-      ar.req.decodeR[TripDoctorApprovalInput] { create =>
-        tripsAlgebra.updateDoctorApproval(
-          create.copy(doctorId = Some(user.id))
-        ) >> NoContent()
-      }
-
-    case ar @ POST -> Root / "chief-mechanic-approval" as user =>
-      ar.req.decodeR[TripChiefMechanicInput] { create =>
-        tripsAlgebra.updateChiefMechanicApproval(
-          create.copy(chiefMechanicId = Some(user.id))
-        ) >> NoContent()
-      }
-
     case ar @ POST -> Root as _ =>
       ar.req.decodeR[TripFilters] { filters =>
         tripsAlgebra.get(filters).flatMap(Ok(_))

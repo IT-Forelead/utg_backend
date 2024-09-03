@@ -20,8 +20,6 @@ trait TripsRepository[F[_]] {
   def get(filters: TripFilters): F[ResponseData[dto.Trip]]
   def findById(id: TripId): F[Option[dto.Trip]]
   def update(id: TripId)(update: dto.Trip => dto.Trip): F[Unit]
-  def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit]
-  def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit]
 }
 
 object TripsRepository {
@@ -52,11 +50,5 @@ object TripsRepository {
         AError.Internal(s"Trip not found by id [$id]").raiseError[F, Unit],
         trip => TripsSql.update.execute(update(trip)),
       )
-
-    override def updateDoctorApproval(input: TripDoctorApprovalInput): F[Unit] =
-      TripsSql.updateDoctorApprovalSql.execute(input)
-
-    override def updateChiefMechanicApproval(input: TripChiefMechanicInput): F[Unit] =
-      TripsSql.updateChiefMechanicApprovalSql.execute(input)
   }
 }

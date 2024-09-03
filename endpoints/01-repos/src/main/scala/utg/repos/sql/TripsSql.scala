@@ -12,8 +12,7 @@ import utg.domain.args.trips._
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
     (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType
-      *: nes.opt *: VehiclesSql.id *: UsersSql.id.opt *: AssetsSql.id.opt *: nonNegDouble.opt
-      *: UsersSql.id.opt *: AssetsSql.id.opt *: nes.opt *: bool).to[dto.Trip]
+      *: nes.opt *: VehiclesSql.id *: nes.opt *: bool).to[dto.Trip]
 
   val insert: Command[dto.Trip] =
     sql"""INSERT INTO trips VALUES ($codec)""".command
@@ -25,7 +24,6 @@ private[repos] object TripsSql extends Sql[TripId] {
     val searchFilters = List(
       filters.workingMode.map(sql"working_mode = $workingModeType"),
       filters.vehicleId.map(sql"vehicle_id = ${VehiclesSql.id}"),
-      filters.driverId.map(sql"driver_id = ${UsersSql.id}"),
       filters.startDate.map(sql"start_date = $date"),
       filters.endDate.map(sql"end_date = $date"),
       filters.from.map(sql"created_at >= $zonedDateTime"),
@@ -48,45 +46,13 @@ private[repos] object TripsSql extends Sql[TripId] {
        work_order = $workingModeType,
        summation = ${nes.opt},
        vehicle_id = ${VehiclesSql.id},
-       doctor_id = ${UsersSql.id.opt},
-       doctor_signature = ${AssetsSql.id.opt},
-       fuel_supply = ${nonNegDouble.opt},
-       chief_mechanic_id = ${UsersSql.id.opt},
-       chief_mechanic_signature = ${AssetsSql.id.opt},
        notes = ${nes.opt}
        WHERE id = $id
      """
       .command
       .contramap {
         case trip: dto.Trip =>
-          trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *:
-            trip.thirdTab *: trip.workingMode *: trip.summation *: trip.vehicleId *: trip.doctorId *:
-            trip.doctorSignature *: trip.fuelSupply *: trip.chiefMechanicId *: trip.chiefMechanicSignature *:
-            trip.notes *: trip.id *: EmptyTuple
-      }
-
-  val updateDoctorApprovalSql: Command[TripDoctorApprovalInput] =
-    sql"""UPDATE trips
-       SET doctor_id = ${UsersSql.id.opt},
-       doctor_signature = ${AssetsSql.id.opt}
-       WHERE id = $id
-     """
-      .command
-      .contramap {
-        case tfe: TripDoctorApprovalInput =>
-          tfe.doctorId *: tfe.doctorSignature *: tfe.tripId *: EmptyTuple
-      }
-
-  val updateChiefMechanicApprovalSql: Command[TripChiefMechanicInput] =
-    sql"""UPDATE trips
-       SET fuel_supply = ${nonNegDouble.opt},
-       chief_mechanic_id = ${UsersSql.id.opt},
-       chief_mechanic_signature = ${AssetsSql.id.opt}
-       WHERE id = $id
-     """
-      .command
-      .contramap {
-        case tfe: TripChiefMechanicInput =>
-          tfe.fuelSupply *: tfe.chiefMechanicId *: tfe.chiefMechanicSignature *: tfe.tripId *: EmptyTuple
+          trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *: trip.thirdTab *:
+            trip.workingMode *: trip.summation *: trip.vehicleId *: trip.notes *: trip.id *: EmptyTuple
       }
 }

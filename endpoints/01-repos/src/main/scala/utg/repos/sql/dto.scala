@@ -190,11 +190,6 @@ object dto {
       workingMode: WorkingModeType,
       summation: Option[NonEmptyString],
       vehicleId: VehicleId,
-      doctorId: Option[UserId],
-      doctorSignature: Option[AssetId],
-      fuelSupply: Option[NonNegDouble],
-      chiefMechanicId: Option[UserId],
-      chiefMechanicSignature: Option[AssetId],
       notes: Option[NonEmptyString],
       deleted: Boolean = false,
     ) {
@@ -204,8 +199,6 @@ object dto {
         trailer: Option[List[domain.Vehicle]],
         semiTrailer: Option[List[domain.Vehicle]],
         accompanyingPersons: Option[List[AuthedUser.User]],
-        doctor: Option[AuthedUser.User],
-        chiefMechanic: Option[AuthedUser.User],
       ): domain.Trip =
       this
         .into[domain.Trip]
@@ -214,8 +207,6 @@ object dto {
         .withFieldConst(_.trailer, trailer)
         .withFieldConst(_.semiTrailer, semiTrailer)
         .withFieldConst(_.accompanyingPersons, accompanyingPersons)
-        .withFieldConst(_.doctor, doctor)
-        .withFieldConst(_.chiefMechanic, chiefMechanic)
         .transform
   }
 
