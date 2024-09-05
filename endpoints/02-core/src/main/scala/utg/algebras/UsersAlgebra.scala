@@ -37,7 +37,6 @@ trait UsersAlgebra[F[_]] {
     ): F[Unit]
   def delete(id: UserId): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
-  def changePassword(changePassword: Credentials): F[Unit]
 }
 object UsersAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
@@ -117,16 +116,6 @@ object UsersAlgebra {
             roleId = userRole.roleId
           )
         )
-
-      override def changePassword(changePassword: Credentials): F[Unit] =
-        for {
-          hash <- SCrypt.hashpw[F](changePassword.password)
-          _ <- usersRepository.changePassword(changePassword.phone)(
-            _.copy(
-              password = hash
-            )
-          )
-        } yield {}
 
       override def delete(id: UserId): F[Unit] =
         usersRepository.delete(id)

@@ -26,7 +26,6 @@ import utg.domain.Role
 import utg.domain.RoleId
 import utg.domain.UserId
 import utg.domain.args.users.UserFilters
-import utg.domain.auth
 import utg.domain.auth.AccessCredentials
 import utg.domain.enums.Privilege
 import utg.exception.AError
@@ -41,11 +40,6 @@ trait UsersRepository[F[_]] {
   def findById(id: UserId): F[Option[User]]
   def create(userAndHash: AccessCredentials[dto.User]): F[Unit]
   def update(id: UserId)(update: dto.User => dto.User): F[Unit]
-  def changePassword(
-      phone: Phone
-    )(
-      update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]
-    ): F[Unit]
   def delete(id: UserId): F[Unit]
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
@@ -165,16 +159,6 @@ object UsersRepository {
       OptionT(UsersSql.findById.queryOption(id)).cataF(
         AError.Internal(s"User not found by id [$id]").raiseError[F, Unit],
         user => UsersSql.update.execute(update(user)),
-      )
-
-    override def changePassword(
-        phone: Phone
-      )(
-        update: auth.AccessCredentials[dto.User] => auth.AccessCredentials[dto.User]
-      ): F[Unit] =
-      OptionT(UsersSql.findByPhone.queryOption(phone)).cataF(
-        AError.Internal(s"User not found by phone [$phone]").raiseError[F, Unit],
-        user => UsersSql.changePassword.execute(update(user)),
       )
 
     override def delete(id: UserId): F[Unit] =

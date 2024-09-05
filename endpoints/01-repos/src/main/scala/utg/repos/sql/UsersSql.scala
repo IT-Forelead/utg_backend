@@ -74,16 +74,6 @@ private[repos] object UsersSql extends Sql[UserId] {
             user.id *: EmptyTuple
       }
 
-  val changePassword: Command[AccessCredentials[dto.User]] =
-    sql"""UPDATE users
-       SET password = $passwordHash,
-       WHERE phone = $phone
-     """
-      .command
-      .contramap { (u: AccessCredentials[dto.User]) =>
-        u.password *: u.data.phone *: EmptyTuple
-      }
-
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =
     List(
       filters.id.map(sql"u.id = $id"),

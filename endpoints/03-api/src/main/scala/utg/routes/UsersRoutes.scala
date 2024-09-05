@@ -11,7 +11,6 @@ import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.Charset
 import org.http4s.Headers
-import org.http4s.HttpRoutes
 import org.http4s.MediaType
 import org.http4s.Response
 import org.http4s.circe.JsonDecoder
@@ -102,14 +101,6 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
               },
         )
     } yield ()
-
-  override val public: HttpRoutes[F] =
-    HttpRoutes.of[F] {
-      case req @ POST -> Root / "change-password" =>
-        req.decodeR[Credentials] { credentials =>
-          users.changePassword(credentials).flatMap(Ok(_))
-        }
-    }
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "create" as _ =>
