@@ -8,20 +8,14 @@ import cats.effect.Async
 import cats.implicits._
 import eu.timepit.refined.types.all.NonNegInt
 import io.estatico.newtype.ops.toCoercibleIdOps
-import org.http4s.AuthedRoutes
-import org.http4s.Charset
-import org.http4s.Headers
-import org.http4s.MediaType
-import org.http4s.Response
+import org.http4s._
 import org.http4s.circe.JsonDecoder
 import org.http4s.headers.`Content-Disposition`
 import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.Multipart
 import org.http4s.multipart.Part
 import org.typelevel.ci.CIStringSyntax
-import uz.scala.http4s.syntax.all.deriveEntityEncoder
-import uz.scala.http4s.syntax.all.http4SyntaxPartOps
-import uz.scala.http4s.syntax.all.http4SyntaxReqOps
+import uz.scala.http4s.syntax.all._
 import uz.scala.http4s.utils.Routes
 import uz.scala.syntax.refined._
 
@@ -29,11 +23,7 @@ import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
 import utg.domain.UserId
-import utg.domain.args.users.CreateRoleInput
-import utg.domain.args.users.UpdateUserInput
-import utg.domain.args.users.UserFilters
-import utg.domain.args.users.UserInput
-import utg.domain.auth.Credentials
+import utg.domain.args.users._
 import utg.domain.enums.DrivingLicenseCategory
 import utg.exception.AError
 import utg.repos.sql.dto.User

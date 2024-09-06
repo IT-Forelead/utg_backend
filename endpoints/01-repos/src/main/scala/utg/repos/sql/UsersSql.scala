@@ -4,6 +4,8 @@ import shapeless.HNil
 import skunk._
 import skunk.codec.all.varchar
 import skunk.implicits._
+import tsec.passwordhashers.PasswordHash
+import tsec.passwordhashers.jca.SCrypt
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
 import utg.Phone
@@ -113,4 +115,7 @@ private[repos] object UsersSql extends Sql[UserId] {
 
   val delete: Command[UserId] =
     sql"""DELETE FROM users WHERE id = $id""".command
+
+  val updatePassword: Command[PasswordHash[SCrypt] *: UserId *: EmptyTuple] =
+    sql"""UPDATE users SET password = $passwordHash WHERE id = $id""".command
 }

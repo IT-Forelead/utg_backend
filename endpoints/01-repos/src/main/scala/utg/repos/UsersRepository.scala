@@ -4,15 +4,13 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
-import cats.implicits.catsSyntaxApplicativeErrorId
-import cats.implicits.catsSyntaxApplicativeId
-import cats.implicits.catsSyntaxOptionId
-import cats.implicits.toFlatMapOps
-import cats.implicits.toFunctorOps
-import cats.implicits.toTraverseOps
+import cats.implicits._
 import eu.timepit.refined.types.string.NonEmptyString
+import scodec.compat.*:
 import skunk._
 import skunk.codec.all.int8
+import tsec.passwordhashers.PasswordHash
+import tsec.passwordhashers.jca.SCrypt
 import uz.scala.skunk.syntax.all.skunkSyntaxCommandOps
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 import uz.scala.skunk.syntax.all.skunkSyntaxQueryOps
@@ -44,6 +42,7 @@ trait UsersRepository[F[_]] {
   def findByIds(ids: NonEmptyList[UserId]): F[Map[UserId, User]]
   def get(filters: UserFilters): F[ResponseData[User]]
   def getAsStream(filters: UserFilters): fs2.Stream[F, dto.User]
+  def updatePassword(id: UserId, password: PasswordHash[SCrypt]): F[Unit]
 }
 
 object UsersRepository {
@@ -169,5 +168,8 @@ object UsersRepository {
         UsersSql.select(filters).paginateOpt(filters.limit.map(_.value), filters.page.map(_.value))
       af.fragment.query(UsersSql.codec *: int8).queryStream(af.argument).map(_._1)
     }
+
+    override def updatePassword(id: UserId, password: PasswordHash[SCrypt]): F[Unit] =
+      UsersSql.updatePassword.execute(password *: id *: EmptyTuple)
   }
 }

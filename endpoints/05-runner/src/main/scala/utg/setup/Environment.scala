@@ -23,6 +23,8 @@ import uz.scala.skunk.SkunkSession
 import utg.Algebras
 import utg.Phone
 import utg.Repositories
+import utg.algebras.AssetsAlgebra
+import utg.algebras.UsersAlgebra
 import utg.auth.impl.Auth
 import utg.auth.impl.LiveMiddleware
 import utg.domain.AuthedUser
@@ -37,6 +39,8 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
     s3Client: S3Client[F],
     operSmsClient: OperSmsClient[F],
     middleware: server.AuthMiddleware[F, AuthedUser],
+    users: UsersAlgebra[F],
+    assets: AssetsAlgebra[F],
   ) {
   private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client, operSmsClient)
 
@@ -66,10 +70,21 @@ object Environment {
       redis <- Redis[F].utf8(config.redis.uri.toString).map(RedisClient[F](_, config.redis.prefix))
       implicit0(random: Random[F]) <- Resource.eval(Random.scalaUtilRandom[F])
       middleware = LiveMiddleware.make[F](config.auth, redis)
-      auth = Auth.make[F](config.auth, findUser(repositories), redis)
       s3Client <- S3Client.resource(config.awsConfig)
       smsBroker <- HttpClientFs2Backend.resource[F]().map { implicit backend =>
         OperSmsClient.make[F](config.opersms)
       }
-    } yield Environment[F](config, repositories, auth, s3Client, smsBroker, middleware)
+      assets = AssetsAlgebra.make[F](repositories.assets, s3Client)
+      users = UsersAlgebra.make[F](repositories.users, assets, smsBroker)
+      auth = Auth.make[F](config.auth, findUser(repositories), redis, smsBroker, users)
+    } yield Environment[F](
+      config,
+      repositories,
+      auth,
+      s3Client,
+      smsBroker,
+      middleware,
+      users,
+      assets,
+    )
 }

@@ -1,5 +1,8 @@
 package utg.auth.impl
 
+import scala.concurrent.duration.DurationInt
+
+import cats.Applicative
 import cats.data.EitherT
 import cats.data.OptionT
 import cats.effect.Sync
@@ -12,25 +15,34 @@ import org.http4s.Request
 import org.typelevel.log4cats.Logger
 import pdi.jwt.JwtAlgorithm
 import tsec.passwordhashers.jca.SCrypt
+import uz.scala.integration.sms.OperSmsClient
 import uz.scala.redis.RedisClient
 import uz.scala.syntax.all.circeSyntaxDecoderOps
-import uz.scala.syntax.refined.commonSyntaxAutoUnwrapV
+import uz.scala.syntax.refined._
 
 import utg.Phone
+import utg.algebras.UsersAlgebra
 import utg.auth.AuthConfig
 import utg.auth.utils.AuthMiddleware
 import utg.auth.utils.JwtExpire
 import utg.auth.utils.Tokens
 import utg.domain.AuthedUser
+import utg.domain.args.users.DataTimeAndCount
+import utg.domain.args.users.LinkCodeAndPassword
 import utg.domain.auth._
+import utg.effects.Calendar
+import utg.exception.AError
 import utg.exception.AError.AuthError
-import utg.exception.AError.AuthError.NoSuchUser
-import utg.exception.AError.AuthError.PasswordDoesNotMatch
+import utg.exception.AError.AuthError._
+import utg.utils.RandomGenerator
 
 trait Auth[F[_], A] {
   def login(credentials: Credentials): F[AuthTokens]
   def destroySession(request: Request[F], phone: Phone): F[Unit]
   def refresh(request: Request[F]): F[AuthTokens]
+  def resetPassword(phone: Phone): F[Unit]
+  def validateLinkCode(linkCode: String): F[String]
+  def updatePasswordWithLinkCode(input: LinkCodeAndPassword): F[Unit]
 }
 
 object Auth {
@@ -38,6 +50,8 @@ object Auth {
       config: AuthConfig,
       findUser: Phone => F[Option[AccessCredentials[AuthedUser]]],
       redis: RedisClient[F],
+      opersms: OperSmsClient[F],
+      users: UsersAlgebra[F],
     )(implicit
       logger: Logger[F]
     ): Auth[F, AuthedUser] =
@@ -47,7 +61,7 @@ object Auth {
       val jwtAuth: JwtSymmetricAuth = JwtAuth.hmac(config.tokenKey.secret, JwtAlgorithm.HS256)
 
       override def login(credentials: Credentials): F[AuthTokens] =
-        findUser(credentials.phone).flatMap {
+        users.findUser(credentials.phone).flatMap {
           case None =>
             NoSuchUser("User Not Found").raiseError[F, AuthTokens]
           case Some(person) if !SCrypt.checkpwUnsafe(credentials.password, person.password) =>
@@ -113,6 +127,40 @@ object Auth {
             .traverse_(token => redis.del(AuthMiddleware.ACCESS_TOKEN_PREFIX + token.value, phone))
         } yield {}
 
+      override def resetPassword(phone: Phone): F[Unit] =
+        users.findUser(phone).flatMap {
+          case None =>
+            NoSuchUser("User Not Found").raiseError[F, Unit]
+          case Some(user) =>
+            OptionT(redis.get(user.data.phone + "sms-count"))
+              .map(_.decodeAs[DataTimeAndCount])
+              .cataF(
+                sentSmsLink(user.data, 0),
+                data =>
+                  Calendar[F].currentDateTime.flatMap { now =>
+                    if (data.total <= 3 && now.isAfter(data.datetime.plusMinutes(10)))
+                      sentSmsLink(user.data, data.total)
+                    else
+                      TryManyTimes("Try many times").raiseError[F, Unit]
+                  },
+              )
+        }
+
+      override def validateLinkCode(linkCode: String): F[String] =
+        OptionT(redis.get(linkCode))
+          .cataF(
+            AError.Internal(s"Invalid code [$linkCode]").raiseError[F, String],
+            _ => "Valid code!".pure[F],
+          )
+
+      override def updatePasswordWithLinkCode(input: LinkCodeAndPassword): F[Unit] =
+        OptionT(redis.get(input.linkCode))
+          .map(_.decodeAs[AuthedUser])
+          .semiflatMap { user =>
+            users.updatePassword(user.id, input.password)
+          }
+          .getOrElseF(AError.Internal("Invalid code").raiseError[F, Unit])
+
       private def createNewToken(person: AuthedUser): F[AuthTokens] =
         for {
           tokens <- tokens.createToken[AuthedUser](person)
@@ -134,5 +182,21 @@ object Auth {
           )
           .value
           .void
+
+      private def sentSmsLink(user: AuthedUser, attempt: Int): F[Unit] =
+        for {
+          now <- Calendar[F].currentDateTime
+          _ <- redis.put(
+            user.phone + "sms-count",
+            DataTimeAndCount(now, attempt + 1),
+            1.day,
+          )
+          code = RandomGenerator.randomLink(6)
+          _ <- redis.put(code, user, 10.minutes)
+          smsText =
+            s"Parolingizni qayta tiklash uchun quydagi havolaga kiring.\n http://utg.iflead.uz/reset-password/$code"
+          _ <- opersms.send(user.phone, smsText, _ => Applicative[F].unit)
+          _ <- logger.info("Link code:" + code)
+        } yield ()
     }
 }

@@ -13,6 +13,7 @@ import uz.scala.http4s.utils.Routes
 
 import utg.auth.impl.Auth
 import utg.domain.AuthedUser
+import utg.domain.args.users.LinkCodeAndPassword
 import utg.domain.auth.Credentials
 
 final case class AuthRoutes[F[_]: Logger: JsonDecoder: MonadThrow](
@@ -29,6 +30,17 @@ final case class AuthRoutes[F[_]: Logger: JsonDecoder: MonadThrow](
 
       case req @ GET -> Root / "refresh" =>
         auth.refresh(req).flatMap(Ok(_))
+
+      case GET -> Root / "reset-password" :? PhoneParam(phone) =>
+        auth.resetPassword(phone).flatMap(Ok(_))
+
+      case GET -> Root / "link-validation" / linkCode =>
+        auth.validateLinkCode(linkCode).flatMap(Ok(_))
+
+      case req @ POST -> Root / "link-validation-and-update-password" =>
+        req.decodeR[LinkCodeAndPassword] { input =>
+          auth.updatePasswordWithLinkCode(input).flatMap(Ok(_))
+        }
     }
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {

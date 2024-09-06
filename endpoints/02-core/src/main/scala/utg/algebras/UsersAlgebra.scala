@@ -6,12 +6,14 @@ import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.effect.std.Random
 import cats.implicits._
+import eu.timepit.refined.types.string.NonEmptyString
 import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.integration.sms.OperSmsClient
 import uz.scala.syntax.refined._
 
+import utg.Phone
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
@@ -37,7 +39,10 @@ trait UsersAlgebra[F[_]] {
     ): F[Unit]
   def delete(id: UserId): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
+  def findUser(phone: Phone): F[Option[AccessCredentials[User]]]
+  def updatePassword(id: UserId, password: NonEmptyString): F[Unit]
 }
+
 object UsersAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
@@ -124,5 +129,14 @@ object UsersAlgebra {
         F.pure {
           usersRepository.getAsStream(filters)
         }
+
+      override def findUser(phone: Phone): F[Option[AccessCredentials[User]]] =
+        usersRepository.find(phone)
+
+      override def updatePassword(id: UserId, password: NonEmptyString): F[Unit] =
+        for {
+          hash <- SCrypt.hashpw[F](password)
+          _ <- usersRepository.updatePassword(id, hash)
+        } yield {}
     }
 }

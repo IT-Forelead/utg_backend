@@ -27,5 +27,8 @@ object AError {
     final case class PasswordDoesNotMatch(cause: String) extends AuthError {
       override def errorCode: String = "AUTHENTICATION"
     }
+    final case class TryManyTimes(cause: String) extends AuthError {
+      override def errorCode: String = "TRY_MANY_TIMES"
+    }
   }
 }
