@@ -19,5 +19,5 @@ private[repos] object TripVehicleAcceptancesSql extends Sql[TripVehicleAcceptanc
   val selectByTripId: Query[TripId, dto.TripVehicleAcceptance] =
     sql"""SELECT * FROM trip_vehicle_acceptances
          WHERE deleted = false AND trip_id = ${TripsSql.id}
-         ORDER BY created_at DESC""".query(codec)
+         ORDER BY created_at ASC, action_type ASC""".query(codec)
 }
