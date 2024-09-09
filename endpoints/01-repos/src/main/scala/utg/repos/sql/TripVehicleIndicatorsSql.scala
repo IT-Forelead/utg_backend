@@ -20,7 +20,7 @@ private[repos] object TripVehicleIndicatorsSql extends Sql[TripVehicleIndicatorI
   val selectByTripId: Query[TripId, dto.TripVehicleIndicator] =
     sql"""SELECT * FROM trip_vehicle_indicators
          WHERE deleted = false AND trip_id = ${TripsSql.id}
-         ORDER BY created_at DESC""".query(codec)
+         ORDER BY created_at ASC, action_type ASC""".query(codec)
 
   val selectLastOdometerIndicatorByVehicleId: Query[VehicleId, NonNegDouble] =
     sql"""SELECT odometer_indicator FROM trip_vehicle_indicators
