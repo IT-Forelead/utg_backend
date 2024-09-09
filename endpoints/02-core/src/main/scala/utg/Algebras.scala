@@ -24,19 +24,20 @@ case class Algebras[F[_]](
     vehicleCategories: VehicleCategoriesAlgebra[F],
     vehicles: VehiclesAlgebra[F],
     trips: TripsAlgebra[F],
+    tripFullyDetails: TripFullyDetailsAlgebra[F],
     tripDrivers: TripDriversAlgebra[F],
-    tripFuelSuppliesAlgebra: TripFuelSuppliesAlgebra[F],
+    tripFuelSupplies: TripFuelSuppliesAlgebra[F],
     tripVehicleIndicators: TripVehicleIndicatorsAlgebra[F],
-    tripGivenFuelsAlgebra: TripGivenFuelsAlgebra[F],
-    tripFuelInspectionsAlgebra: TripFuelInspectionsAlgebra[F],
-    tripFuelRatesAlgebra: TripFuelRatesAlgebra[F],
-    tripVehicleAcceptancesAlgebra: TripVehicleAcceptancesAlgebra[F],
+    tripGivenFuels: TripGivenFuelsAlgebra[F],
+    tripFuelInspections: TripFuelInspectionsAlgebra[F],
+    tripFuelRates: TripFuelRatesAlgebra[F],
+    tripVehicleAcceptances: TripVehicleAcceptancesAlgebra[F],
     tripDriverTasks: TripDriverTasksAlgebra[F],
-    tripRouteDelaysAlgebra: TripRouteDelaysAlgebra[F],
-    tripCompleteTasksAlgebra: TripCompleteTasksAlgebra[F],
-    tripCompleteTaskAcceptancesAlgebra: TripCompleteTaskAcceptancesAlgebra[F],
-    medicalExaminationsAlgebra: MedicalExaminationsAlgebra[F],
-    vehicleHistoriesAlgebra: VehicleHistoriesAlgebra[F],
+    tripRouteDelays: TripRouteDelaysAlgebra[F],
+    tripCompleteTasks: TripCompleteTasksAlgebra[F],
+    tripCompleteTaskAcceptances: TripCompleteTaskAcceptancesAlgebra[F],
+    medicalExaminations: MedicalExaminationsAlgebra[F],
+    vehicleHistories: VehicleHistoriesAlgebra[F],
   )
 
 object Algebras {
@@ -49,6 +50,66 @@ object Algebras {
       P: PasswordHasher[F, SCrypt]
     ): Algebras[F] = {
     val assetsAlgebra = AssetsAlgebra.make[F](repositories.assets, s3Client)
+    val tripsAlgebra = TripsAlgebra.make[F](
+      repositories.trips,
+      repositories.tripDrivers,
+      repositories.tripTrailers,
+      repositories.tripSemiTrailers,
+      repositories.tripAccompanyingPersons,
+      repositories.users,
+      repositories.vehicles,
+    )
+    val tripFuelSuppliesAlgebra = TripFuelSuppliesAlgebra.make[F](
+      repositories.tripFuelSupplies,
+      repositories.tripFuelSupplyItems,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripVehicleIndicatorsAlgebra = TripVehicleIndicatorsAlgebra.make[F](
+      repositories.tripVehicleIndicators,
+      repositories.trips,
+    )
+    val tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](
+      repositories.tripGivenFuels,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripFuelInspectionsAlgebra = TripFuelInspectionsAlgebra.make[F](
+      repositories.tripFuelInspections,
+      repositories.tripFuelInspectionItems,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripFuelRatesAlgebra = TripFuelRatesAlgebra.make[F](
+      repositories.tripFuelRates,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
+      repositories.tripVehicleAcceptances,
+      repositories.users,
+      repositories.trips,
+    )
+    val tripDriverTasksAlgebra = TripDriverTasksAlgebra.make[F](
+      repositories.tripDriverTasks,
+      repositories.trips,
+    )
+    val tripRouteDelaysAlgebra = TripRouteDelaysAlgebra.make[F](
+      repositories.tripRouteDelays,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripCompleteTasksAlgebra = TripCompleteTasksAlgebra.make[F](
+      repositories.tripCompleteTasks,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripCompleteTaskAcceptancesAlgebra = TripCompleteTaskAcceptancesAlgebra.make[F](
+      repositories.tripCompleteTaskAcceptances,
+      repositories.trips,
+      repositories.users,
+    )
+    val tripDriversAlgebra = TripDriversAlgebra.make[F](repositories.tripDrivers)
     Algebras[F](
       auth = auth,
       assets = assetsAlgebra,
@@ -58,73 +119,39 @@ object Algebras {
       branches = BranchesAlgebra.make[F](repositories.branches, repositories.regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](repositories.vehicleCategories),
       vehicles = VehiclesAlgebra.make[F](repositories.vehicles),
-      trips = TripsAlgebra.make[F](
-        repositories.trips,
-        repositories.tripDrivers,
-        repositories.tripTrailers,
-        repositories.tripSemiTrailers,
-        repositories.tripAccompanyingPersons,
-        repositories.users,
-        repositories.vehicles,
-      ),
-      tripDrivers = TripDriversAlgebra.make[F](repositories.tripDrivers),
-      tripFuelSuppliesAlgebra = TripFuelSuppliesAlgebra.make[F](
-        repositories.tripFuelSupplies,
-        repositories.tripFuelSupplyItems,
-        repositories.trips,
-        repositories.users,
-      ),
-      tripVehicleIndicators = TripVehicleIndicatorsAlgebra.make[F](
-        repositories.tripVehicleIndicators,
-        repositories.trips,
-      ),
-      tripGivenFuelsAlgebra = TripGivenFuelsAlgebra.make[F](
-        repositories.tripGivenFuels,
-        repositories.trips,
-        repositories.users,
-      ),
-      tripFuelInspectionsAlgebra = TripFuelInspectionsAlgebra.make[F](
-        repositories.tripFuelInspections,
-        repositories.tripFuelInspectionItems,
-        repositories.trips,
-        repositories.users,
-      ),
-      tripFuelRatesAlgebra = TripFuelRatesAlgebra.make[F](
-        repositories.tripFuelRates,
-        repositories.trips,
-        repositories.users,
-      ),
-      tripVehicleAcceptancesAlgebra = TripVehicleAcceptancesAlgebra.make[F](
-        repositories.tripVehicleAcceptances,
-        repositories.users,
-        repositories.trips,
-      ),
-      tripDriverTasks = TripDriverTasksAlgebra.make[F](
-        repositories.tripDriverTasks,
-        repositories.trips,
-      ),
-      tripRouteDelaysAlgebra = TripRouteDelaysAlgebra.make[F](
-        repositories.tripRouteDelays,
-        repositories.trips,
-        repositories.users,
-      ),
-      tripCompleteTasksAlgebra = TripCompleteTasksAlgebra.make[F](
-        repositories.tripCompleteTasks,
-        repositories.trips,
-        repositories.users,
-      ),
-      tripCompleteTaskAcceptancesAlgebra = TripCompleteTaskAcceptancesAlgebra.make[F](
-        repositories.tripCompleteTaskAcceptances,
-        repositories.trips,
-        repositories.users,
-      ),
-      medicalExaminationsAlgebra = MedicalExaminationsAlgebra.make[F](
+      trips = tripsAlgebra,
+      tripDrivers = tripDriversAlgebra,
+      tripFuelSupplies = tripFuelSuppliesAlgebra,
+      tripVehicleIndicators = tripVehicleIndicatorsAlgebra,
+      tripGivenFuels = tripGivenFuelsAlgebra,
+      tripFuelInspections = tripFuelInspectionsAlgebra,
+      tripFuelRates = tripFuelRatesAlgebra,
+      tripVehicleAcceptances = tripVehicleAcceptancesAlgebra,
+      tripDriverTasks = tripDriverTasksAlgebra,
+      tripRouteDelays = tripRouteDelaysAlgebra,
+      tripCompleteTasks = tripCompleteTasksAlgebra,
+      tripCompleteTaskAcceptances = tripCompleteTaskAcceptancesAlgebra,
+      medicalExaminations = MedicalExaminationsAlgebra.make[F](
         repositories.medicalExaminations,
         repositories.trips,
         repositories.tripDrivers,
         repositories.users,
       ),
-      vehicleHistoriesAlgebra = VehicleHistoriesAlgebra.make[F](repositories.vehicleHistories),
+      vehicleHistories = VehicleHistoriesAlgebra.make[F](repositories.vehicleHistories),
+      tripFullyDetails = TripFullyDetailsAlgebra.make[F](
+        tripsAlgebra,
+        tripDriversAlgebra,
+        tripFuelSuppliesAlgebra,
+        tripVehicleAcceptancesAlgebra,
+        tripVehicleIndicatorsAlgebra,
+        tripGivenFuelsAlgebra,
+        tripFuelInspectionsAlgebra,
+        tripFuelRatesAlgebra,
+        tripDriverTasksAlgebra,
+        tripCompleteTasksAlgebra,
+        tripCompleteTaskAcceptancesAlgebra,
+        tripRouteDelaysAlgebra,
+      ),
     )
   }
 }

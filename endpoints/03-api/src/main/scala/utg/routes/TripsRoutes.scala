@@ -1,13 +1,12 @@
 package utg.routes
 
 import java.io.ByteArrayOutputStream
-
 import scala.util.Random
-
 import cats.MonadThrow
 import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFunctorOps
+import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s.AuthedRoutes
 import org.http4s.Charset
 import org.http4s.Header
@@ -20,13 +19,13 @@ import org.xhtmlrenderer.pdf.ITextRenderer
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
-
-import utg.algebras.TripsAlgebra
-import utg.domain.AuthedUser
+import utg.algebras.{TripFullyDetailsAlgebra, TripsAlgebra}
+import utg.domain.{AuthedUser, TripId}
 import utg.domain.args.trips._
 
 final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
-    tripsAlgebra: TripsAlgebra[F]
+    tripsAlgebra: TripsAlgebra[F],
+    tripFullyDetailsAlgebra: TripFullyDetailsAlgebra[F],
   ) extends Routes[F, AuthedUser] {
   override val path = "/trips"
 
@@ -82,6 +81,9 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
       ar.req.decodeR[TripFilters] { filters =>
         tripsAlgebra.get(filters).flatMap(Ok(_))
       }
+
+    case GET -> Root / "fully-details" / UUIDVar(id) as _ =>
+      tripFullyDetailsAlgebra.getFullyDetails(id.coerce[TripId]).flatMap(Ok(_))
   }
 
   private def html2Pdf(htmlContent: String): Array[Byte] = {
