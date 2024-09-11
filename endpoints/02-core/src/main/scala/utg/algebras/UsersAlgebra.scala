@@ -1,7 +1,6 @@
 package utg.algebras
 
 import caliban.uploads.FileMeta
-import cats.Applicative
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.effect.std.Random
@@ -10,15 +9,16 @@ import eu.timepit.refined.types.string.NonEmptyString
 import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
-import uz.scala.integration.sms.OperSmsClient
 import uz.scala.syntax.refined._
 
 import utg.Phone
 import utg.domain.AuthedUser.User
 import utg.domain.ResponseData
 import utg.domain.UserId
+import utg.domain.args.smsMessages.SmsMessageInput
 import utg.domain.args.users._
 import utg.domain.auth._
+import utg.domain.enums.DeliveryStatus
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
@@ -47,7 +47,7 @@ object UsersAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
       assets: AssetsAlgebra[F],
-      opersms: OperSmsClient[F],
+      smsMessagesAlgebra: SmsMessagesAlgebra[F],
     )(implicit
       F: MonadThrow[F],
       P: PasswordHasher[F, SCrypt],
@@ -89,7 +89,8 @@ object UsersAlgebra {
           _ <- usersRepository.create(accessCredentials)
           smsText =
             s"Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n %%UTG_DOMAIN%%\n Parolingiz: $password"
-          _ <- opersms.send(userInput.phone, smsText, _ => Applicative[F].unit)
+          smsMessageInput = SmsMessageInput(userInput.phone, smsText, DeliveryStatus.Sent)
+          _ <- smsMessagesAlgebra.create(smsMessageInput)
         } yield id
 
       override def update(

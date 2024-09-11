@@ -59,6 +59,15 @@ CREATE TYPE DRIVING_LICENSE_CATEGORY AS ENUM (
   'DE'
 );
 
+CREATE TYPE DELIVERY_STATUS AS ENUM (
+  'sent',
+  'delivered',
+  'not_delivered',
+  'failed',
+  'transmitted',
+  'undefined'
+);
+
 CREATE TABLE IF NOT EXISTS assets(
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -530,4 +539,14 @@ CREATE TABLE IF NOT EXISTS vehicle_histories (
   branch_id UUID NOT NULL
     CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
   registered_number VARCHAR NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS sms_messages (
+  id UUID PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  phone VARCHAR NOT NULL,
+  text VARCHAR NOT NULL,
+  status DELIVERY_STATUS NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
 );

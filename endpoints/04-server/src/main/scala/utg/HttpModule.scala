@@ -49,6 +49,7 @@ object HttpModule {
         new TripCompleteTasksRoutes[F](env.algebras.tripCompleteTasks),
         new TripCompleteTaskAcceptancesRoutes[F](env.algebras.tripCompleteTaskAcceptances),
         new MedicalExaminationsRoutes[F](env.algebras.medicalExaminations),
+        new SmsMessagesRoutes[F](env.algebras.smsMessages),
       )
       .map { r =>
         Router(

@@ -2,7 +2,6 @@ package utg.routes
 
 import cats.MonadThrow
 import cats.implicits._
-import io.circe.refined._
 import org.http4s.AuthedRoutes
 import org.http4s.circe.JsonDecoder
 import uz.scala.http4s.syntax.all.deriveEntityEncoder

@@ -52,6 +52,8 @@ package object sql {
     `enum`[WorkingModeType](WorkingModeType, Type("working_mode_type"))
   val healthType: Codec[HealthType] =
     `enum`[HealthType](HealthType, Type("health_type"))
+  val deliveryStatus: Codec[DeliveryStatus] =
+    `enum`[DeliveryStatus](DeliveryStatus, Type("delivery_status"))
   val vehicleIndicatorActionType: Codec[VehicleIndicatorActionType] =
     `enum`[VehicleIndicatorActionType](
       VehicleIndicatorActionType,

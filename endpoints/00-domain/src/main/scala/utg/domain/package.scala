@@ -29,6 +29,8 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class RoleId(value: UUID)
   @derive(eqv, show, uuid)
+  @newtype case class SmsMessageId(value: UUID)
+  @derive(eqv, show, uuid)
   @newtype case class UserId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class AssetId(value: UUID)

@@ -1,7 +1,5 @@
 package utg.setup
 
-import cats.Monad
-import cats.data.OptionT
 import cats.effect.Async
 import cats.effect.Resource
 import cats.effect.std.Console
@@ -21,14 +19,13 @@ import uz.scala.redis.RedisClient
 import uz.scala.skunk.SkunkSession
 
 import utg.Algebras
-import utg.Phone
 import utg.Repositories
 import utg.algebras.AssetsAlgebra
+import utg.algebras.SmsMessagesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.auth.impl.Auth
 import utg.auth.impl.LiveMiddleware
 import utg.domain.AuthedUser
-import utg.domain.auth.AccessCredentials
 import utg.http.{ Environment => ServerEnvironment }
 import utg.utils.ConfigLoader
 
@@ -41,6 +38,7 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
     middleware: server.AuthMiddleware[F, AuthedUser],
     users: UsersAlgebra[F],
     assets: AssetsAlgebra[F],
+    smsMessages: SmsMessagesAlgebra[F],
   ) {
   private val algebras: Algebras[F] = Algebras.make[F](auth, repositories, s3Client, operSmsClient)
 
@@ -53,13 +51,6 @@ case class Environment[F[_]: Async: Logger: Dispatcher: Random](
 }
 
 object Environment {
-  private def findUser[F[_]: Monad](
-      repositories: Repositories[F]
-    ): Phone => F[Option[AccessCredentials[AuthedUser]]] = phone =>
-    OptionT(repositories.users.find(phone))
-      .map(identity[AccessCredentials[AuthedUser]])
-      .value
-
   def make[F[_]: Async: Console: Logger: Dispatcher]: Resource[F, Environment[F]] =
     for {
       config <- Resource.eval(ConfigLoader.load[F, Config])
@@ -75,8 +66,9 @@ object Environment {
         OperSmsClient.make[F](config.opersms)
       }
       assets = AssetsAlgebra.make[F](repositories.assets, s3Client)
-      users = UsersAlgebra.make[F](repositories.users, assets, smsBroker)
-      auth = Auth.make[F](config.auth, findUser(repositories), redis, smsBroker, users)
+      smsMessages = SmsMessagesAlgebra.make[F](repositories.smsMessages, smsBroker)
+      users = UsersAlgebra.make[F](repositories.users, assets, smsMessages)
+      auth = Auth.make[F](config.auth, redis, users, smsMessages)
     } yield Environment[F](
       config,
       repositories,
@@ -86,5 +78,6 @@ object Environment {
       middleware,
       users,
       assets,
+      smsMessages,
     )
 }

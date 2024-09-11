@@ -38,6 +38,7 @@ case class Algebras[F[_]](
     tripCompleteTaskAcceptances: TripCompleteTaskAcceptancesAlgebra[F],
     medicalExaminations: MedicalExaminationsAlgebra[F],
     vehicleHistories: VehicleHistoriesAlgebra[F],
+    smsMessages: SmsMessagesAlgebra[F],
   )
 
 object Algebras {
@@ -110,10 +111,11 @@ object Algebras {
       repositories.users,
     )
     val tripDriversAlgebra = TripDriversAlgebra.make[F](repositories.tripDrivers)
+    val smsMessagesAlgebra = SmsMessagesAlgebra.make[F](repositories.smsMessages, opersms)
     Algebras[F](
       auth = auth,
       assets = assetsAlgebra,
-      users = UsersAlgebra.make[F](repositories.users, assetsAlgebra, opersms),
+      users = UsersAlgebra.make[F](repositories.users, assetsAlgebra, smsMessagesAlgebra),
       roles = RolesAlgebra.make[F](repositories.roles),
       regions = RegionsAlgebra.make[F](repositories.regions),
       branches = BranchesAlgebra.make[F](repositories.branches, repositories.regions),
@@ -152,6 +154,7 @@ object Algebras {
         tripCompleteTaskAcceptancesAlgebra,
         tripRouteDelaysAlgebra,
       ),
+      smsMessages = smsMessagesAlgebra,
     )
   }
 }

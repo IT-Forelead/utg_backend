@@ -33,6 +33,7 @@ case class Repositories[F[_]](
     tripCompleteTaskAcceptances: TripCompleteTaskAcceptancesRepository[F],
     medicalExaminations: MedicalExaminationsRepository[F],
     vehicleHistories: VehicleHistoriesRepository[F],
+    smsMessages: SmsMessagesRepository[F],
   )
 
 object Repositories {
@@ -68,6 +69,7 @@ object Repositories {
       tripCompleteTaskAcceptances = TripCompleteTaskAcceptancesRepository.make[F],
       medicalExaminations = MedicalExaminationsRepository.make[F],
       vehicleHistories = VehicleHistoriesRepository.make[F],
+      smsMessages = SmsMessagesRepository.make[F],
     )
   }
 }

@@ -2,7 +2,6 @@ package utg.auth.impl
 
 import scala.concurrent.duration.DurationInt
 
-import cats.Applicative
 import cats.data.EitherT
 import cats.data.OptionT
 import cats.effect.Sync
@@ -15,21 +14,23 @@ import org.http4s.Request
 import org.typelevel.log4cats.Logger
 import pdi.jwt.JwtAlgorithm
 import tsec.passwordhashers.jca.SCrypt
-import uz.scala.integration.sms.OperSmsClient
 import uz.scala.redis.RedisClient
 import uz.scala.syntax.all.circeSyntaxDecoderOps
 import uz.scala.syntax.refined._
 
 import utg.Phone
+import utg.algebras.SmsMessagesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.auth.AuthConfig
 import utg.auth.utils.AuthMiddleware
 import utg.auth.utils.JwtExpire
 import utg.auth.utils.Tokens
 import utg.domain.AuthedUser
+import utg.domain.args.smsMessages.SmsMessageInput
 import utg.domain.args.users.DataTimeAndCount
 import utg.domain.args.users.LinkCodeAndPassword
 import utg.domain.auth._
+import utg.domain.enums.DeliveryStatus
 import utg.effects.Calendar
 import utg.exception.AError
 import utg.exception.AError.AuthError
@@ -48,10 +49,9 @@ trait Auth[F[_], A] {
 object Auth {
   def make[F[_]: Sync](
       config: AuthConfig,
-      findUser: Phone => F[Option[AccessCredentials[AuthedUser]]],
       redis: RedisClient[F],
-      opersms: OperSmsClient[F],
       users: UsersAlgebra[F],
+      smsMessages: SmsMessagesAlgebra[F],
     )(implicit
       logger: Logger[F]
     ): Auth[F, AuthedUser] =
@@ -195,8 +195,10 @@ object Auth {
           _ <- redis.put(code, user, 10.minutes)
           smsText =
             s"Parolingizni qayta tiklash uchun quydagi havolaga kiring.\n http://utg.iflead.uz/reset-password/$code"
-          _ <- opersms.send(user.phone, smsText, _ => Applicative[F].unit)
-          _ <- logger.info("Link code:" + code)
+          smsMessageInput = SmsMessageInput(user.phone, smsText, DeliveryStatus.Sent)
+          _ <- smsMessages.create(smsMessageInput).flatMap { message =>
+            logger.info("Message is SEND:" + message)
+          }
         } yield ()
     }
 }

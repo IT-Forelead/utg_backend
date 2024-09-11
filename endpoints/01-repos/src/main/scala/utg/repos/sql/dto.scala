@@ -104,6 +104,7 @@ object dto {
     def toDomain: domain.Region =
       this.transformInto[domain.Region]
   }
+
   case class Branch(
       id: BranchId,
       name: NonEmptyString,
@@ -117,6 +118,20 @@ object dto {
         .withFieldConst(_.region, region)
         .transform
   }
+
+  case class SmsMessage(
+      id: SmsMessageId,
+      createdAt: ZonedDateTime,
+      phone: Phone,
+      text: NonEmptyString,
+      status: DeliveryStatus,
+      updatedAt: Option[ZonedDateTime] = None,
+      deleted: Boolean = false,
+    ) {
+    def toDomain: domain.SmsMessage =
+      this.transformInto[domain.SmsMessage]
+  }
+
   case class VehicleCategory(
       id: VehicleCategoryId,
       name: NonEmptyString,
