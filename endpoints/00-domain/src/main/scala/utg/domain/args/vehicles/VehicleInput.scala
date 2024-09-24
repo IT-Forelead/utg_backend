@@ -8,7 +8,6 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import utg.InventoryNumber
-import utg.RegisteredNumber
 import utg.domain.BranchId
 import utg.domain.VehicleCategoryId
 import utg.domain.enums._

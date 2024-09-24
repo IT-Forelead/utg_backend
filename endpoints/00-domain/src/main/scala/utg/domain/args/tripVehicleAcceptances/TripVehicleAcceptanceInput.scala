@@ -1,7 +1,6 @@
 package utg.domain.args.tripVehicleAcceptances
 
 import io.circe.generic.JsonCodec
-import io.circe.refined._
 
 import utg.domain.AssetId
 import utg.domain.TripId

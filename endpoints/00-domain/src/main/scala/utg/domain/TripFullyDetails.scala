@@ -1,7 +1,6 @@
 package utg.domain
 
 import io.circe.generic.JsonCodec
-import io.circe.refined._
 
 @JsonCodec
 case class TripFullyDetails(
