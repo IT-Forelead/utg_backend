@@ -25,6 +25,7 @@ import utg.domain.AuthedUser
 import utg.domain.UserId
 import utg.domain.args.users._
 import utg.domain.enums.DrivingLicenseCategory
+import utg.domain.enums.MachineOperatorLicenseCategory
 import utg.exception.AError
 import utg.repos.sql.dto.User
 import utg.utils.FileUtil
@@ -62,13 +63,21 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
             matrix
               .tail
               .traverse_ { row =>
-                val listCategories =
+                val drivingLicenseCategories =
                   if (row(8).trim.isEmpty)
                     List.empty[String]
                   else
                     row(8).trim.split(",").map(_.trim).toList
-                val makePrettyLicense = NonEmptyList.fromList(
-                  listCategories.map(DrivingLicenseCategory.withName)
+                val makePrettyDrivingLicense = NonEmptyList.fromList(
+                  drivingLicenseCategories.map(DrivingLicenseCategory.withName)
+                )
+                val machineOperatorLicenseCategories =
+                  if (row(10).trim.isEmpty)
+                    List.empty[String]
+                  else
+                    row(10).trim.split(",").map(_.trim).toList
+                val makePrettyMachineOperatorLicense = NonEmptyList.fromList(
+                  machineOperatorLicenseCategories.map(MachineOperatorLicenseCategory.withName)
                 )
                 val roleIdOpt = roles.toMap.get(row.head)
                 roleIdOpt.fold(
@@ -84,7 +93,9 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
                       row(5),
                       row(6),
                       row.lift(7),
-                      makePrettyLicense,
+                      makePrettyDrivingLicense,
+                      row.lift(9),
+                      makePrettyMachineOperatorLicense,
                     )
                   )
                 }

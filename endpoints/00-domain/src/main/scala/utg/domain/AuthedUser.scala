@@ -11,6 +11,7 @@ import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.Phone
 import utg.domain.enums.DrivingLicenseCategory
+import utg.domain.enums.MachineOperatorLicenseCategory
 import utg.domain.enums.Privilege
 
 @JsonCodec
@@ -41,6 +42,8 @@ object AuthedUser {
       branch: Option[Branch],
       drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
+      machineOperatorLicenseNumber: Option[NonEmptyString],
+      machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)

@@ -69,8 +69,10 @@ object UsersRepository {
         }
         drivingLicenseCategories =
           userDto.drivingLicenseCategories.flatMap(NonEmptyList.fromList)
+        machineOperatorLicenseCategories =
+          userDto.machineOperatorLicenseCategories.flatMap(NonEmptyList.fromList)
       } yield optRole.map { role =>
-        userDto.toDomain(role, branch, drivingLicenseCategories)
+        userDto.toDomain(role, branch, drivingLicenseCategories, machineOperatorLicenseCategories)
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
@@ -111,6 +113,8 @@ object UsersRepository {
           val privelegies = roleOpt.flatMap(_.tail.head).toList
           val drivingLicenseCategories =
             userDto.drivingLicenseCategories.flatMap(NonEmptyList.fromList)
+          val machineOperatorLicenseCategories =
+            userDto.machineOperatorLicenseCategories.flatMap(NonEmptyList.fromList)
           userDto.toDomain(
             Role(
               id = userDto.roleId,
@@ -119,6 +123,7 @@ object UsersRepository {
             ),
             maybeBranch,
             drivingLicenseCategories,
+            machineOperatorLicenseCategories,
           )
         }
       }

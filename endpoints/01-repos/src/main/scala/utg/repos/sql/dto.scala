@@ -35,11 +35,14 @@ object dto {
       branchCode: Option[NonEmptyString],
       drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
+      machineOperatorLicenseNumber: Option[NonEmptyString],
+      machineOperatorLicenseCategories: Option[List[MachineOperatorLicenseCategory]],
     ) {
     def toDomain(
         role: domain.Role,
         branch: Option[utg.domain.Branch],
         drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
+        machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
       ): AuthedUser.User =
       this
         .into[AuthedUser.User]
@@ -47,6 +50,7 @@ object dto {
         .withFieldConst(_.phone, phone)
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
+        .withFieldConst(_.machineOperatorLicenseCategories, machineOperatorLicenseCategories)
         .transform
 
     private def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
@@ -68,6 +72,7 @@ object dto {
         .withFieldConst(_.roleId, user.role.id)
         .withFieldConst(_.branchCode, user.branch.map(_.code))
         .withFieldConst(_.drivingLicenseCategories, user.drivingLicenseCategories.map(_.toList))
+        .withFieldConst(_.machineOperatorLicenseCategories, user.machineOperatorLicenseCategories.map(_.toList))
         .transform
 
     private val CsvHeaders: List[String] =

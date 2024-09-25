@@ -82,6 +82,8 @@ object UsersAlgebra {
             branchCode = Option(userInput.branchCode),
             drivingLicenseNumber = userInput.drivingLicenseNumber,
             drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
+            machineOperatorLicenseNumber = userInput.machineOperatorLicenseNumber,
+            machineOperatorLicenseCategories = userInput.machineOperatorLicenseCategories.map(_.toList),
           )
           password <- randomStr[F](8)
           hash <- SCrypt.hashpw[F](password)
@@ -112,6 +114,8 @@ object UsersAlgebra {
               assetId = assetId,
               drivingLicenseNumber = userInput.drivingLicenseNumber,
               drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
+              machineOperatorLicenseNumber = userInput.machineOperatorLicenseNumber,
+              machineOperatorLicenseCategories = userInput.machineOperatorLicenseCategories.map(_.toList),
             )
           )
         } yield {}

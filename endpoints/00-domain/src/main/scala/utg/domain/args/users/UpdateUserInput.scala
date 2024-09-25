@@ -10,6 +10,7 @@ import utg.Phone
 import utg.domain.RoleId
 import utg.domain.UserId
 import utg.domain.enums.DrivingLicenseCategory
+import utg.domain.enums.MachineOperatorLicenseCategory
 
 @JsonCodec
 case class UpdateUserInput(
@@ -23,4 +24,6 @@ case class UpdateUserInput(
     roleId: RoleId,
     drivingLicenseNumber: Option[NonEmptyString],
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
+    machineOperatorLicenseNumber: Option[NonEmptyString],
+    machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
   )

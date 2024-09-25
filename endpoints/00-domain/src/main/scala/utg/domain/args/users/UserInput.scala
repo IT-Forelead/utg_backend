@@ -9,6 +9,7 @@ import io.circe.refined._
 import utg.Phone
 import utg.domain.RoleId
 import utg.domain.enums.DrivingLicenseCategory
+import utg.domain.enums.MachineOperatorLicenseCategory
 
 @JsonCodec
 case class UserInput(
@@ -21,4 +22,6 @@ case class UserInput(
     branchCode: NonEmptyString,
     drivingLicenseNumber: Option[NonEmptyString],
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
+    machineOperatorLicenseNumber: Option[NonEmptyString],
+    machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
   )

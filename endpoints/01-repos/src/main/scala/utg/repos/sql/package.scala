@@ -69,6 +69,14 @@ package object sql {
   val drivingLicenseCategories: Codec[List[DrivingLicenseCategory]] =
     _drivingLicenseCategory.imap(_.flattenTo(List))(Arr(_: _*))
 
+  private val _machineOperatorLicenseCategory: Codec[Arr[MachineOperatorLicenseCategory]] =
+    `_enum`[MachineOperatorLicenseCategory](
+      MachineOperatorLicenseCategory,
+      Type("_machine_operator_license_category", List(Type("machine_operator_license_category"))),
+    )
+  val machineOperatorLicenseCategory: Codec[List[MachineOperatorLicenseCategory]] =
+    _machineOperatorLicenseCategory.imap(_.flattenTo(List))(Arr(_: _*))
+
   private val _fuelType: Codec[Arr[FuelType]] =
     `_enum`[FuelType](FuelType, Type("_fuel_type", List(Type("fuel_type"))))
   val fuelTypes: Codec[List[FuelType]] =

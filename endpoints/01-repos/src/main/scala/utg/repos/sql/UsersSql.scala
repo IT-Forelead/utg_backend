@@ -17,14 +17,34 @@ import utg.domain.auth.AccessCredentials
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
     (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt *: phone *: RolesSql.id
-      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt)
+      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: nes.opt
+      *: machineOperatorLicenseCategory.opt)
       .to[dto.User]
 
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
-    (codec *: passwordHash).map {
-      case user *: hash *: HNil =>
+    (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt *: phone *: RolesSql.id
+      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: passwordHash
+      *: nes.opt *: machineOperatorLicenseCategory.opt).map {
+      case id *: createdAt *: firstname *: lastname *: middleName *: personalNumber *: phone *: roleId *: assetId *:
+        branchCode *: drivingLicenseNumber *: drivingLicenseCategories *: hash *: machineOperatorLicenseNumber *:
+        machineOperatorLicenseCategories *: HNil =>
         AccessCredentials(
-          data = user,
+          data = dto.User(
+            id = id,
+            createdAt = createdAt,
+            firstname = firstname,
+            lastname = lastname,
+            middleName = middleName,
+            personalNumber = personalNumber,
+            phone = phone,
+            roleId = roleId,
+            assetId = assetId,
+            branchCode = branchCode,
+            drivingLicenseNumber = drivingLicenseNumber,
+            drivingLicenseCategories = drivingLicenseCategories,
+            machineOperatorLicenseNumber = machineOperatorLicenseNumber,
+            machineOperatorLicenseCategories = machineOperatorLicenseCategories,
+          ),
           password = hash,
         )
     }
@@ -43,15 +63,30 @@ private[repos] object UsersSql extends Sql[UserId] {
           WHERE id IN (${id.values.list(ids)})""".query(codec)
 
   val insert: Command[AccessCredentials[dto.User]] =
-    sql"""INSERT INTO users VALUES ($id, $zonedDateTime, $nes, $nes, ${nes.opt}, $nonNegInt, $phone, ${RolesSql.id}, ${AssetsSql
-        .id
-        .opt}, ${nes.opt}, ${nes.opt}, ${drivingLicenseCategories.opt}, $passwordHash)"""
+    sql"""INSERT INTO users VALUES (
+          $id,
+          $zonedDateTime,
+          $nes,
+          $nes,
+          ${nes.opt},
+          $nonNegInt,
+          $phone,
+          ${RolesSql.id},
+          ${AssetsSql.id.opt},
+          ${nes.opt},
+          ${nes.opt},
+          ${drivingLicenseCategories.opt},
+          $passwordHash,
+          ${nes.opt},
+          ${machineOperatorLicenseCategory.opt}
+        )"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
           u.data.personalNumber *: u.data.phone *: u.data.roleId *: u.data.assetId *:
           u.data.branchCode *: u.data.drivingLicenseNumber *: u.data.drivingLicenseCategories *:
-          u.password *: EmptyTuple
+          u.password *: u.data.machineOperatorLicenseNumber *:
+          u.data.machineOperatorLicenseCategories *: EmptyTuple
       }
 
   val update: Command[dto.User] =
@@ -65,7 +100,9 @@ private[repos] object UsersSql extends Sql[UserId] {
        asset_id = ${AssetsSql.id.opt},
        branch_code = ${nes.opt},
        driving_license_number = ${nes.opt},
-       driving_license_categories = ${drivingLicenseCategories.opt}
+       driving_license_categories = ${drivingLicenseCategories.opt},
+       machine_operator_license_number = ${nes.opt},
+       machine_operator_license_category = ${machineOperatorLicenseCategory.opt}
        WHERE id = $id
      """
       .command
@@ -73,6 +110,7 @@ private[repos] object UsersSql extends Sql[UserId] {
         case user: dto.User =>
           user.firstname *: user.lastname *: user.middleName *: user.personalNumber *: user.phone *: user.roleId *:
             user.assetId *: user.branchCode *: user.drivingLicenseNumber *: user.drivingLicenseCategories *:
+            user.machineOperatorLicenseNumber *: user.machineOperatorLicenseCategories *:
             user.id *: EmptyTuple
       }
 
@@ -108,6 +146,8 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.branch_code AS branch_code,
               u.driving_license_number,
               u.driving_license_categories,
+              u.machine_operator_license_number,
+              u.machine_operator_license_category,
               COUNT(*) OVER() AS total
             FROM users u"""
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)
