@@ -2,6 +2,7 @@ package utg.repos.sql
 
 import shapeless.HNil
 import skunk._
+import skunk.codec.all.date
 import skunk.codec.all.varchar
 import skunk.implicits._
 import tsec.passwordhashers.PasswordHash
@@ -18,39 +19,63 @@ private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
     (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt *: phone *: RolesSql.id
       *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: nes.opt
-      *: machineOperatorLicenseCategory.opt)
+      *: machineOperatorLicenseCategory.opt *: date.opt *: date.opt *: date.opt *: date.opt *: date.opt)
       .to[dto.User]
 
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
-    (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt *: phone *: RolesSql.id
-      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: passwordHash
-      *: nes.opt *: machineOperatorLicenseCategory.opt).map {
-      case id *: createdAt *: firstname *: lastname *: middleName *: personalNumber *: phone *: roleId *: assetId *:
-        branchCode *: drivingLicenseNumber *: drivingLicenseCategories *: hash *: machineOperatorLicenseNumber *:
-        machineOperatorLicenseCategories *: HNil =>
+    (codec *: passwordHash).map {
+      case user *: hash *: HNil =>
         AccessCredentials(
           data = dto.User(
-            id = id,
-            createdAt = createdAt,
-            firstname = firstname,
-            lastname = lastname,
-            middleName = middleName,
-            personalNumber = personalNumber,
-            phone = phone,
-            roleId = roleId,
-            assetId = assetId,
-            branchCode = branchCode,
-            drivingLicenseNumber = drivingLicenseNumber,
-            drivingLicenseCategories = drivingLicenseCategories,
-            machineOperatorLicenseNumber = machineOperatorLicenseNumber,
-            machineOperatorLicenseCategories = machineOperatorLicenseCategories,
+            id = user.id,
+            createdAt = user.createdAt,
+            firstname = user.firstname,
+            lastname = user.lastname,
+            middleName = user.middleName,
+            personalNumber = user.personalNumber,
+            phone = user.phone,
+            roleId = user.roleId,
+            assetId = user.assetId,
+            branchCode = user.branchCode,
+            drivingLicenseNumber = user.drivingLicenseNumber,
+            drivingLicenseCategories = user.drivingLicenseCategories,
+            machineOperatorLicenseNumber = user.machineOperatorLicenseNumber,
+            machineOperatorLicenseCategories = user.machineOperatorLicenseCategories,
+            birthday = user.birthday,
+            drivingLicenseGiven = user.drivingLicenseGiven,
+            drivingLicenseExpire = user.drivingLicenseExpire,
+            machineOperatorLicenseGiven = user.machineOperatorLicenseGiven,
+            machineOperatorLicenseExpire = user.machineOperatorLicenseExpire,
           ),
           password = hash,
         )
     }
 
   val findByPhone: Query[Phone, AccessCredentials[dto.User]] =
-    sql"""SELECT * FROM users WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
+    sql"""SELECT
+          id,
+          created_at,
+          firstname,
+          lastname,
+          middle_name,
+          personal_number,
+          phone,
+          role_id,
+          asset_id,
+          branch_code,
+          driving_license_number,
+          driving_license_categories,
+          machine_operator_license_number,
+          machine_operator_license_category,
+          birthday,
+          driving_license_given,
+          driving_license_expire,
+          machine_operator_license_given,
+          machine_operator_license_expire,
+          password
+          FROM users
+          WHERE phone = $phone
+          LIMIT 1""".query(accessCredentialsDecoder)
 
   val findById: Query[UserId, dto.User] =
     sql"""SELECT
@@ -67,7 +92,12 @@ private[repos] object UsersSql extends Sql[UserId] {
           driving_license_number,
           driving_license_categories,
           machine_operator_license_number,
-          machine_operator_license_category
+          machine_operator_license_category,
+          birthday,
+          driving_license_given,
+          driving_license_expire,
+          machine_operator_license_given,
+          machine_operator_license_expire
           FROM users
           WHERE id = $id LIMIT 1""".query(codec)
 
@@ -86,7 +116,12 @@ private[repos] object UsersSql extends Sql[UserId] {
           driving_license_number,
           driving_license_categories,
           machine_operator_license_number,
-          machine_operator_license_category
+          machine_operator_license_category,
+          birthday,
+          driving_license_given,
+          driving_license_expire,
+          machine_operator_license_given,
+          machine_operator_license_expire
           FROM users
           WHERE id IN (${id.values.list(ids)})""".query(codec)
 
@@ -106,15 +141,21 @@ private[repos] object UsersSql extends Sql[UserId] {
           ${drivingLicenseCategories.opt},
           $passwordHash,
           ${nes.opt},
-          ${machineOperatorLicenseCategory.opt}
+          ${machineOperatorLicenseCategory.opt},
+          ${date.opt},
+          ${date.opt},
+          ${date.opt},
+          ${date.opt},
+          ${date.opt}
         )"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
           u.data.personalNumber *: u.data.phone *: u.data.roleId *: u.data.assetId *:
           u.data.branchCode *: u.data.drivingLicenseNumber *: u.data.drivingLicenseCategories *:
-          u.password *: u.data.machineOperatorLicenseNumber *:
-          u.data.machineOperatorLicenseCategories *: EmptyTuple
+          u.password *: u.data.machineOperatorLicenseNumber *: u.data.machineOperatorLicenseCategories *:
+          u.data.birthday *: u.data.drivingLicenseGiven *: u.data.drivingLicenseExpire *:
+          u.data.machineOperatorLicenseGiven *: u.data.machineOperatorLicenseExpire *: EmptyTuple
       }
 
   val update: Command[dto.User] =
@@ -130,7 +171,12 @@ private[repos] object UsersSql extends Sql[UserId] {
        driving_license_number = ${nes.opt},
        driving_license_categories = ${drivingLicenseCategories.opt},
        machine_operator_license_number = ${nes.opt},
-       machine_operator_license_category = ${machineOperatorLicenseCategory.opt}
+       machine_operator_license_category = ${machineOperatorLicenseCategory.opt},
+       birthday = ${date.opt},
+       driving_license_given = ${date.opt},
+       driving_license_expire = ${date.opt},
+       machine_operator_license_given = ${date.opt},
+       machine_operator_license_expire = ${date.opt}
        WHERE id = $id
      """
       .command
@@ -138,8 +184,9 @@ private[repos] object UsersSql extends Sql[UserId] {
         case user: dto.User =>
           user.firstname *: user.lastname *: user.middleName *: user.personalNumber *: user.phone *: user.roleId *:
             user.assetId *: user.branchCode *: user.drivingLicenseNumber *: user.drivingLicenseCategories *:
-            user.machineOperatorLicenseNumber *: user.machineOperatorLicenseCategories *:
-            user.id *: EmptyTuple
+            user.machineOperatorLicenseNumber *: user.machineOperatorLicenseCategories *: user.birthday *:
+            user.drivingLicenseGiven *: user.drivingLicenseExpire *: user.machineOperatorLicenseGiven *:
+            user.machineOperatorLicenseExpire *: user.id *: EmptyTuple
       }
 
   private def searchFilter(filters: UserFilters): List[Option[AppliedFragment]] =
@@ -176,6 +223,11 @@ private[repos] object UsersSql extends Sql[UserId] {
               u.driving_license_categories,
               u.machine_operator_license_number,
               u.machine_operator_license_category,
+              u.birthday,
+              u.driving_license_given,
+              u.driving_license_expire,
+              u.machine_operator_license_given,
+              u.machine_operator_license_expire,
               COUNT(*) OVER() AS total
             FROM users u"""
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)

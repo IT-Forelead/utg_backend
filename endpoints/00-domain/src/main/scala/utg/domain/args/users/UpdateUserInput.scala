@@ -1,5 +1,7 @@
 package utg.domain.args.users
 
+import java.time.LocalDate
+
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
@@ -26,4 +28,9 @@ case class UpdateUserInput(
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
     machineOperatorLicenseNumber: Option[NonEmptyString],
     machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
+    birthday: Option[LocalDate],
+    drivingLicenseGiven: Option[LocalDate],
+    drivingLicenseExpire: Option[LocalDate],
+    machineOperatorLicenseGiven: Option[LocalDate],
+    machineOperatorLicenseExpire: Option[LocalDate],
   )

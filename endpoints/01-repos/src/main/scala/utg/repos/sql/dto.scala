@@ -37,6 +37,11 @@ object dto {
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
       machineOperatorLicenseNumber: Option[NonEmptyString],
       machineOperatorLicenseCategories: Option[List[MachineOperatorLicenseCategory]],
+      birthday: Option[LocalDate],
+      drivingLicenseGiven: Option[LocalDate],
+      drivingLicenseExpire: Option[LocalDate],
+      machineOperatorLicenseGiven: Option[LocalDate],
+      machineOperatorLicenseExpire: Option[LocalDate],
     ) {
     def toDomain(
         role: domain.Role,

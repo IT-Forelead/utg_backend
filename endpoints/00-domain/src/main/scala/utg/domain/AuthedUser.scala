@@ -1,5 +1,6 @@
 package utg.domain
 
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 import cats.data.NonEmptyList
@@ -44,6 +45,11 @@ object AuthedUser {
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
       machineOperatorLicenseNumber: Option[NonEmptyString],
       machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
+      birthday: Option[LocalDate],
+      drivingLicenseGiven: Option[LocalDate],
+      drivingLicenseExpire: Option[LocalDate],
+      machineOperatorLicenseGiven: Option[LocalDate],
+      machineOperatorLicenseExpire: Option[LocalDate],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)

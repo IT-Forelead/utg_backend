@@ -1,7 +1,6 @@
 package utg.routes
 
 import java.io.InputStream
-
 import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
@@ -18,7 +17,6 @@ import org.typelevel.ci.CIStringSyntax
 import uz.scala.http4s.syntax.all._
 import uz.scala.http4s.utils.Routes
 import uz.scala.syntax.refined._
-
 import utg.algebras.RolesAlgebra
 import utg.algebras.UsersAlgebra
 import utg.domain.AuthedUser
@@ -29,6 +27,9 @@ import utg.domain.enums.MachineOperatorLicenseCategory
 import utg.exception.AError
 import utg.repos.sql.dto.User
 import utg.utils.FileUtil
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 final case class UsersRoutes[F[_]: JsonDecoder: Async](
     users: UsersAlgebra[F],
@@ -47,6 +48,9 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
         `Content-Type`(MediaType.text.csv, Charset.`UTF-8`),
       ),
     )
+
+  def parseLocalDate(dateStr: String, dateFormat: String = "yyyy-MM-dd"): LocalDate =
+    LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(dateFormat))
 
   private def uploadUsers(part: Part[F])(is: InputStream): F[Unit] =
     for {
@@ -96,6 +100,11 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
                       makePrettyDrivingLicense,
                       row.lift(9),
                       makePrettyMachineOperatorLicense,
+                      row.lift(11).map(parseLocalDate(_)),
+                      row.lift(12).map(parseLocalDate(_)),
+                      row.lift(13).map(parseLocalDate(_)),
+                      row.lift(14).map(parseLocalDate(_)),
+                      row.lift(15).map(parseLocalDate(_)),
                     )
                   )
                 }

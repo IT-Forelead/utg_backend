@@ -84,6 +84,11 @@ object UsersAlgebra {
             drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
             machineOperatorLicenseNumber = userInput.machineOperatorLicenseNumber,
             machineOperatorLicenseCategories = userInput.machineOperatorLicenseCategories.map(_.toList),
+            birthday = userInput.birthday,
+            drivingLicenseGiven = userInput.drivingLicenseGiven,
+            drivingLicenseExpire = userInput.drivingLicenseExpire,
+            machineOperatorLicenseGiven = userInput.machineOperatorLicenseGiven,
+            machineOperatorLicenseExpire = userInput.machineOperatorLicenseExpire,
           )
           password <- randomStr[F](8)
           hash <- SCrypt.hashpw[F](password)
@@ -116,6 +121,11 @@ object UsersAlgebra {
               drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
               machineOperatorLicenseNumber = userInput.machineOperatorLicenseNumber,
               machineOperatorLicenseCategories = userInput.machineOperatorLicenseCategories.map(_.toList),
+              birthday = userInput.birthday,
+              drivingLicenseGiven = userInput.drivingLicenseGiven,
+              drivingLicenseExpire = userInput.drivingLicenseExpire,
+              machineOperatorLicenseGiven = userInput.machineOperatorLicenseGiven,
+              machineOperatorLicenseExpire = userInput.machineOperatorLicenseExpire,
             )
           )
         } yield {}
