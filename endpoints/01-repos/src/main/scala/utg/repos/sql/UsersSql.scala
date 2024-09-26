@@ -53,12 +53,40 @@ private[repos] object UsersSql extends Sql[UserId] {
     sql"""SELECT * FROM users WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
   val findById: Query[UserId, dto.User] =
-    sql"""SELECT id, created_at, firstname, lastname, middle_name, personal_number, phone, role_id, asset_id, branch_code, driving_license_number, driving_license_categories
+    sql"""SELECT
+          id,
+          created_at,
+          firstname,
+          lastname,
+          middle_name,
+          personal_number,
+          phone,
+          role_id,
+          asset_id,
+          branch_code,
+          driving_license_number,
+          driving_license_categories,
+          machine_operator_license_number,
+          machine_operator_license_category
           FROM users
           WHERE id = $id LIMIT 1""".query(codec)
 
   def findByIds(ids: List[UserId]): Query[ids.type, dto.User] =
-    sql"""SELECT id, created_at, firstname, lastname, middle_name, personal_number, phone, role_id, asset_id, branch_code, driving_license_number, driving_license_categories
+    sql"""SELECT
+          id,
+          created_at,
+          firstname,
+          lastname,
+          middle_name,
+          personal_number,
+          phone,
+          role_id,
+          asset_id,
+          branch_code,
+          driving_license_number,
+          driving_license_categories,
+          machine_operator_license_number,
+          machine_operator_license_category
           FROM users
           WHERE id IN (${id.values.list(ids)})""".query(codec)
 
