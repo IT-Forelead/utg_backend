@@ -12,15 +12,14 @@ import utg.domain.args.vehicles.VehicleFilters
 private[repos] object VehiclesSql extends Sql[VehicleId] {
   private[repos] val codec: Codec[dto.Vehicle] =
     (id *: zonedDateTime *: BranchesSql.id *: VehicleCategoriesSql.id *: vehicleType *: nes *: nes.opt
-      *: inventoryNumber *: nonNegInt *: nes.opt *: nes.opt *: nes.opt *: conditionType *: fuelTypes.opt *: nes.opt
-      *: gpsTrackingType.opt *: nonNegDouble.opt *: nonNegDouble.opt *: bool).to[dto.Vehicle]
+      *: inventoryNumber *: nonNegInt *: nes.opt *: nes.opt *: nes.opt *: conditionType *: nes.opt
+      *: gpsTrackingType.opt *: nonNegDouble.opt *: bool).to[dto.Vehicle]
 
   val insert: Command[dto.Vehicle] =
     sql"""INSERT INTO vehicles VALUES ($codec)""".command
 
   val findById: Query[VehicleId, dto.Vehicle] =
-    sql"""SELECT * FROM vehicles WHERE id = $id LIMIT 1"""
-      .query(codec)
+    sql"""SELECT * FROM vehicles WHERE id = $id LIMIT 1""".query(codec)
 
   def findByIds(ids: List[VehicleId]): Query[ids.type, dto.Vehicle] =
     sql"""SELECT * FROM vehicles WHERE id IN (${id.values.list(ids)})""".query(codec)
@@ -47,11 +46,9 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
         v.chassis_number AS chassis_number,
         v.engine_number AS engine_number,
         v.condition AS condition,
-        v.fuel_types AS fuel_types,
         v.description AS description,
         v.gps_tracking AS gps_tracking,
         v.fuel_level_sensor AS fuel_level_sensor,
-        v.fuel_tank_volume AS fuel_tank_volume,
         v.deleted AS deleted,
         COUNT(*) OVER() AS total
         FROM vehicles v""".apply(Void)

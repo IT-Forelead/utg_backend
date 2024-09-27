@@ -53,11 +53,11 @@ object VehicleCsvGenerator {
       vehicle.chassisNumber.map(_.value).getOrElse(""),
       vehicle.engineNumber.map(_.value).getOrElse(""),
       vehicle.conditionType.entryName,
-      vehicle.fuelTypes.map(_.toList.map(_.entryName).mkString(",")).getOrElse(""),
+//      vehicle.fuelTypes.map(_.toList.map(_.entryName).mkString(",")).getOrElse(""),
       vehicle.description.map(_.value).getOrElse(""),
       vehicle.gpsTracking.map(_.entryName).getOrElse(""),
       vehicle.fuelLevelSensor.map(_.value).getOrElse(0.0).toString,
-      vehicle.fuelTankVolume.map(_.value).getOrElse(0.0).toString,
+//      vehicle.fuelTankVolume.map(_.value).getOrElse(0.0).toString,
     )
 
   def makeCsv[F[_]: Concurrent: Sync]: fs2.Pipe[F, Vehicle, Byte] =

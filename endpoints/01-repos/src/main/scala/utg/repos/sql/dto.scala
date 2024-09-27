@@ -77,7 +77,10 @@ object dto {
         .withFieldConst(_.roleId, user.role.id)
         .withFieldConst(_.branchCode, user.branch.map(_.code))
         .withFieldConst(_.drivingLicenseCategories, user.drivingLicenseCategories.map(_.toList))
-        .withFieldConst(_.machineOperatorLicenseCategories, user.machineOperatorLicenseCategories.map(_.toList))
+        .withFieldConst(
+          _.machineOperatorLicenseCategories,
+          user.machineOperatorLicenseCategories.map(_.toList),
+        )
         .transform
 
     private val CsvHeaders: List[String] =
@@ -166,23 +169,34 @@ object dto {
       chassisNumber: Option[NonEmptyString],
       engineNumber: Option[NonEmptyString],
       conditionType: ConditionType,
-      fuelTypes: Option[List[FuelType]],
       description: Option[NonEmptyString],
       gpsTracking: Option[GpsTrackingType],
       fuelLevelSensor: Option[NonNegDouble],
-      fuelTankVolume: Option[NonNegDouble],
       deleted: Boolean = false,
     ) {
     def toDomain(
         branch: Option[domain.Branch],
         vehicleCategory: domain.VehicleCategory,
-        fuelTypes: Option[NonEmptyList[FuelType]],
+        fuels: List[domain.VehicleFuelItem],
       ): domain.Vehicle =
       this
         .into[domain.Vehicle]
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.vehicleCategory, vehicleCategory.some)
-        .withFieldConst(_.fuelTypes, fuelTypes)
+        .withFieldConst(_.fuels, fuels)
+        .transform
+  }
+
+  case class VehicleFuelItem(
+      id: VehicleFuelItemId,
+      vehicleId: VehicleId,
+      fuelType: FuelType,
+      fuelTankVolume: NonNegDouble,
+      deleted: Boolean = false,
+    ) {
+    def toDomain: domain.VehicleFuelItem =
+      this
+        .into[domain.VehicleFuelItem]
         .transform
   }
 

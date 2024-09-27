@@ -120,7 +120,10 @@ object Algebras {
       regions = RegionsAlgebra.make[F](repositories.regions),
       branches = BranchesAlgebra.make[F](repositories.branches, repositories.regions),
       vehicleCategories = VehicleCategoriesAlgebra.make[F](repositories.vehicleCategories),
-      vehicles = VehiclesAlgebra.make[F](repositories.vehicles),
+      vehicles = VehiclesAlgebra.make[F](
+        repositories.vehicles,
+        repositories.vehicleFuelItems,
+      ),
       trips = tripsAlgebra,
       tripDrivers = tripDriversAlgebra,
       tripFuelSupplies = tripFuelSuppliesAlgebra,

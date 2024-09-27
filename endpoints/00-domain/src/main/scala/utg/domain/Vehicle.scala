@@ -2,7 +2,6 @@ package utg.domain
 
 import java.time.ZonedDateTime
 
-import cats.data.NonEmptyList
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
@@ -27,9 +26,8 @@ case class Vehicle(
     chassisNumber: Option[NonEmptyString],
     engineNumber: Option[NonEmptyString],
     conditionType: ConditionType,
-    fuelTypes: Option[NonEmptyList[FuelType]],
     description: Option[NonEmptyString],
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
-    fuelTankVolume: Option[NonNegDouble],
+    fuels: List[VehicleFuelItem],
   )

@@ -15,11 +15,13 @@ import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleCategory
 import utg.domain.VehicleCategoryId
+import utg.domain.VehicleFuelItem
 import utg.domain.VehicleId
 import utg.domain.args.vehicles.VehicleFilters
 import utg.repos.sql.BranchesSql
 import utg.repos.sql.RegionsSql
 import utg.repos.sql.VehicleCategoriesSql
+import utg.repos.sql.VehicleFuelItemsSql
 import utg.repos.sql.VehiclesSql
 import utg.repos.sql.dto
 
@@ -51,13 +53,16 @@ object VehiclesRepository {
               vehicleType = vehicleCategory.head.vehicleType,
             )
           }
+        fuels <- VehicleFuelItemsSql
+          .selectByVehicleId
+          .queryList(vehicleDto.id)
+          .map(_.map(_.toDomain))
         branch <-
           (for {
             branch <- OptionT(BranchesSql.findById.queryOption(vehicleDto.branchId))
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
-        fuelTypes = vehicleDto.fuelTypes.flatMap(NonEmptyList.fromList)
-      } yield vehicleDto.toDomain(branch, vehicleCategory, fuelTypes)
+      } yield vehicleDto.toDomain(branch, vehicleCategory, fuels)
 
     private def makeVehicles(dtos: List[dto.Vehicle]): F[List[Vehicle]] = {
       val vehicleCategoryIds = NonEmptyList.fromList(dtos.map(_.vehicleCategoryId))
@@ -79,13 +84,21 @@ object VehiclesRepository {
               }.toMap
             }
         }
-        ids = NonEmptyList.fromList(dtos.map(_.branchId))
-        branchById <- ids.fold(Map.empty[BranchId, dto.Branch].pure[F]) { branches =>
+        branchIds = NonEmptyList.fromList(dtos.map(_.branchId))
+        branchById <- branchIds.fold(Map.empty[BranchId, dto.Branch].pure[F]) { branches =>
           val branchesList = branches.toList
           BranchesSql
             .findByIds(branchesList)
             .queryList(branchesList)
             .map(_.map(b => b.id -> b).toMap)
+        }
+        vehicleIds = NonEmptyList.fromList(dtos.map(_.id))
+        fuelsByVehicleId <- vehicleIds.fold(Map.empty[VehicleId, List[VehicleFuelItem]].pure[F]) { vIds =>
+          val vehicleIdsList = vIds.toList
+          VehicleFuelItemsSql
+            .findByVehicleIds(vehicleIdsList)
+            .queryList(vehicleIdsList)
+            .map(_.map(_.toDomain).groupBy(_.vehicleId))
         }
         maybeRegionIds = NonEmptyList.fromList(branchById.values.toList.map(_.regionId))
         regionById <- maybeRegionIds.fold(Map.empty[RegionId, dto.Region].pure[F]) { regionIds =>
@@ -101,8 +114,6 @@ object VehiclesRepository {
           val maybeBranch = branchById
             .get(vehicleDto.branchId)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
-          val fuelTypes =
-            vehicleDto.fuelTypes.flatMap(NonEmptyList.fromList)
           vehicleDto.toDomain(
             maybeBranch,
             VehicleCategory(
@@ -110,7 +121,7 @@ object VehiclesRepository {
               name = vehicleCategory.name,
               vehicleType = vehicleCategory.vehicleType,
             ),
-            fuelTypes,
+            fuels = fuelsByVehicleId.getOrElse(vehicleDto.id, Nil),
           )
         }
       }
@@ -151,11 +162,10 @@ object VehiclesRepository {
               chassisNumber = dto.chassisNumber,
               engineNumber = dto.engineNumber,
               conditionType = dto.conditionType,
-              fuelTypes = dto.fuelTypes.flatMap(NonEmptyList.fromList),
               description = dto.description,
               gpsTracking = dto.gpsTracking,
               fuelLevelSensor = dto.fuelLevelSensor,
-              fuelTankVolume = dto.fuelTankVolume,
+              fuels = Nil,
             )
           }.toMap
         }

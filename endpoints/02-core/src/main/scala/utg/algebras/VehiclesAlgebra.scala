@@ -1,15 +1,18 @@
 package utg.algebras
 
 import cats.MonadThrow
+import cats.data.NonEmptyList
 import cats.implicits._
 
 import utg.domain.ResponseData
 import utg.domain.Vehicle
+import utg.domain.VehicleFuelItem
 import utg.domain.VehicleId
 import utg.domain.args.vehicles.VehicleFilters
 import utg.domain.args.vehicles.VehicleInput
 import utg.effects.Calendar
 import utg.effects.GenUUID
+import utg.repos.VehicleFuelItemsRepository
 import utg.repos.VehiclesRepository
 import utg.repos.sql.dto
 import utg.utils.ID
@@ -22,7 +25,8 @@ trait VehiclesAlgebra[F[_]] {
 
 object VehiclesAlgebra {
   def make[F[_]: Calendar: GenUUID](
-      vehiclesRepository: VehiclesRepository[F]
+      vehiclesRepository: VehiclesRepository[F],
+      vehicleFuelItemsRepository: VehicleFuelItemsRepository[F],
     )(implicit
       F: MonadThrow[F]
     ): VehiclesAlgebra[F] =
@@ -45,23 +49,25 @@ object VehiclesAlgebra {
             chassisNumber = vehicleInput.chassisNumber,
             engineNumber = vehicleInput.engineNumber,
             conditionType = vehicleInput.conditionType,
-            fuelTypes = vehicleInput.fuelTypes.map(_.toList),
             description = vehicleInput.description,
             gpsTracking = vehicleInput.gpsTracking,
             fuelLevelSensor = vehicleInput.fuelLevelSensor,
-            fuelTankVolume = vehicleInput.fuelTankVolume,
           )
           _ <- vehiclesRepository.create(dtoVehicle)
+          _ <- vehicleInput.fuels.traverse { fuels =>
+            vehicleFuelItemsRepository.create(id, fuels)
+          }
         } yield id
 
       override def get(filters: VehicleFilters): F[ResponseData[Vehicle]] =
         vehiclesRepository.get(filters)
 
       override def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]] =
-        F.pure {
-          vehiclesRepository.getAsStream(filters).evalMap { vehicle =>
+        vehiclesRepository
+          .getAsStream(filters)
+          .evalMap { vehicle =>
             vehiclesRepository.makeVehicle(vehicle)
           }
-        }
+          .pure[F]
     }
 }

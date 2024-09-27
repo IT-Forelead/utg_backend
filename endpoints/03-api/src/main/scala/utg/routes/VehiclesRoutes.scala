@@ -74,91 +74,90 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     "не исправен" -> ConditionType.Invalid,
   )
 
-  private def uploadVehicles(part: Part[F])(is: InputStream): F[Unit] =
-    for {
-      branches <- branchesAlgebra
-        .getBranches
-        .map(branches => branches.map(branch => (branch.name.value, branch.id)))
-      vehicleCategories <- vehicleCategoriesAlgebra
-        .getVehicleCategories
-        .map(vcList => vcList.map(vc => (vc.name.value, vc.id)))
-      _ <- OptionT
-        .fromOption[F](
-          part
-            .filename
-            .flatMap(filename => FileUtil.parseCsvOrXlsInputStream(is, filename).toOption)
-        )
-        .cataF(
-          AError.Internal("Can't parse file").raiseError[F, Unit],
-          matrix =>
-            matrix
-              .filter(_.exists(_.nonEmpty))
-              .tail
-              .traverse_ { row =>
-                val branchIdOpt = branches.toMap.get(row.head)
-                val vehicleType = VehicleType.withName(row(1))
-                val vehicleCategoryIdOpt = vehicleCategories.toMap.get(row(2))
-
-                val listFuelTypes =
-                  if (row(5).trim.isEmpty)
-                    List.empty[String]
-                  else
-                    row(5).trim.split(",").map(_.trim).toList
-
-                val makePrettyFuelType = NonEmptyList.fromList(
-                  listFuelTypes.map(FuelType.withName)
-                )
-
-                val conditionType =
-                  ConditionType
-                    .withNameOption(row(8))
-                    .getOrElse(
-                      conditionMap(row(8).toLowerCase())
-                    )
-
-                val gpsTrackingType = row
-                  .lift(13)
-                  .flatMap(gps =>
-                    GpsTrackingType
-                      .withNameOption(gps)
-                      .orElse(
-                        gpsMap.get(gps.toLowerCase())
-                      )
-                  )
-
-                branchIdOpt.fold(
-                  AError.Internal(s"Branch is not valid: ${row.head}").raiseError[F, VehicleId]
-                ) { branchId =>
-                  vehicleCategoryIdOpt.fold(
-                    AError
-                      .Internal(s"Vehicle Category is not valid: ${row(2)}")
-                      .raiseError[F, VehicleId]
-                  ) { vehicleCategoryId =>
-                    vehiclesAlgebra.create(
-                      VehicleInput(
-                        branchId = branchId,
-                        vehicleCategoryId = vehicleCategoryId,
-                        vehicleType = vehicleType,
-                        brand = row(3),
-                        registeredNumber = row.lift(4),
-                        inventoryNumber = row(9).replace(".0", ""),
-                        yearOfRelease = NonNegInt.unsafeFrom(row(7).replace(".0", "").toInt),
-                        bodyNumber = row.lift(11).map(_.replace(".0", "")),
-                        chassisNumber = row.lift(12).map(_.replace(".0", "")),
-                        engineNumber = row.lift(10).map(_.replace(".0", "")),
-                        conditionType = conditionType,
-                        fuelTypes = makePrettyFuelType,
-                        description = row.lift(6),
-                        gpsTracking = gpsTrackingType,
-                        None,
-                        None,
-                      )
-                    )
-                  }
-                }
-              },
-        )
-    } yield ()
+//  private def uploadVehicles(part: Part[F])(is: InputStream): F[Unit] =
+//    for {
+//      branches <- branchesAlgebra
+//        .getBranches
+//        .map(branches => branches.map(branch => (branch.name.value, branch.id)))
+//      vehicleCategories <- vehicleCategoriesAlgebra
+//        .getVehicleCategories
+//        .map(vcList => vcList.map(vc => (vc.name.value, vc.id)))
+//      _ <- OptionT
+//        .fromOption[F](
+//          part
+//            .filename
+//            .flatMap(filename => FileUtil.parseCsvOrXlsInputStream(is, filename).toOption)
+//        )
+//        .cataF(
+//          AError.Internal("Can't parse file").raiseError[F, Unit],
+//          matrix =>
+//            matrix
+//              .filter(_.exists(_.nonEmpty))
+//              .tail
+//              .traverse_ { row =>
+//                val branchIdOpt = branches.toMap.get(row.head)
+//                val vehicleType = VehicleType.withName(row(1))
+//                val vehicleCategoryIdOpt = vehicleCategories.toMap.get(row(2))
+//
+//                val listFuelTypes =
+//                  if (row(5).trim.isEmpty)
+//                    List.empty[String]
+//                  else
+//                    row(5).trim.split(",").map(_.trim).toList
+//
+//                val makePrettyFuelType = NonEmptyList.fromList(
+//                  listFuelTypes.map(FuelType.withName)
+//                )
+//
+//                val conditionType =
+//                  ConditionType
+//                    .withNameOption(row(8))
+//                    .getOrElse(
+//                      conditionMap(row(8).toLowerCase())
+//                    )
+//
+//                val gpsTrackingType = row
+//                  .lift(13)
+//                  .flatMap(gps =>
+//                    GpsTrackingType
+//                      .withNameOption(gps)
+//                      .orElse(
+//                        gpsMap.get(gps.toLowerCase())
+//                      )
+//                  )
+//
+//                branchIdOpt.fold(
+//                  AError.Internal(s"Branch is not valid: ${row.head}").raiseError[F, VehicleId]
+//                ) { branchId =>
+//                  vehicleCategoryIdOpt.fold(
+//                    AError
+//                      .Internal(s"Vehicle Category is not valid: ${row(2)}")
+//                      .raiseError[F, VehicleId]
+//                  ) { vehicleCategoryId =>
+//                    vehiclesAlgebra.create(
+//                      VehicleInput(
+//                        branchId = branchId,
+//                        vehicleCategoryId = vehicleCategoryId,
+//                        vehicleType = vehicleType,
+//                        brand = row(3),
+//                        registeredNumber = row.lift(4),
+//                        inventoryNumber = row(9).replace(".0", ""),
+//                        yearOfRelease = NonNegInt.unsafeFrom(row(7).replace(".0", "").toInt),
+//                        bodyNumber = row.lift(11).map(_.replace(".0", "")),
+//                        chassisNumber = row.lift(12).map(_.replace(".0", "")),
+//                        engineNumber = row.lift(10).map(_.replace(".0", "")),
+//                        conditionType = conditionType,
+//                        description = row.lift(6),
+//                        gpsTracking = gpsTrackingType,
+//                        fuelLevelSensor = None,
+//                        fuels = None,
+//                      )
+//                    )
+//                  }
+//                }
+//              },
+//        )
+//    } yield ()
 
   override val `private`: AuthedRoutes[AuthedUser, F] = AuthedRoutes.of {
     case ar @ POST -> Root / "create" as _ =>
@@ -181,26 +180,27 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
           )
         }
 
-    case ar @ POST -> Root / "batch-insert" as _ =>
-      ar.req.decode[Multipart[F]] { multipart =>
-        val allowedMediaTypes = List(
-          MediaType.unsafeParse("text/csv"),
-          MediaType.unsafeParse("application/vnd.ms-excel"),
-          MediaType.unsafeParse("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-        )
-        val filteredParts = multipart.parts.fileParts(allowedMediaTypes: _*)
-        if (filteredParts.nonEmpty)
-          filteredParts
-            .traverse { part =>
-              part
-                .body
-                .through(fs2.io.toInputStream)
-                .evalMap(uploadVehicles(part))
-                .compile
-                .drain
-            }
-            .flatMap(_ => Accepted("Successfully uploaded"))
-        else UnsupportedMediaType("Invalid file format. Only Xls, Xlsx and CSV files are accepted")
-      }
+//    TODO: Temporary disabled
+//    case ar @ POST -> Root / "batch-insert" as _ =>
+//      ar.req.decode[Multipart[F]] { multipart =>
+//        val allowedMediaTypes = List(
+//          MediaType.unsafeParse("text/csv"),
+//          MediaType.unsafeParse("application/vnd.ms-excel"),
+//          MediaType.unsafeParse("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+//        )
+//        val filteredParts = multipart.parts.fileParts(allowedMediaTypes: _*)
+//        if (filteredParts.nonEmpty)
+//          filteredParts
+//            .traverse { part =>
+//              part
+//                .body
+//                .through(fs2.io.toInputStream)
+//                .evalMap(uploadVehicles(part))
+//                .compile
+//                .drain
+//            }
+//            .flatMap(_ => Accepted("Successfully uploaded"))
+//        else UnsupportedMediaType("Invalid file format. Only Xls, Xlsx and CSV files are accepted")
+//      }
   }
 }

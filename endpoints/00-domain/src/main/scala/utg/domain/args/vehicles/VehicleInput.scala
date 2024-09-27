@@ -9,6 +9,7 @@ import io.circe.refined._
 
 import utg.InventoryNumber
 import utg.domain.BranchId
+import utg.domain.FuelTypeAndQuantity
 import utg.domain.VehicleCategoryId
 import utg.domain.enums._
 
@@ -25,9 +26,8 @@ case class VehicleInput(
     chassisNumber: Option[NonEmptyString],
     engineNumber: Option[NonEmptyString],
     conditionType: ConditionType,
-    fuelTypes: Option[NonEmptyList[FuelType]],
     description: Option[NonEmptyString],
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
-    fuelTankVolume: Option[NonNegDouble],
+    fuels: Option[NonEmptyList[FuelTypeAndQuantity]],
   )
