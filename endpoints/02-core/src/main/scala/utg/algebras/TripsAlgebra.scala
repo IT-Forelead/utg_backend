@@ -370,7 +370,7 @@ object TripsAlgebra {
               firstTab = input.firstTab,
               secondTab = input.secondTab,
               thirdTab = input.thirdTab,
-              workingMode = input.workingMode.getOrElse(dtoTrip.workingMode),
+              workingMode = input.workingMode,
               summation = input.summation,
               vehicleId = input.vehicleId.getOrElse(dtoTrip.vehicleId),
             )

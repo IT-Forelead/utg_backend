@@ -11,7 +11,7 @@ import utg.domain.args.trips._
 
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType
+    (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType.opt
       *: nes.opt *: VehiclesSql.id *: nes.opt *: bool).to[dto.Trip]
 
   val insert: Command[dto.Trip] =
@@ -43,7 +43,7 @@ private[repos] object TripsSql extends Sql[TripId] {
        first_tab = ${nes.opt},
        second_tab = ${nes.opt},
        third_tab = ${nes.opt},
-       work_order = $workingModeType,
+       work_order = ${workingModeType.opt},
        summation = ${nes.opt},
        vehicle_id = ${VehiclesSql.id},
        notes = ${nes.opt}

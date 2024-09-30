@@ -20,7 +20,7 @@ case class Trip(
     firstTab: Option[NonEmptyString],
     secondTab: Option[NonEmptyString],
     thirdTab: Option[NonEmptyString],
-    workingMode: WorkingModeType,
+    workingMode: Option[WorkingModeType],
     summation: Option[NonEmptyString],
     vehicle: Option[Vehicle],
     drivers: List[TripDriver],

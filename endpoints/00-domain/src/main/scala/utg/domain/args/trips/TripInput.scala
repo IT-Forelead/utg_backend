@@ -19,7 +19,7 @@ case class TripInput(
     firstTab: Option[NonEmptyString],
     secondTab: Option[NonEmptyString],
     thirdTab: Option[NonEmptyString],
-    workingMode: WorkingModeType,
+    workingMode: Option[WorkingModeType],
     summation: Option[NonEmptyString],
     vehicleId: VehicleId,
     driverIds: NonEmptyList[UserId],

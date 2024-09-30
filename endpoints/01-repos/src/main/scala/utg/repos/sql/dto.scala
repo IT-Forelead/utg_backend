@@ -226,7 +226,7 @@ object dto {
       firstTab: Option[NonEmptyString],
       secondTab: Option[NonEmptyString],
       thirdTab: Option[NonEmptyString],
-      workingMode: WorkingModeType,
+      workingMode: Option[WorkingModeType],
       summation: Option[NonEmptyString],
       vehicleId: VehicleId,
       notes: Option[NonEmptyString],
