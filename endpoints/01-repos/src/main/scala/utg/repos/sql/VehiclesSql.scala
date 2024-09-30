@@ -29,6 +29,7 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
       filters.brand.map(s => s"%$s%").map(sql"v.brand ILIKE $varchar"),
       filters.registeredNumber.map(sql"v.registered_number = $registeredNumber"),
       filters.conditionType.map(sql"v.condition = $conditionType"),
+      filters.vehicleType.map(sql"v.vehicle_type = $vehicleType"),
     )
 
     val baseQuery: AppliedFragment =
