@@ -4,12 +4,12 @@ import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.implicits._
 
+import utg.domain.FuelTypeAndQuantity
 import utg.domain.ResponseData
 import utg.domain.Vehicle
 import utg.domain.VehicleFuelItem
 import utg.domain.VehicleId
-import utg.domain.args.vehicles.VehicleFilters
-import utg.domain.args.vehicles.VehicleInput
+import utg.domain.args.vehicles._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.repos.VehicleFuelItemsRepository
@@ -21,6 +21,7 @@ trait VehiclesAlgebra[F[_]] {
   def create(vehicleInput: VehicleInput): F[VehicleId]
   def get(filters: VehicleFilters): F[ResponseData[Vehicle]]
   def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]]
+  def update(input: UpdateVehicleInput): F[Unit]
 }
 
 object VehiclesAlgebra {
@@ -69,5 +70,40 @@ object VehiclesAlgebra {
             vehiclesRepository.makeVehicle(vehicle)
           }
           .pure[F]
+
+      override def update(input: UpdateVehicleInput): F[Unit] =
+        for {
+          _ <- vehiclesRepository.update(input.id) { dtoVehicle =>
+            dtoVehicle.copy(
+              branchId = input.branchId,
+              vehicleCategoryId = input.vehicleCategoryId,
+              vehicleType = input.vehicleType,
+              brand = input.brand,
+              registeredNumber = input.registeredNumber,
+              yearOfRelease = input.yearOfRelease,
+              bodyNumber = input.bodyNumber,
+              chassisNumber = input.chassisNumber,
+              engineNumber = input.engineNumber,
+              conditionType = input.conditionType,
+              description = input.description,
+              gpsTracking = input.gpsTracking,
+              fuelLevelSensor = input.fuelLevelSensor,
+            )
+          }
+          _ <- input.fuels.traverse { fuels =>
+            updateVehicleFuelItems(input.id, fuels)
+          }
+        } yield ()
+
+      private def updateVehicleFuelItems(
+          vehicleId: VehicleId,
+          fuels: NonEmptyList[FuelTypeAndQuantity],
+        ): F[Unit] =
+        for {
+          _ <- vehicleFuelItemsRepository.deleteByVehicleId(vehicleId)
+          _ <- fuels.traverse_ { item =>
+            vehicleFuelItemsRepository.create(vehicleId, NonEmptyList.one(item))
+          }
+        } yield ()
     }
 }

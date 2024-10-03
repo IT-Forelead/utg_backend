@@ -55,4 +55,30 @@ private[repos] object VehiclesSql extends Sql[VehicleId] {
         FROM vehicles v""".apply(Void)
     baseQuery.whereAndOpt(searchFilters)
   }
+
+  val update: Command[dto.Vehicle] =
+    sql"""UPDATE vehicles
+       SET branch_id = ${BranchesSql.id},
+       vehicle_category_id = ${VehicleCategoriesSql.id},
+       vehicle_type = ${vehicleType},
+       brand = $nes,
+       registered_number = ${nes.opt},
+       year_of_release = ${nonNegInt},
+       body_number = ${nes.opt},
+       chassis_number = ${nes.opt},
+       engine_number = ${nes.opt},
+       condition = ${conditionType},
+       description = ${nes.opt},
+       gps_tracking = ${gpsTrackingType.opt},
+       fuel_level_sensor = ${nonNegDouble.opt}
+       WHERE id = $id
+     """
+      .command
+      .contramap {
+        case vehicle: dto.Vehicle =>
+          vehicle.branchId *: vehicle.vehicleCategoryId *: vehicle.vehicleType *: vehicle.brand *:
+            vehicle.registeredNumber *: vehicle.yearOfRelease *: vehicle.bodyNumber *: vehicle.chassisNumber *:
+            vehicle.engineNumber *: vehicle.conditionType *: vehicle.description *: vehicle.gpsTracking *:
+            vehicle.fuelLevelSensor *: vehicle.id *: EmptyTuple
+      }
 }

@@ -22,4 +22,7 @@ private[repos] object VehicleFuelItemsSql extends Sql[VehicleFuelItemId] {
   def findByVehicleIds(ids: List[VehicleId]): Query[ids.type, dto.VehicleFuelItem] =
     sql"""SELECT * FROM vehicle_fuel_items WHERE vehicle_id IN (${VehiclesSql.id.values.list(ids)})"""
       .query(codec)
+
+  val deleteByVehicleIdSql: Command[VehicleId] =
+    sql"""DELETE FROM vehicle_fuel_items WHERE vehicle_id = ${VehiclesSql.id}""".command
 }

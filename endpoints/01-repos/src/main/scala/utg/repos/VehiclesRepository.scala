@@ -18,6 +18,7 @@ import utg.domain.VehicleCategoryId
 import utg.domain.VehicleFuelItem
 import utg.domain.VehicleId
 import utg.domain.args.vehicles.VehicleFilters
+import utg.exception.AError
 import utg.repos.sql.BranchesSql
 import utg.repos.sql.RegionsSql
 import utg.repos.sql.VehicleCategoriesSql
@@ -31,6 +32,7 @@ trait VehiclesRepository[F[_]] {
   def getAsStream(filters: VehicleFilters): fs2.Stream[F, dto.Vehicle]
   def makeVehicle(vehicleDto: dto.Vehicle): F[Vehicle]
   def findByIds(ids: List[VehicleId]): F[Map[VehicleId, Vehicle]]
+  def update(id: VehicleId)(update: dto.Vehicle => dto.Vehicle): F[Unit]
 }
 
 object VehiclesRepository {
@@ -93,12 +95,13 @@ object VehiclesRepository {
             .map(_.map(b => b.id -> b).toMap)
         }
         vehicleIds = NonEmptyList.fromList(dtos.map(_.id))
-        fuelsByVehicleId <- vehicleIds.fold(Map.empty[VehicleId, List[VehicleFuelItem]].pure[F]) { vIds =>
-          val vehicleIdsList = vIds.toList
-          VehicleFuelItemsSql
-            .findByVehicleIds(vehicleIdsList)
-            .queryList(vehicleIdsList)
-            .map(_.map(_.toDomain).groupBy(_.vehicleId))
+        fuelsByVehicleId <- vehicleIds.fold(Map.empty[VehicleId, List[VehicleFuelItem]].pure[F]) {
+          vIds =>
+            val vehicleIdsList = vIds.toList
+            VehicleFuelItemsSql
+              .findByVehicleIds(vehicleIdsList)
+              .queryList(vehicleIdsList)
+              .map(_.map(_.toDomain).groupBy(_.vehicleId))
         }
         maybeRegionIds = NonEmptyList.fromList(branchById.values.toList.map(_.regionId))
         regionById <- maybeRegionIds.fold(Map.empty[RegionId, dto.Region].pure[F]) { regionIds =>
@@ -176,5 +179,11 @@ object VehiclesRepository {
         VehiclesSql.get(filters).paginateOpt(filters.limit, filters.page)
       af.fragment.query(VehiclesSql.codec *: int8).queryStream(af.argument).map(_._1)
     }
+
+    override def update(id: VehicleId)(update: dto.Vehicle => dto.Vehicle): F[Unit] =
+      OptionT(VehiclesSql.findById.queryOption(id)).cataF(
+        AError.Internal(s"Vehicle not found by id [$id]").raiseError[F, Unit],
+        vehicle => VehiclesSql.update.execute(update(vehicle)),
+      )
   }
 }

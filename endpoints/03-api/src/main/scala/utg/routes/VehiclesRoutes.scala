@@ -7,6 +7,7 @@ import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
 import cats.implicits.catsSyntaxApplicativeErrorId
+import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
 import cats.implicits.toFoldableOps
 import cats.implicits.toFunctorOps
@@ -35,6 +36,7 @@ import utg.algebras.VehiclesAlgebra
 import utg.domain.AuthedUser
 import utg.domain.VehicleCsvGenerator.makeCsv
 import utg.domain.VehicleId
+import utg.domain.args.vehicles.UpdateVehicleInput
 import utg.domain.args.vehicles.VehicleFilters
 import utg.domain.args.vehicles.VehicleInput
 import utg.domain.enums.ConditionType
@@ -163,6 +165,11 @@ final case class VehiclesRoutes[F[_]: JsonDecoder: MonadThrow: Async](
     case ar @ POST -> Root / "create" as _ =>
       ar.req.decodeR[VehicleInput] { create =>
         vehiclesAlgebra.create(create).flatMap(Created(_))
+      }
+
+    case ar @ POST -> Root / "edit" as _ =>
+      ar.req.decodeR[UpdateVehicleInput] { input =>
+        vehiclesAlgebra.update(input) >> NoContent()
       }
 
     case ar @ POST -> Root as _ =>

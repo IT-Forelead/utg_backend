@@ -24,6 +24,7 @@ trait VehicleFuelItemsRepository[F[_]] {
     ): F[Unit]
   def getByVehicleId(id: VehicleId): F[List[dto.VehicleFuelItem]]
   def findByVehicleIds(ids: NonEmptyList[VehicleId]): F[Map[VehicleId, List[VehicleFuelItem]]]
+  def deleteByVehicleId(id: VehicleId): F[Unit]
 }
 
 object VehicleFuelItemsRepository {
@@ -60,5 +61,8 @@ object VehicleFuelItemsRepository {
         .queryList(vehicleIds)
         .map(_.map(_.toDomain).groupBy(_.vehicleId))
     }
+
+    override def deleteByVehicleId(id: VehicleId): F[Unit] =
+      VehicleFuelItemsSql.deleteByVehicleIdSql.execute(id)
   }
 }
