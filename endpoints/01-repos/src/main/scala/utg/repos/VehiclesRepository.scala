@@ -1,5 +1,6 @@
 package utg.repos
 
+import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.data.OptionT
 import cats.effect.Async
@@ -36,7 +37,7 @@ trait VehiclesRepository[F[_]] {
 }
 
 object VehiclesRepository {
-  def make[F[_]: Async](
+  def make[F[_]: Async: MonadThrow](
       implicit
       session: Resource[F, Session[F]]
     ): VehiclesRepository[F] = new VehiclesRepository[F] {
@@ -117,6 +118,7 @@ object VehiclesRepository {
           val maybeBranch = branchById
             .get(vehicleDto.branchId)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
+          val fuels = fuelsByVehicleId.getOrElse(vehicleDto.id, Nil)
           vehicleDto.toDomain(
             maybeBranch,
             VehicleCategory(
@@ -124,7 +126,7 @@ object VehiclesRepository {
               name = vehicleCategory.name,
               vehicleType = vehicleCategory.vehicleType,
             ),
-            fuels = fuelsByVehicleId.getOrElse(vehicleDto.id, Nil),
+            fuels,
           )
         }
       }
@@ -149,28 +151,12 @@ object VehiclesRepository {
       ): F[Map[VehicleId, Vehicle]] =
       NonEmptyList.fromList(ids).fold(Map.empty[VehicleId, Vehicle].pure[F]) { rIds =>
         val branchIds = rIds.toList
-        VehiclesSql.findByIds(branchIds).queryList(branchIds).map {
-          _.map { dto =>
-            dto.id -> Vehicle(
-              id = dto.id,
-              createdAt = dto.createdAt,
-              vehicleType = dto.vehicleType,
-              branch = None,
-              vehicleCategory = None,
-              brand = dto.brand,
-              registeredNumber = dto.registeredNumber,
-              inventoryNumber = dto.inventoryNumber,
-              yearOfRelease = dto.yearOfRelease,
-              bodyNumber = dto.bodyNumber,
-              chassisNumber = dto.chassisNumber,
-              engineNumber = dto.engineNumber,
-              conditionType = dto.conditionType,
-              description = dto.description,
-              gpsTracking = dto.gpsTracking,
-              fuelLevelSensor = dto.fuelLevelSensor,
-              fuels = Nil,
-            )
-          }.toMap
+        VehiclesSql.findByIds(branchIds).queryList(branchIds).flatMap { dtos =>
+          dtos
+            .traverse { dto =>
+              makeVehicle(dto).map(v => dto.id -> v)
+            }
+            .map(_.toMap)
         }
       }
 
