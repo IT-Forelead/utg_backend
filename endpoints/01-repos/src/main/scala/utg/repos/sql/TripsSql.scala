@@ -32,7 +32,7 @@ private[repos] object TripsSql extends Sql[TripId] {
 
     val baseQuery: AppliedFragment =
       sql"""SELECT *, COUNT(*) OVER() AS total FROM trips WHERE deleted = false""".apply(Void)
-    baseQuery.andOpt(searchFilters)
+    baseQuery.andOpt(searchFilters) |+| sql""" ORDER BY created_at DESC""".apply(Void)
   }
 
   val update: Command[dto.Trip] =
