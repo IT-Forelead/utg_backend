@@ -1,7 +1,9 @@
 package utg.routes
 
 import java.io.ByteArrayOutputStream
+
 import scala.util.Random
+
 import cats.MonadThrow
 import cats.implicits.catsSyntaxFlatMapOps
 import cats.implicits.toFlatMapOps
@@ -19,8 +21,11 @@ import org.xhtmlrenderer.pdf.ITextRenderer
 import uz.scala.http4s.syntax.all.deriveEntityEncoder
 import uz.scala.http4s.syntax.all.http4SyntaxReqOps
 import uz.scala.http4s.utils.Routes
-import utg.algebras.{TripFullyDetailsAlgebra, TripsAlgebra}
-import utg.domain.{AuthedUser, TripId}
+
+import utg.algebras.TripFullyDetailsAlgebra
+import utg.algebras.TripsAlgebra
+import utg.domain.AuthedUser
+import utg.domain.TripId
 import utg.domain.args.trips._
 
 final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
@@ -84,6 +89,16 @@ final case class TripsRoutes[F[_]: JsonDecoder: MonadThrow](
 
     case GET -> Root / "fully-details" / UUIDVar(id) as _ =>
       tripFullyDetailsAlgebra.getFullyDetails(id.coerce[TripId]).flatMap(Ok(_))
+
+    case GET -> Root / "download-pdf" / UUIDVar(id) as _ =>
+      val fileName = s"trips-${Random.alphanumeric.take(10).mkString}.pdf"
+      tripFullyDetailsAlgebra.getFullyDetailsPdf(id.coerce[TripId]).flatMap { pdfBytes =>
+        Ok(fs2.Stream.emits[F, Byte](pdfBytes))
+          .map(
+            _.withContentType(`Content-Type`(MediaType.application.pdf, Charset.`UTF-8`))
+              .putHeaders(Header.Raw(ci"Content-Disposition", s"attachment; filename=$fileName"))
+          )
+      }
   }
 
   private def html2Pdf(htmlContent: String): Array[Byte] = {

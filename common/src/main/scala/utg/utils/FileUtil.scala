@@ -2,13 +2,13 @@ package utg.utils
 
 import java.io.InputStream
 import java.io.InputStreamReader
-
 import scala.jdk.CollectionConverters._
-
 import com.github.tototoshi.csv.CSVReader
 import com.github.tototoshi.csv.DefaultCSVFormat
 import org.apache.poi.EncryptedDocumentException
 import org.apache.poi.ss.usermodel._
+
+import scala.io.Source
 
 object FileUtil {
   def parseCsvOrXlsInputStream(
@@ -73,4 +73,12 @@ object FileUtil {
       case error: Throwable =>
         Left("Error occurred. Please check uploaded file.")
     }
+
+  def getFileAsString(filePath: String): String = {
+    val source = Source.fromResource(filePath)
+    try
+      source.mkString
+    finally
+      source.close()
+  }
 }

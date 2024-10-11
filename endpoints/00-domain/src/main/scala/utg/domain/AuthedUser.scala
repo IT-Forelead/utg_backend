@@ -51,7 +51,7 @@ object AuthedUser {
       machineOperatorLicenseGiven: Option[LocalDate],
       machineOperatorLicenseExpire: Option[LocalDate],
     ) extends AuthedUser {
-    val fullName = s"$firstname $lastname"
+    val fullName = s"$firstname $lastname $middleName"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)
   }
 }
