@@ -1,5 +1,7 @@
 package utg.domain.args.vehicles
 
+import java.time.LocalDate
+
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
@@ -15,19 +17,32 @@ import utg.domain.enums._
 
 @JsonCodec
 case class VehicleInput(
-    branchId: BranchId,
-    vehicleCategoryId: VehicleCategoryId,
     vehicleType: VehicleType,
-    brand: NonEmptyString,
     registeredNumber: Option[NonEmptyString],
-    inventoryNumber: InventoryNumber,
+    brand: NonEmptyString,
+    color: Option[NonEmptyString],
+    owner: Option[NonEmptyString],
+    address: Option[NonEmptyString],
+    dateOfIssue: Option[LocalDate],
+    issuingAuthority: Option[NonEmptyString],
+    pin: Option[NonNegInt],
     yearOfRelease: NonNegInt,
+    vehicleCategoryId: VehicleCategoryId,
     bodyNumber: Option[NonEmptyString],
     chassisNumber: Option[NonEmptyString],
+    maxMass: NonNegInt,
+    unloadMass: NonNegInt,
     engineNumber: Option[NonEmptyString],
+    engineCapacity: Option[NonNegInt],
+    fuels: Option[NonEmptyList[FuelTypeAndQuantity]],
+    numberOfSeats: NonNegInt,
+    numberOfStandingPlaces: NonNegInt,
+    specialMarks: Option[NonEmptyString],
+    licenseNumber: Option[NonEmptyString],
+    branchId: BranchId,
+    inventoryNumber: InventoryNumber,
     conditionType: ConditionType,
-    description: Option[NonEmptyString],
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
-    fuels: Option[NonEmptyList[FuelTypeAndQuantity]],
+    description: Option[NonEmptyString],
   )

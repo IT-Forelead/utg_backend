@@ -1,5 +1,6 @@
 package utg.domain
 
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 import eu.timepit.refined.types.all.NonNegDouble
@@ -16,18 +17,31 @@ case class Vehicle(
     id: VehicleId,
     createdAt: ZonedDateTime,
     vehicleType: VehicleType,
-    branch: Option[Branch],
-    vehicleCategory: Option[VehicleCategory],
-    brand: NonEmptyString,
     registeredNumber: Option[NonEmptyString],
-    inventoryNumber: InventoryNumber,
+    brand: NonEmptyString,
+    color: Option[NonEmptyString],
+    owner: Option[NonEmptyString],
+    address: Option[NonEmptyString],
+    dateOfIssue: Option[LocalDate],
+    issuingAuthority: Option[NonEmptyString],
+    pin: Option[NonNegInt],
     yearOfRelease: NonNegInt,
+    vehicleCategory: Option[VehicleCategory],
     bodyNumber: Option[NonEmptyString],
     chassisNumber: Option[NonEmptyString],
+    maxMass: NonNegInt,
+    unloadMass: NonNegInt,
     engineNumber: Option[NonEmptyString],
+    engineCapacity: Option[NonNegInt],
+    fuels: List[VehicleFuelItem],
+    numberOfSeats: NonNegInt,
+    numberOfStandingPlaces: NonNegInt,
+    specialMarks: Option[NonEmptyString],
+    licenseNumber: Option[NonEmptyString],
+    branch: Option[Branch],
+    inventoryNumber: InventoryNumber,
     conditionType: ConditionType,
-    description: Option[NonEmptyString],
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
-    fuels: List[VehicleFuelItem],
+    description: Option[NonEmptyString],
   )

@@ -9,7 +9,7 @@ import utg.domain.TripId
 
 private[repos] object TripFuelRatesSql extends Sql[TripFuelRateId] {
   private[repos] val codec: Codec[dto.TripFuelRate] =
-    (id *: zonedDateTime *: TripsSql.id *: nonNegDouble *: nonNegDouble *: nonNegDouble
+    (id *: zonedDateTime *: TripsSql.id *: fuelType *: nonNegDouble *: nonNegDouble *: nonNegDouble
       *: UsersSql.id *: AssetsSql.id *: bool).to[dto.TripFuelRate]
 
   val insert: Command[dto.TripFuelRate] =

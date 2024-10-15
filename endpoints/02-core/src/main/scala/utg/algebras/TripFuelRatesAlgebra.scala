@@ -18,6 +18,7 @@ import utg.repos.TripFuelRatesRepository
 import utg.repos.TripsRepository
 import utg.repos.UsersRepository
 import utg.repos.sql.dto
+import utg.repos.sql.fuelType
 import utg.utils.ID
 
 trait TripFuelRatesAlgebra[F[_]] {
@@ -45,6 +46,7 @@ object TripFuelRatesAlgebra {
                 id = id,
                 createdAt = now,
                 tripId = trip.id,
+                fuelType = input.fuelType,
                 normChangeCoefficient = input.normChangeCoefficient,
                 equipmentWorkingTime = input.equipmentWorkingTime,
                 engineWorkingTime = input.engineWorkingTime,
@@ -68,6 +70,7 @@ object TripFuelRatesAlgebra {
               id = tfr.id,
               createdAt = tfr.createdAt,
               tripId = tfr.tripId,
+              fuelType = tfr.fuelType,
               normChangeCoefficient = tfr.normChangeCoefficient,
               equipmentWorkingTime = tfr.equipmentWorkingTime,
               engineWorkingTime = tfr.engineWorkingTime,

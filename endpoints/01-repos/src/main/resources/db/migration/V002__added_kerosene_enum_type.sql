@@ -1,1 +1,0 @@
-ALTER TYPE FUEL_TYPE ADD VALUE 'kerosene';

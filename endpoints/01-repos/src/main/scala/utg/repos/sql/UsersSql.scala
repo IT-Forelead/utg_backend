@@ -17,65 +17,19 @@ import utg.domain.auth.AccessCredentials
 
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt *: phone *: RolesSql.id
-      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: nes.opt
-      *: machineOperatorLicenseCategory.opt *: date.opt *: date.opt *: date.opt *: date.opt *: date.opt)
+    (id *: zonedDateTime *: nes *: nes *: nes.opt *: date.opt *: nonNegInt *: phone *: RolesSql.id
+      *: AssetsSql.id.opt *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: date.opt
+      *: date.opt *: nes.opt *: machineOperatorLicenseCategory.opt *: date.opt *: date.opt)
       .to[dto.User]
 
   private val accessCredentialsDecoder: Decoder[AccessCredentials[dto.User]] =
     (codec *: passwordHash).map {
       case user *: hash *: HNil =>
-        AccessCredentials(
-          data = dto.User(
-            id = user.id,
-            createdAt = user.createdAt,
-            firstname = user.firstname,
-            lastname = user.lastname,
-            middleName = user.middleName,
-            personalNumber = user.personalNumber,
-            phone = user.phone,
-            roleId = user.roleId,
-            assetId = user.assetId,
-            branchCode = user.branchCode,
-            drivingLicenseNumber = user.drivingLicenseNumber,
-            drivingLicenseCategories = user.drivingLicenseCategories,
-            machineOperatorLicenseNumber = user.machineOperatorLicenseNumber,
-            machineOperatorLicenseCategories = user.machineOperatorLicenseCategories,
-            birthday = user.birthday,
-            drivingLicenseGiven = user.drivingLicenseGiven,
-            drivingLicenseExpire = user.drivingLicenseExpire,
-            machineOperatorLicenseGiven = user.machineOperatorLicenseGiven,
-            machineOperatorLicenseExpire = user.machineOperatorLicenseExpire,
-          ),
-          password = hash,
-        )
+        AccessCredentials(user, hash)
     }
 
   val findByPhone: Query[Phone, AccessCredentials[dto.User]] =
-    sql"""SELECT
-          id,
-          created_at,
-          firstname,
-          lastname,
-          middle_name,
-          personal_number,
-          phone,
-          role_id,
-          asset_id,
-          branch_code,
-          driving_license_number,
-          driving_license_categories,
-          machine_operator_license_number,
-          machine_operator_license_category,
-          birthday,
-          driving_license_given,
-          driving_license_expire,
-          machine_operator_license_given,
-          machine_operator_license_expire,
-          password
-          FROM users
-          WHERE phone = $phone
-          LIMIT 1""".query(accessCredentialsDecoder)
+    sql"""SELECT * FROM users WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
   val findById: Query[UserId, dto.User] =
     sql"""SELECT
@@ -84,6 +38,7 @@ private[repos] object UsersSql extends Sql[UserId] {
           firstname,
           lastname,
           middle_name,
+          birthday,
           personal_number,
           phone,
           role_id,
@@ -91,11 +46,10 @@ private[repos] object UsersSql extends Sql[UserId] {
           branch_code,
           driving_license_number,
           driving_license_categories,
-          machine_operator_license_number,
-          machine_operator_license_category,
-          birthday,
           driving_license_given,
           driving_license_expire,
+          machine_operator_license_number,
+          machine_operator_license_category,
           machine_operator_license_given,
           machine_operator_license_expire
           FROM users
@@ -108,6 +62,7 @@ private[repos] object UsersSql extends Sql[UserId] {
           firstname,
           lastname,
           middle_name,
+          birthday,
           personal_number,
           phone,
           role_id,
@@ -115,11 +70,10 @@ private[repos] object UsersSql extends Sql[UserId] {
           branch_code,
           driving_license_number,
           driving_license_categories,
-          machine_operator_license_number,
-          machine_operator_license_category,
-          birthday,
           driving_license_given,
           driving_license_expire,
+          machine_operator_license_number,
+          machine_operator_license_category,
           machine_operator_license_given,
           machine_operator_license_expire
           FROM users
@@ -132,6 +86,7 @@ private[repos] object UsersSql extends Sql[UserId] {
           $nes,
           $nes,
           ${nes.opt},
+          ${date.opt},
           $nonNegInt,
           $phone,
           ${RolesSql.id},
@@ -139,23 +94,23 @@ private[repos] object UsersSql extends Sql[UserId] {
           ${nes.opt},
           ${nes.opt},
           ${drivingLicenseCategories.opt},
-          $passwordHash,
+          ${date.opt},
+          ${date.opt},
           ${nes.opt},
           ${machineOperatorLicenseCategory.opt},
           ${date.opt},
           ${date.opt},
-          ${date.opt},
-          ${date.opt},
-          ${date.opt}
+          $passwordHash
         )"""
       .command
       .contramap { (u: AccessCredentials[dto.User]) =>
         u.data.id *: u.data.createdAt *: u.data.firstname *: u.data.lastname *: u.data.middleName *:
-          u.data.personalNumber *: u.data.phone *: u.data.roleId *: u.data.assetId *:
-          u.data.branchCode *: u.data.drivingLicenseNumber *: u.data.drivingLicenseCategories *:
-          u.password *: u.data.machineOperatorLicenseNumber *: u.data.machineOperatorLicenseCategories *:
-          u.data.birthday *: u.data.drivingLicenseGiven *: u.data.drivingLicenseExpire *:
-          u.data.machineOperatorLicenseGiven *: u.data.machineOperatorLicenseExpire *: EmptyTuple
+          u.data.birthday *: u.data.personalNumber *: u.data.phone *: u.data.roleId *:
+          u.data.assetId *: u.data.branchCode *: u.data.drivingLicenseNumber *:
+          u.data.drivingLicenseCategories *: u.data.drivingLicenseGiven *:
+          u.data.drivingLicenseExpire *: u.data.machineOperatorLicenseNumber *:
+          u.data.machineOperatorLicenseCategories *: u.data.machineOperatorLicenseGiven *:
+          u.data.machineOperatorLicenseExpire *: u.password *: EmptyTuple
       }
 
   val update: Command[dto.User] =

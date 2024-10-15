@@ -1,9 +1,11 @@
 CREATE TYPE VEHICLE_TYPE AS ENUM (
+  'truck',
+  'bus',
   'auto',
-  'special_road_vehicles',
+  'pickup',
+  'special_vehicle',
   'trailer',
-  'welding_equipment',
-  'other_mechanism'
+  'road_construction_vehicle'
 );
 
 CREATE TYPE CONDITION_TYPE AS ENUM (
@@ -17,8 +19,8 @@ CREATE TYPE FUEL_TYPE AS ENUM (
   'diesel',
   'methane',
   'propane',
-  'hybrid',
-  'electric'
+  'electric',
+  'kerosene'
 );
 
 CREATE TYPE GPS_TRACKING_TYPE AS ENUM (
@@ -57,6 +59,15 @@ CREATE TYPE DRIVING_LICENSE_CATEGORY AS ENUM (
   'BE',
   'CE',
   'DE'
+);
+
+CREATE TYPE MACHINE_OPERATOR_LICENSE_CATEGORY AS ENUM (
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F'
 );
 
 CREATE TYPE DELIVERY_STATUS AS ENUM (
@@ -99,34 +110,65 @@ CREATE TABLE IF NOT EXISTS regions
     deleted BOOLEAN NOT NULL DEFAULT false
 );
 
-INSERT INTO "regions" ("id", "name")
-VALUES ('4fcb3bc7-8459-45dc-a380-10f995e15ad8', 'Андижон вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('122a0d83-fb8e-4dbf-a65d-3ee6a0688037', 'Бухоро вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('d51b9830-7cb6-4420-a07e-c8df78d90447', 'Фарғона вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('a4ec39b1-dfad-45e1-a12c-7986ffa4e4bf', 'Жиззах вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('2d27b575-f952-4c93-8f9e-02c89758cbc7', 'Наманган вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('51b00d57-1b99-47c5-b89c-8d1fab5825f6', 'Навоий вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('f4bbb8aa-680f-4220-9079-b460e9f2e573', 'Қашқадарё вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('425ff71e-57dd-459f-a831-cf57b30a7345', 'Самарқанд вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('3acfc29c-3e14-4beb-96f6-20f025e431ab', 'Сирдарё вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('54b834ee-0df9-465e-ad34-be1834b491d0', 'Сурхондарё вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('3b316182-e55c-4e03-8811-052fcd888236', 'Тошкент вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('ad514b71-3096-4be5-a455-d87abbb081b2', 'Хоразм вилояти');
-INSERT INTO "regions" ("id", "name")
-VALUES ('8b88eb6c-24e1-4ecd-b944-8605d28da975', 'Қорақалпоғистон Республикаси');
-INSERT INTO "regions" ("id", "name")
-VALUES ('dac35ec3-a904-42d7-af20-5d7e853fe1f6', 'Тошкент шаҳри');
+INSERT INTO
+  regions (id, name)
+VALUES
+  (
+    '4fcb3bc7-8459-45dc-a380-10f995e15ad8',
+    'Андижон вилояти'
+  ),
+  (
+    '122a0d83-fb8e-4dbf-a65d-3ee6a0688037',
+    'Бухоро вилояти'
+  ),
+  (
+    'd51b9830-7cb6-4420-a07e-c8df78d90447',
+    'Фарғона вилояти'
+  ),
+  (
+    'a4ec39b1-dfad-45e1-a12c-7986ffa4e4bf',
+    'Жиззах вилояти'
+  ),
+  (
+    '2d27b575-f952-4c93-8f9e-02c89758cbc7',
+    'Наманган вилояти'
+  ),
+  (
+    '51b00d57-1b99-47c5-b89c-8d1fab5825f6',
+    'Навоий вилояти'
+  ),
+  (
+    'f4bbb8aa-680f-4220-9079-b460e9f2e573',
+    'Қашқадарё вилояти'
+  ),
+  (
+    '425ff71e-57dd-459f-a831-cf57b30a7345',
+    'Самарқанд вилояти'
+  ),
+  (
+    '3acfc29c-3e14-4beb-96f6-20f025e431ab',
+    'Сирдарё вилояти'
+  ),
+  (
+    '54b834ee-0df9-465e-ad34-be1834b491d0',
+    'Сурхондарё вилояти'
+  ),
+  (
+    '3b316182-e55c-4e03-8811-052fcd888236',
+    'Тошкент вилояти'
+  ),
+  (
+    'ad514b71-3096-4be5-a455-d87abbb081b2',
+    'Хоразм вилояти'
+  ),
+  (
+    '8b88eb6c-24e1-4ecd-b944-8605d28da975',
+    'Қорақалпоғистон Республикаси'
+  ),
+  (
+    'dac35ec3-a904-42d7-af20-5d7e853fe1f6',
+    'Тошкент шаҳри'
+  );
 
 CREATE TABLE IF NOT EXISTS branches (
   id UUID PRIMARY KEY NOT NULL,
@@ -142,6 +184,7 @@ CREATE TABLE IF NOT EXISTS users (
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
   middle_name VARCHAR NULL,
+  birthday DATE NULL,
   personal_number INT NOT NULL UNIQUE,
   phone VARCHAR NOT NULL UNIQUE,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -149,6 +192,12 @@ CREATE TABLE IF NOT EXISTS users (
   branch_code VARCHAR NULL,
   driving_license_number VARCHAR NULL UNIQUE,
   driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
+  driving_license_given DATE NULL,
+  driving_license_expire DATE NULL,
+  machine_operator_license_number VARCHAR NULL UNIQUE,
+  machine_operator_license_category _MACHINE_OPERATOR_LICENSE_CATEGORY NULL,
+  machine_operator_license_given DATE NULL,
+  machine_operator_license_expire DATE NULL,
   password VARCHAR NOT NULL
 );
 
@@ -190,6 +239,10 @@ VALUES
   (
     '95fe6cba-7ea4-415e-8faf-500a3199dc14',
     'refueller'
+  ),
+  (
+    '3e858380-ad3b-4fa3-bb98-dfe2104e5d5b',
+    'machine_operator'
   );
 
 INSERT INTO
@@ -253,27 +306,186 @@ CREATE TABLE IF NOT EXISTS vehicle_categories (
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
+INSERT INTO
+  vehicle_categories (id, name, vehicle_type)
+VALUES
+  (
+    '425dfbb8-f83b-4e84-87f9-97ffcc4e90be',
+    'Бортли автомобил',
+    'truck'
+  ),
+  (
+    'df8b5b7e-9c46-4c9c-a12f-d465582ce93b',
+    'Ўзи ағдарувчи автомобил',
+    'truck'
+  ),
+  (
+    '51903ae1-0df8-4f88-8166-3302e5bb5430',
+    'Фургон',
+    'truck'
+  ),
+  (
+    '8986c735-4d7b-43d9-8818-330c00d3b8de',
+    'Автоцистерна',
+    'truck'
+  ),
+  (
+    'f6676093-6a9b-4c33-8f97-2ba87ed8f757',
+    'Эгарли шатакчи автомобил',
+    'truck'
+  ),
+  (
+    'd7c7a985-31f0-48df-a27b-03f6af382a18',
+    'Қувур ташувчи автомобил',
+    'truck'
+  ),
+  (
+    'f10e0b28-31fa-4bb2-979f-08b80b30123d',
+    'Тузилиши бўйича бошқа кузов',
+    'truck'
+  ),
+  (
+    '60647105-c2a8-45a2-92cd-336f7029aa38',
+    'Автобус',
+    'bus'
+  ),
+  (
+    '8c1e02e5-af8b-41b4-82fc-5bad30625e4f',
+    'Микроавтобус',
+    'bus'
+  ),
+  (
+    '462f7a98-a2aa-4c6c-ae9f-1092e059756e',
+    'Енгил автомобиль',
+    'auto'
+  ),
+  (
+    '6b0aae22-4afe-4b1b-8ebf-6ade94f44a14',
+    'Пикап',
+    'pickup'
+  ),
+  (
+    '67b00136-4642-431d-87c1-448f77e94195',
+    'Енгил фургон',
+    'pickup'
+  ),
+  (
+    '74e60ba8-1bf7-4fb3-b067-20afba8ce3eb',
+    'Махсус енгил автомобил',
+    'special_vehicle'
+  ),
+  (
+    'ed36f633-d3a9-4bd2-a14e-b10e4b27b2bc',
+    'Ўт ўчирувчи автомобил',
+    'special_vehicle'
+  ),
+  (
+    '342ce703-2058-441f-95ad-b6a286dd5eca',
+    'Автокран',
+    'special_vehicle'
+  ),
+  (
+    '0a24c6d8-2d62-4262-82e2-776aa66a4e56',
+    'Бошқа турдаги махсус автомобил',
+    'special_vehicle'
+  ),
+  (
+    'bd7bc1f3-d2b1-4a90-bd9a-820810e96674',
+    'Автомобил тиркамаси',
+    'trailer'
+  ),
+  (
+    '237c5322-114e-48b6-b784-0b5a96cb7ee6',
+    'Автомобил ярим тиркамаси',
+    'trailer'
+  ),
+  (
+    '7ebf14ed-217e-44a9-8fb0-a27ccfa371cd',
+    'Трактор тиркамаси',
+    'trailer'
+  ),
+  (
+    '9a220e31-cb2a-49a3-babd-3d06f53f50d0',
+    'Трактор',
+    'road_construction_vehicle'
+  ),
+  (
+    'a27cb8c8-d9fb-4c1c-8145-b16d0be7a61e',
+    'Экскаватор',
+    'road_construction_vehicle'
+  ),
+  (
+    '6471ce95-a459-4cd7-a072-4d39767928ad',
+    'Бульдозер',
+    'road_construction_vehicle'
+  ),
+  (
+    'ca9bdce9-798f-4a04-a1ec-0e04489fdf76',
+    'Қувурёткизгич',
+    'road_construction_vehicle'
+  ),
+  (
+    '8a1eaff8-097d-493b-830d-41edbfd93517',
+    'Пайвандлаш агрегати',
+    'road_construction_vehicle'
+  ),
+  (
+    'e43e2f64-6e87-4bd5-9076-092a97423fd4',
+    'Сув тўлдирувчи агрегат',
+    'road_construction_vehicle'
+  ),
+  (
+    '84f14f0c-c887-489d-b9ea-7cc31ae2fd4f',
+    'Сиқувчи агрегат',
+    'road_construction_vehicle'
+  ),
+  (
+    'b24ccdc7-6400-463c-9882-bdd6b2349860',
+    'Бошқа турдаги механизм',
+    'road_construction_vehicle'
+  );
+
 CREATE TABLE IF NOT EXISTS vehicles (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  branch_id UUID NOT NULL
-    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  vehicle_type VEHICLE_TYPE NOT NULL,
+  registered_number VARCHAR NULL UNIQUE,
+  brand VARCHAR NOT NULL,
+  color VARCHAR NULL,
+  owner VARCHAR NULL,
+  address VARCHAR NULL,
+  date_of_issue DATE NULL,
+  issuing_authority VARCHAR NULL,
+  pin INT NULL,
+  year_of_release INT NOT NULL,
   vehicle_category_id UUID NOT NULL
     CONSTRAINT fk_vehicle_category_id REFERENCES vehicle_categories (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  vehicle_type VEHICLE_TYPE NOT NULL,
-  brand VARCHAR NOT NULL,
-  registered_number VARCHAR NULL UNIQUE,
-  inventory_number VARCHAR NOT NULL UNIQUE,
-  year_of_release INT NOT NULL,
   body_number VARCHAR NULL,
   chassis_number VARCHAR NULL,
+  max_mass INT NOT NULL DEFAULT 0,
+  unload_mass INT NOT NULL DEFAULT 0,
   engine_number VARCHAR NULL,
+  engine_capacity INT NULL,
+  number_of_seats INT NOT NULL DEFAULT 0,
+  number_of_standing_places INT NOT NULL DEFAULT 0,
+  special_marks VARCHAR NULL,
+  license_number VARCHAR NULL,
+  branch_id UUID NOT NULL
+    CONSTRAINT fk_branch_id REFERENCES branches (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  inventory_number VARCHAR NOT NULL UNIQUE,
   condition CONDITION_TYPE NOT NULL,
-  fuel_types _FUEL_TYPE NULL,
-  description VARCHAR NULL,
   gps_tracking GPS_TRACKING_TYPE NULL,
   fuel_level_sensor DOUBLE PRECISION NULL,
-  fuel_tank_volume DOUBLE PRECISION NULL,
+  description VARCHAR NULL,
+  deleted BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE TABLE IF NOT EXISTS vehicle_fuel_items (
+  id UUID PRIMARY KEY NOT NULL,
+  vehicle_id UUID NOT NULL
+    CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_type FUEL_TYPE NOT NULL,
+  fuel_tank_volume DOUBLE PRECISION NOT NULL,
   deleted BOOLEAN NOT NULL DEFAULT false
 );
 
@@ -286,7 +498,7 @@ CREATE TABLE IF NOT EXISTS trips (
   first_tab VARCHAR NULL,
   second_tab VARCHAR NULL,
   third_tab VARCHAR NULL,
-  work_order WORKING_MODE_TYPE NOT NULL,
+  work_order WORKING_MODE_TYPE NULL,
   summation VARCHAR NULL,
   vehicle_id UUID NOT NULL
     CONSTRAINT fk_vehicle_id REFERENCES vehicles (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -435,6 +647,7 @@ CREATE TABLE IF NOT EXISTS trip_fuel_rates (
   id UUID PRIMARY KEY NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   trip_id UUID NOT NULL CONSTRAINT fk_trip_id REFERENCES trips (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  fuel_type FUEL_TYPE NOT NULL,
   norm_change_coeff DOUBLE PRECISION NULL,
   equipment_working_time DOUBLE PRECISION NULL,
   engine_working_time DOUBLE PRECISION NULL,

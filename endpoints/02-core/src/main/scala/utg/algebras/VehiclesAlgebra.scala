@@ -7,7 +7,6 @@ import cats.implicits._
 import utg.domain.FuelTypeAndQuantity
 import utg.domain.ResponseData
 import utg.domain.Vehicle
-import utg.domain.VehicleFuelItem
 import utg.domain.VehicleId
 import utg.domain.args.vehicles._
 import utg.effects.Calendar
@@ -18,7 +17,7 @@ import utg.repos.sql.dto
 import utg.utils.ID
 
 trait VehiclesAlgebra[F[_]] {
-  def create(vehicleInput: VehicleInput): F[VehicleId]
+  def create(input: VehicleInput): F[VehicleId]
   def get(filters: VehicleFilters): F[ResponseData[Vehicle]]
   def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]]
   def update(input: UpdateVehicleInput): F[Unit]
@@ -32,30 +31,43 @@ object VehiclesAlgebra {
       F: MonadThrow[F]
     ): VehiclesAlgebra[F] =
     new VehiclesAlgebra[F] {
-      override def create(vehicleInput: VehicleInput): F[VehicleId] =
+      override def create(input: VehicleInput): F[VehicleId] =
         for {
           id <- ID.make[F, VehicleId]
           now <- Calendar[F].currentZonedDateTime
           dtoVehicle = dto.Vehicle(
             id = id,
             createdAt = now,
-            branchId = vehicleInput.branchId,
-            vehicleCategoryId = vehicleInput.vehicleCategoryId,
-            vehicleType = vehicleInput.vehicleType,
-            brand = vehicleInput.brand,
-            registeredNumber = vehicleInput.registeredNumber,
-            inventoryNumber = vehicleInput.inventoryNumber,
-            yearOfRelease = vehicleInput.yearOfRelease,
-            bodyNumber = vehicleInput.bodyNumber,
-            chassisNumber = vehicleInput.chassisNumber,
-            engineNumber = vehicleInput.engineNumber,
-            conditionType = vehicleInput.conditionType,
-            description = vehicleInput.description,
-            gpsTracking = vehicleInput.gpsTracking,
-            fuelLevelSensor = vehicleInput.fuelLevelSensor,
+            vehicleType = input.vehicleType,
+            registeredNumber = input.registeredNumber,
+            brand = input.brand,
+            color = input.color,
+            owner = input.owner,
+            address = input.address,
+            dateOfIssue = input.dateOfIssue,
+            issuingAuthority = input.issuingAuthority,
+            pin = input.pin,
+            yearOfRelease = input.yearOfRelease,
+            vehicleCategoryId = input.vehicleCategoryId,
+            bodyNumber = input.bodyNumber,
+            chassisNumber = input.chassisNumber,
+            maxMass = input.maxMass,
+            unloadMass = input.unloadMass,
+            engineNumber = input.engineNumber,
+            engineCapacity = input.engineCapacity,
+            numberOfSeats = input.numberOfSeats,
+            numberOfStandingPlaces = input.numberOfStandingPlaces,
+            specialMarks = input.specialMarks,
+            licenseNumber = input.licenseNumber,
+            branchId = input.branchId,
+            inventoryNumber = input.inventoryNumber,
+            conditionType = input.conditionType,
+            gpsTracking = input.gpsTracking,
+            fuelLevelSensor = input.fuelLevelSensor,
+            description = input.description,
           )
           _ <- vehiclesRepository.create(dtoVehicle)
-          _ <- vehicleInput.fuels.traverse { fuels =>
+          _ <- input.fuels.traverse { fuels =>
             vehicleFuelItemsRepository.create(id, fuels)
           }
         } yield id
@@ -75,19 +87,32 @@ object VehiclesAlgebra {
         for {
           _ <- vehiclesRepository.update(input.id) { dtoVehicle =>
             dtoVehicle.copy(
-              branchId = input.branchId,
-              vehicleCategoryId = input.vehicleCategoryId,
               vehicleType = input.vehicleType,
-              brand = input.brand,
               registeredNumber = input.registeredNumber,
+              brand = input.brand,
+              color = input.color,
+              owner = input.owner,
+              address = input.address,
+              dateOfIssue = input.dateOfIssue,
+              issuingAuthority = input.issuingAuthority,
+              pin = input.pin,
               yearOfRelease = input.yearOfRelease,
+              vehicleCategoryId = input.vehicleCategoryId,
               bodyNumber = input.bodyNumber,
               chassisNumber = input.chassisNumber,
+              maxMass = input.maxMass,
+              unloadMass = input.unloadMass,
               engineNumber = input.engineNumber,
+              engineCapacity = input.engineCapacity,
+              numberOfSeats = input.numberOfSeats,
+              numberOfStandingPlaces = input.numberOfStandingPlaces,
+              specialMarks = input.specialMarks,
+              licenseNumber = input.licenseNumber,
+              branchId = input.branchId,
               conditionType = input.conditionType,
-              description = input.description,
               gpsTracking = input.gpsTracking,
               fuelLevelSensor = input.fuelLevelSensor,
+              description = input.description,
             )
           }
           _ <- input.fuels.traverse { fuels =>
