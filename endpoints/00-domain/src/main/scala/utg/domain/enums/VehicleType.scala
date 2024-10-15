@@ -10,6 +10,7 @@ object VehicleType extends CirceEnum[VehicleType] with Enum[VehicleType] {
   case object Bus extends VehicleType
   case object Auto extends VehicleType
   case object Pickup extends VehicleType
+  case object SpecialVehicle extends VehicleType
   case object Trailer extends VehicleType
   case object RoadConstructionVehicle extends VehicleType
   override def values: IndexedSeq[VehicleType] = findValues
