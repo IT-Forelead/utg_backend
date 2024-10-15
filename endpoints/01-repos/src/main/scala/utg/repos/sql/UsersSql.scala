@@ -203,7 +203,7 @@ private[repos] object UsersSql extends Sql[UserId] {
             machine_operator_license_number,
             machine_operator_license_category,
             machine_operator_license_given,
-            machine_operator_license_expire
+            machine_operator_license_expire,
             COUNT(*) OVER() AS total
             FROM users"""
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)
