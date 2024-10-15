@@ -31,6 +31,27 @@ private[repos] object UsersSql extends Sql[UserId] {
   val findByPhone: Query[Phone, AccessCredentials[dto.User]] =
     sql"""SELECT * FROM users WHERE phone = $phone LIMIT 1""".query(accessCredentialsDecoder)
 
+//    id UUID PRIMARY KEY NOT NULL,
+//    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+//    firstname VARCHAR NOT NULL,
+//    lastname VARCHAR NOT NULL,
+//    middle_name VARCHAR NULL,
+//    birthday DATE NULL,
+//    personal_number INT NOT NULL UNIQUE,
+//    phone VARCHAR NOT NULL UNIQUE,
+//    role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
+//    asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+//    branch_code VARCHAR NULL,
+//    driving_license_number VARCHAR NULL UNIQUE,
+//    driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
+//    driving_license_given DATE NULL,
+//    driving_license_expire DATE NULL,
+//    machine_operator_license_number VARCHAR NULL UNIQUE,
+//    machine_operator_license_category _MACHINE_OPERATOR_LICENSE_CATEGORY NULL,
+//    machine_operator_license_given DATE NULL,
+//    machine_operator_license_expire DATE NULL,
+//    password VARCHAR NOT NULL
+
   val findById: Query[UserId, dto.User] =
     sql"""SELECT
           id,
@@ -152,39 +173,39 @@ private[repos] object UsersSql extends Sql[UserId] {
     )
 
   private def orderBy(filters: UserFilters): Fragment[Void] = {
-    val sorting: String = filters.sortBy.fold("u.created_at") {
-      case UserSorting.CreatedAt => "u.created_at"
-      case UserSorting.FirstName => "u.firstname"
-      case UserSorting.LastName => "u.lastname"
-      case UserSorting.Role => "u.role_id"
+    val sorting: String = filters.sortBy.fold("created_at") {
+      case UserSorting.CreatedAt => "created_at"
+      case UserSorting.FirstName => "firstname"
+      case UserSorting.LastName => "lastname"
+      case UserSorting.Role => "role_id"
     }
     sql""" ORDER BY #$sorting #${filters.sortOrder.fold("")(_.value)}"""
   }
 
   def select(filters: UserFilters): AppliedFragment = {
     val baseQuery: Fragment[Void] =
-      sql"""SELECT 
-              u.id AS user_id,
-              u.created_at AS created_at,
-              u.firstname AS firstname,
-              u.lastname  AS lastname,
-              u.middle_name AS middle_name,
-              u.personal_number AS personal_number,
-              u.phone AS phone,
-              u.role_id AS role_id,
-              u.asset_id AS asset_id,
-              u.branch_code AS branch_code,
-              u.driving_license_number,
-              u.driving_license_categories,
-              u.machine_operator_license_number,
-              u.machine_operator_license_category,
-              u.birthday,
-              u.driving_license_given,
-              u.driving_license_expire,
-              u.machine_operator_license_given,
-              u.machine_operator_license_expire,
-              COUNT(*) OVER() AS total
-            FROM users u"""
+      sql"""SELECT
+            id,
+            created_at,
+            firstname,
+            lastname,
+            middle_name,
+            birthday,
+            personal_number,
+            phone,
+            role_id,
+            asset_id,
+            branch_code,
+            driving_license_number,
+            driving_license_categories,
+            driving_license_given,
+            driving_license_expire,
+            machine_operator_license_number,
+            machine_operator_license_category,
+            machine_operator_license_given,
+            machine_operator_license_expire
+            COUNT(*) OVER() AS total
+            FROM users"""
     baseQuery(Void).whereAndOpt(searchFilter(filters)) |+| orderBy(filters)(Void)
   }
 
