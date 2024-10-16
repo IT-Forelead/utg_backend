@@ -191,12 +191,16 @@ object dto {
         branch: Option[domain.Branch],
         vehicleCategory: domain.VehicleCategory,
         fuels: List[domain.VehicleFuelItem],
+        vehiclePhotos: List[AssetId],
+        vehicleLicensePhotos: List[AssetId],
       ): domain.Vehicle =
       this
         .into[domain.Vehicle]
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.vehicleCategory, vehicleCategory.some)
         .withFieldConst(_.fuels, fuels)
+        .withFieldConst(_.vehiclePhotos, vehiclePhotos)
+        .withFieldConst(_.vehicleLicensePhotos, vehicleLicensePhotos)
         .transform
   }
 
@@ -212,6 +216,20 @@ object dto {
         .into[domain.VehicleFuelItem]
         .transform
   }
+
+  case class VehiclePhoto(
+      id: VehiclePhotoId,
+      vehicleId: VehicleId,
+      assetId: AssetId,
+      deleted: Boolean = false,
+    )
+
+  case class VehicleLicensePhoto(
+      id: VehicleLicensePhotoId,
+      vehicleId: VehicleId,
+      assetId: AssetId,
+      deleted: Boolean = false,
+    )
 
   case class MedicalExamination(
       id: MedicalExaminationId,

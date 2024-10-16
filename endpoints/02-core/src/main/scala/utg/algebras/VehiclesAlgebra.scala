@@ -4,6 +4,7 @@ import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.implicits._
 
+import utg.domain.AssetId
 import utg.domain.FuelTypeAndQuantity
 import utg.domain.ResponseData
 import utg.domain.Vehicle
@@ -12,6 +13,8 @@ import utg.domain.args.vehicles._
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.repos.VehicleFuelItemsRepository
+import utg.repos.VehicleLicensePhotosRepository
+import utg.repos.VehiclePhotosRepository
 import utg.repos.VehiclesRepository
 import utg.repos.sql.dto
 import utg.utils.ID
@@ -27,6 +30,8 @@ object VehiclesAlgebra {
   def make[F[_]: Calendar: GenUUID](
       vehiclesRepository: VehiclesRepository[F],
       vehicleFuelItemsRepository: VehicleFuelItemsRepository[F],
+      vehiclePhotosRepository: VehiclePhotosRepository[F],
+      vehicleLicensePhotosRepository: VehicleLicensePhotosRepository[F],
     )(implicit
       F: MonadThrow[F]
     ): VehiclesAlgebra[F] =
@@ -69,6 +74,12 @@ object VehiclesAlgebra {
           _ <- vehiclesRepository.create(dtoVehicle)
           _ <- input.fuels.traverse { fuels =>
             vehicleFuelItemsRepository.create(id, fuels)
+          }
+          _ <- input.vehiclePhotoIds.traverse { photoIds =>
+            vehiclePhotosRepository.create(id, photoIds)
+          }
+          _ <- input.licensePhotoIds.traverse { photoIds =>
+            vehicleLicensePhotosRepository.create(id, photoIds)
           }
         } yield id
 
@@ -118,6 +129,12 @@ object VehiclesAlgebra {
           _ <- input.fuels.traverse { fuels =>
             updateVehicleFuelItems(input.id, fuels)
           }
+          _ <- input.vehiclePhotoIds.traverse { assetIds =>
+            updateVehiclePhotos(input.id, assetIds)
+          }
+          _ <- input.licensePhotoIds.traverse { assetIds =>
+            updateVehicleLicensePhotos(input.id, assetIds)
+          }
         } yield ()
 
       private def updateVehicleFuelItems(
@@ -128,6 +145,28 @@ object VehiclesAlgebra {
           _ <- vehicleFuelItemsRepository.deleteByVehicleId(vehicleId)
           _ <- fuels.traverse_ { item =>
             vehicleFuelItemsRepository.create(vehicleId, NonEmptyList.one(item))
+          }
+        } yield ()
+
+      private def updateVehiclePhotos(
+          vehicleId: VehicleId,
+          assetIds: NonEmptyList[AssetId],
+        ): F[Unit] =
+        for {
+          _ <- vehiclePhotosRepository.deleteByVehicleId(vehicleId)
+          _ <- assetIds.traverse_ { assetId =>
+            vehiclePhotosRepository.create(vehicleId, NonEmptyList.one(assetId))
+          }
+        } yield ()
+
+      private def updateVehicleLicensePhotos(
+          vehicleId: VehicleId,
+          assetIds: NonEmptyList[AssetId],
+        ): F[Unit] =
+        for {
+          _ <- vehicleLicensePhotosRepository.deleteByVehicleId(vehicleId)
+          _ <- assetIds.traverse_ { assetId =>
+            vehicleLicensePhotosRepository.create(vehicleId, NonEmptyList.one(assetId))
           }
         } yield ()
     }

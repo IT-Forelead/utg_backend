@@ -24,6 +24,8 @@ import utg.repos.sql.BranchesSql
 import utg.repos.sql.RegionsSql
 import utg.repos.sql.VehicleCategoriesSql
 import utg.repos.sql.VehicleFuelItemsSql
+import utg.repos.sql.VehicleLicensePhotosSql
+import utg.repos.sql.VehiclePhotosSql
 import utg.repos.sql.VehiclesSql
 import utg.repos.sql.dto
 
@@ -60,12 +62,26 @@ object VehiclesRepository {
           .selectByVehicleId
           .queryList(vehicleDto.id)
           .map(_.map(_.toDomain))
+        vehiclePhotos <- VehiclePhotosSql
+          .selectByVehicleId
+          .queryList(vehicleDto.id)
+          .map(_.map(_.assetId))
+        vehicleLicensePhotos <- VehicleLicensePhotosSql
+          .selectByVehicleId
+          .queryList(vehicleDto.id)
+          .map(_.map(_.assetId))
         branch <-
           (for {
             branch <- OptionT(BranchesSql.findById.queryOption(vehicleDto.branchId))
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
-      } yield vehicleDto.toDomain(branch, vehicleCategory, fuels)
+      } yield vehicleDto.toDomain(
+        branch,
+        vehicleCategory,
+        fuels,
+        vehiclePhotos,
+        vehicleLicensePhotos,
+      )
 
     private def makeVehicles(dtos: List[dto.Vehicle]): F[List[Vehicle]] = {
       val vehicleCategoryIds = NonEmptyList.fromList(dtos.map(_.vehicleCategoryId))
@@ -104,6 +120,24 @@ object VehiclesRepository {
               .queryList(vehicleIdsList)
               .map(_.map(_.toDomain).groupBy(_.vehicleId))
         }
+        vehiclePhotosByVehicleId <- vehicleIds.fold(
+          Map.empty[VehicleId, List[dto.VehiclePhoto]].pure[F]
+        ) { vIds =>
+          val vehicleIdsList = vIds.toList
+          VehiclePhotosSql
+            .findByVehicleIds(vehicleIdsList)
+            .queryList(vehicleIdsList)
+            .map(_.groupBy(_.vehicleId))
+        }
+        vehicleLicensePhotosByVehicleId <- vehicleIds.fold(
+          Map.empty[VehicleId, List[dto.VehicleLicensePhoto]].pure[F]
+        ) { vIds =>
+          val vehicleIdsList = vIds.toList
+          VehicleLicensePhotosSql
+            .findByVehicleIds(vehicleIdsList)
+            .queryList(vehicleIdsList)
+            .map(_.groupBy(_.vehicleId))
+        }
         maybeRegionIds = NonEmptyList.fromList(branchById.values.toList.map(_.regionId))
         regionById <- maybeRegionIds.fold(Map.empty[RegionId, dto.Region].pure[F]) { regionIds =>
           val regionIdList = regionIds.toList
@@ -119,6 +153,9 @@ object VehiclesRepository {
             .get(vehicleDto.branchId)
             .map(b => b.toDomain(regionById.get(b.regionId).map(_.toDomain)))
           val fuels = fuelsByVehicleId.getOrElse(vehicleDto.id, Nil)
+          val vehiclePhotos = vehiclePhotosByVehicleId.getOrElse(vehicleDto.id, Nil).map(_.assetId)
+          val vehicleLicensePhotos =
+            vehicleLicensePhotosByVehicleId.getOrElse(vehicleDto.id, Nil).map(_.assetId)
           vehicleDto.toDomain(
             maybeBranch,
             VehicleCategory(
@@ -127,6 +164,8 @@ object VehiclesRepository {
               vehicleType = vehicleCategory.vehicleType,
             ),
             fuels,
+            vehiclePhotos,
+            vehicleLicensePhotos,
           )
         }
       }

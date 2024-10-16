@@ -44,4 +44,6 @@ case class Vehicle(
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
     description: Option[NonEmptyString],
+    vehiclePhotos: List[AssetId],
+    vehicleLicensePhotos: List[AssetId],
   )

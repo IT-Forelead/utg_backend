@@ -10,6 +10,7 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import utg.InventoryNumber
+import utg.domain.AssetId
 import utg.domain.BranchId
 import utg.domain.FuelTypeAndQuantity
 import utg.domain.VehicleCategoryId
@@ -45,4 +46,6 @@ case class VehicleInput(
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
     description: Option[NonEmptyString],
+    vehiclePhotoIds: Option[NonEmptyList[AssetId]],
+    licensePhotoIds: Option[NonEmptyList[AssetId]],
   )
