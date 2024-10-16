@@ -1,6 +1,5 @@
 package utg.algebras
 
-import caliban.uploads.FileMeta
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.effect.std.Random
@@ -10,11 +9,9 @@ import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined._
-
 import utg.Phone
 import utg.domain.AuthedUser.User
-import utg.domain.ResponseData
-import utg.domain.UserId
+import utg.domain.{FileMeta, ResponseData, UserId}
 import utg.domain.args.smsMessages.SmsMessageInput
 import utg.domain.args.users._
 import utg.domain.auth._
@@ -35,7 +32,7 @@ trait UsersAlgebra[F[_]] {
   def update(
       id: UserId,
       userInput: UpdateUserInput,
-      fileMeta: Option[FileMeta] = None,
+      fileMeta: Option[FileMeta[F]] = None,
     ): F[Unit]
   def delete(id: UserId): F[Unit]
   def updatePrivilege(userRole: UpdateUserRole): F[Unit]
@@ -103,7 +100,7 @@ object UsersAlgebra {
       override def update(
           id: UserId,
           userInput: UpdateUserInput,
-          fileMeta: Option[FileMeta],
+          fileMeta: Option[FileMeta[F]],
         ): F[Unit] =
         for {
           assetId <- fileMeta.traverse(assets.create)

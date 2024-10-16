@@ -2,7 +2,6 @@ package utg.algebras
 
 import java.net.URL
 
-import caliban.uploads.FileMeta
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.data.OptionT
@@ -13,6 +12,7 @@ import uz.scala.syntax.refined._
 import utg.domain.Asset
 import utg.domain.Asset.AssetInfo
 import utg.domain.AssetId
+import utg.domain.FileMeta
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.exception.AError
@@ -20,18 +20,19 @@ import utg.repos.AssetsRepository
 import utg.utils.ID
 
 trait AssetsAlgebra[F[_]] {
-  def create(meta: FileMeta): F[AssetId]
+  def create(meta: FileMeta[F]): F[AssetId]
   def getPublicUrl(assetIds: NonEmptyList[AssetId]): F[Map[AssetId, URL]]
   def getAssetInfo(assetId: AssetId): F[AssetInfo]
   def findByIds(assetIds: List[AssetId]): F[Map[AssetId, AssetInfo]]
 }
+
 object AssetsAlgebra {
   def make[F[_]: MonadThrow: GenUUID: Calendar: Lambda[M[_] => fs2.Compiler[M, M]]](
       assetsRepository: AssetsRepository[F],
       s3Client: S3Client[F],
     ): AssetsAlgebra[F] =
     new AssetsAlgebra[F] {
-      override def create(meta: FileMeta): F[AssetId] =
+      override def create(meta: FileMeta[F]): F[AssetId] =
         for {
           id <- ID.make[F, AssetId]
           now <- Calendar[F].currentZonedDateTime
@@ -44,7 +45,8 @@ object AssetsAlgebra {
             fileName = meta.fileName.some,
             contentType = meta.contentType,
           )
-          _ <- fs2.Stream.iterable(meta.bytes).through(s3Client.putObject(key)).compile.drain
+//          _ <- fs2.Stream.iterable(meta.bytes).through(s3Client.putObject(key)).compile.drain
+          _ <- meta.bytes.through(s3Client.putObject(key)).compile.drain
           _ <- assetsRepository.create(asset)
         } yield id
 

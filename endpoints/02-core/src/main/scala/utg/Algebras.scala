@@ -123,6 +123,8 @@ object Algebras {
       vehicles = VehiclesAlgebra.make[F](
         repositories.vehicles,
         repositories.vehicleFuelItems,
+        repositories.vehiclePhotos,
+        repositories.vehicleLicensePhotos,
       ),
       trips = tripsAlgebra,
       tripDrivers = tripDriversAlgebra,
