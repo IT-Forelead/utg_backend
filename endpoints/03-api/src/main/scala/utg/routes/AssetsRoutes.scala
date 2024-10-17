@@ -64,7 +64,7 @@ final case class AssetsRoutes[F[_]: Logger: JsonDecoder: Async: Random](
             fp.contentLength.getOrElse(0L),
           )
         }
-        fileMeta.traverse(fm => assetsAlgebra.create(fm)).flatMap(_ => Created())
+        fileMeta.traverse(fm => assetsAlgebra.create(fm)).flatMap(Created(_))
       }
   }
 }
