@@ -3,11 +3,13 @@ package utg.algebras
 import cats.MonadThrow
 import cats.data.NonEmptyList
 import cats.implicits._
+import cats.implicits.toFlatMapOps
 
 import utg.domain.AssetId
 import utg.domain.FuelTypeAndQuantity
 import utg.domain.ResponseData
 import utg.domain.Vehicle
+import utg.domain.Vehicle.VehicleInfo
 import utg.domain.VehicleId
 import utg.domain.args.vehicles._
 import utg.effects.Calendar
@@ -21,7 +23,7 @@ import utg.utils.ID
 
 trait VehiclesAlgebra[F[_]] {
   def create(input: VehicleInput): F[VehicleId]
-  def get(filters: VehicleFilters): F[ResponseData[Vehicle]]
+  def get(filters: VehicleFilters): F[ResponseData[VehicleInfo]]
   def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]]
   def update(input: UpdateVehicleInput): F[Unit]
 }
@@ -32,6 +34,7 @@ object VehiclesAlgebra {
       vehicleFuelItemsRepository: VehicleFuelItemsRepository[F],
       vehiclePhotosRepository: VehiclePhotosRepository[F],
       vehicleLicensePhotosRepository: VehicleLicensePhotosRepository[F],
+      assetsAlgebra: AssetsAlgebra[F],
     )(implicit
       F: MonadThrow[F]
     ): VehiclesAlgebra[F] =
@@ -83,8 +86,22 @@ object VehiclesAlgebra {
           }
         } yield id
 
-      override def get(filters: VehicleFilters): F[ResponseData[Vehicle]] =
-        vehiclesRepository.get(filters)
+      override def get(filters: VehicleFilters): F[ResponseData[VehicleInfo]] =
+        for {
+          vehicles <- vehiclesRepository.get(filters)
+          vehiclePhotoIds = vehicles.data.flatMap(_.vehiclePhotoIds).distinct
+          vehiclePhotos <- assetsAlgebra.getByIds(vehiclePhotoIds)
+          vehicleLicensePhotoIds = vehicles.data.flatMap(_.vehicleLicensePhotoIds).distinct
+          vehicleLicensePhotos <- assetsAlgebra.findByIds(vehicleLicensePhotoIds)
+          data = vehicles
+            .data
+            .map( v =>
+              v.toDomain(
+                vehiclePhotos.filter(s => v.vehiclePhotoIds.contains(s.id)),
+                vehicleLicensePhotos.view.values.toList,
+              )
+            )
+        } yield ResponseData(data, vehicles.total)
 
       override def getAsStream(filters: VehicleFilters): F[fs2.Stream[F, Vehicle]] =
         vehiclesRepository

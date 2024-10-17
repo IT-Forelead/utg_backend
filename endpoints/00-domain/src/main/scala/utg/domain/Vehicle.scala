@@ -8,8 +8,11 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
+import io.scalaland.chimney.dsl.TransformationOps
 
 import utg.InventoryNumber
+import utg.domain.Asset.AssetInfo
+import utg.domain.Vehicle.VehicleInfo
 import utg.domain.enums._
 
 @JsonCodec
@@ -44,6 +47,54 @@ case class Vehicle(
     gpsTracking: Option[GpsTrackingType],
     fuelLevelSensor: Option[NonNegDouble],
     description: Option[NonEmptyString],
-    vehiclePhotos: List[AssetId],
-    vehicleLicensePhotos: List[AssetId],
-  )
+    vehiclePhotoIds: List[AssetId],
+    vehicleLicensePhotoIds: List[AssetId],
+  ) {
+  def toDomain(
+      vehiclePhotos: List[AssetInfo],
+      vehicleLicensePhotos: List[AssetInfo],
+    ): VehicleInfo =
+    this
+      .into[VehicleInfo]
+      .withFieldConst(_.vehiclePhotos, vehiclePhotos)
+      .withFieldConst(_.vehicleLicensePhotos, vehicleLicensePhotos)
+      .transform
+}
+
+object Vehicle {
+  @JsonCodec
+  case class VehicleInfo(
+      id: VehicleId,
+      createdAt: ZonedDateTime,
+      vehicleType: VehicleType,
+      registeredNumber: Option[NonEmptyString],
+      brand: NonEmptyString,
+      color: Option[NonEmptyString],
+      owner: Option[NonEmptyString],
+      address: Option[NonEmptyString],
+      dateOfIssue: Option[LocalDate],
+      issuingAuthority: Option[NonEmptyString],
+      pin: Option[NonNegInt],
+      yearOfRelease: NonNegInt,
+      vehicleCategory: Option[VehicleCategory],
+      bodyNumber: Option[NonEmptyString],
+      chassisNumber: Option[NonEmptyString],
+      maxMass: NonNegInt,
+      unloadMass: NonNegInt,
+      engineNumber: Option[NonEmptyString],
+      engineCapacity: Option[NonNegInt],
+      fuels: List[VehicleFuelItem],
+      numberOfSeats: NonNegInt,
+      numberOfStandingPlaces: NonNegInt,
+      specialMarks: Option[NonEmptyString],
+      licenseNumber: Option[NonEmptyString],
+      branch: Option[Branch],
+      inventoryNumber: InventoryNumber,
+      conditionType: ConditionType,
+      gpsTracking: Option[GpsTrackingType],
+      fuelLevelSensor: Option[NonNegDouble],
+      description: Option[NonEmptyString],
+      vehiclePhotos: List[AssetInfo],
+      vehicleLicensePhotos: List[AssetInfo],
+    )
+}

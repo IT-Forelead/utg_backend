@@ -199,8 +199,8 @@ object dto {
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.vehicleCategory, vehicleCategory.some)
         .withFieldConst(_.fuels, fuels)
-        .withFieldConst(_.vehiclePhotos, vehiclePhotos)
-        .withFieldConst(_.vehicleLicensePhotos, vehicleLicensePhotos)
+        .withFieldConst(_.vehiclePhotoIds, vehiclePhotos)
+        .withFieldConst(_.vehicleLicensePhotoIds, vehicleLicensePhotos)
         .transform
   }
 

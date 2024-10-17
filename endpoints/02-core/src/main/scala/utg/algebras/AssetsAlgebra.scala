@@ -24,6 +24,7 @@ trait AssetsAlgebra[F[_]] {
   def getPublicUrl(assetIds: NonEmptyList[AssetId]): F[Map[AssetId, URL]]
   def getAssetInfo(assetId: AssetId): F[AssetInfo]
   def findByIds(assetIds: List[AssetId]): F[Map[AssetId, AssetInfo]]
+  def getByIds(assetIds: List[AssetId]): F[List[AssetInfo]]
 }
 
 object AssetsAlgebra {
@@ -65,6 +66,7 @@ object AssetsAlgebra {
         ) { asset =>
           s3Client.generateUrl(asset.s3Key.value).map { url =>
             AssetInfo(
+              asset.id,
               asset.fileName,
               asset.contentType,
               getFileType(asset.s3Key.value),
@@ -82,6 +84,7 @@ object AssetsAlgebra {
             case assetId -> asset =>
               s3Client.generatePresignedUrl(asset.s3Key.value).map { url =>
                 assetId -> AssetInfo(
+                  asset.id,
                   asset.fileName,
                   asset.contentType,
                   getFileType(asset.s3Key.value),
@@ -90,6 +93,25 @@ object AssetsAlgebra {
               }
           }
         } yield assetInfoById.toMap
+
+      override def getByIds(assetIds: List[AssetId]): F[List[AssetInfo]] =
+        for {
+          assets <- NonEmptyList
+            .fromList(assetIds)
+            .fold(Map.empty[AssetId, Asset].pure[F])(assetsRepository.getAssets)
+          assetInfos <- assets.toList.traverse {
+            case _ -> asset =>
+              s3Client.generatePresignedUrl(asset.s3Key.value).map { url =>
+                AssetInfo(
+                  asset.id,
+                  asset.fileName,
+                  asset.contentType,
+                  getFileType(asset.s3Key.value),
+                  url,
+                )
+              }
+          }
+        } yield assetInfos
 
       private def getFileType(filename: String): String = {
         val extension = filename.substring(filename.lastIndexOf('.') + 1)

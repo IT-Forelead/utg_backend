@@ -125,6 +125,7 @@ object Algebras {
         repositories.vehicleFuelItems,
         repositories.vehiclePhotos,
         repositories.vehicleLicensePhotos,
+        assetsAlgebra
       ),
       trips = tripsAlgebra,
       tripDrivers = tripDriversAlgebra,
