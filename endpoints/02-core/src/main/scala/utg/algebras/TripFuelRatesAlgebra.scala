@@ -18,7 +18,6 @@ import utg.repos.TripFuelRatesRepository
 import utg.repos.TripsRepository
 import utg.repos.UsersRepository
 import utg.repos.sql.dto
-import utg.repos.sql.fuelType
 import utg.utils.ID
 
 trait TripFuelRatesAlgebra[F[_]] {

@@ -1,6 +1,5 @@
 package utg.domain
 
-import java.time.LocalDate
 import java.time.ZonedDateTime
 
 import eu.timepit.refined.types.string.NonEmptyString
@@ -14,12 +13,11 @@ import utg.domain.enums.WorkingModeType
 case class Trip(
     id: TripId,
     createdAt: ZonedDateTime,
-    startDate: LocalDate,
-    endDate: Option[LocalDate],
+    startDate: ZonedDateTime,
+    endDate: Option[ZonedDateTime],
     serialNumber: Option[NonEmptyString],
     firstTab: Option[NonEmptyString],
     secondTab: Option[NonEmptyString],
-    thirdTab: Option[NonEmptyString],
     workingMode: Option[WorkingModeType],
     summation: Option[NonEmptyString],
     vehicle: Option[Vehicle],

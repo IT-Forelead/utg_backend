@@ -1,6 +1,6 @@
 package utg.domain.args.trips
 
-import java.time.LocalDate
+import java.time.ZonedDateTime
 
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.string.NonEmptyString
@@ -15,12 +15,11 @@ import utg.domain.enums.WorkingModeType
 @JsonCodec
 case class UpdateTripInput(
     id: TripId,
-    startDate: Option[LocalDate],
-    endDate: Option[LocalDate],
+    startDate: Option[ZonedDateTime],
+    endDate: Option[ZonedDateTime],
     serialNumber: Option[NonEmptyString],
     firstTab: Option[NonEmptyString],
     secondTab: Option[NonEmptyString],
-    thirdTab: Option[NonEmptyString],
     workingMode: Option[WorkingModeType],
     summation: Option[NonEmptyString],
     driverIds: Option[NonEmptyList[UserId]],
