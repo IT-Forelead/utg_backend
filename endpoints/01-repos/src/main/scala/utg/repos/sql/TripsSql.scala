@@ -2,7 +2,6 @@ package utg.repos.sql
 
 import skunk._
 import skunk.codec.all.bool
-import skunk.codec.all.date
 import skunk.implicits._
 import uz.scala.skunk.syntax.all.skunkSyntaxFragmentOps
 
@@ -11,7 +10,7 @@ import utg.domain.args.trips._
 
 private[repos] object TripsSql extends Sql[TripId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: date *: date.opt *: nes.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType.opt
+    (id *: zonedDateTime *: zonedDateTime *: zonedDateTime.opt *: nes.opt *: nes.opt *: nes.opt *: workingModeType.opt
       *: nes.opt *: VehiclesSql.id *: nes.opt *: bool).to[dto.Trip]
 
   val insert: Command[dto.Trip] =
@@ -24,8 +23,8 @@ private[repos] object TripsSql extends Sql[TripId] {
     val searchFilters = List(
       filters.workingMode.map(sql"working_mode = $workingModeType"),
       filters.vehicleId.map(sql"vehicle_id = ${VehiclesSql.id}"),
-      filters.startDate.map(sql"start_date = $date"),
-      filters.endDate.map(sql"end_date = $date"),
+      filters.startDate.map(sql"start_date = $zonedDateTime"),
+      filters.endDate.map(sql"end_date = $zonedDateTime"),
       filters.from.map(sql"created_at >= $zonedDateTime"),
       filters.to.map(sql"created_at <= $zonedDateTime"),
     )
@@ -37,12 +36,11 @@ private[repos] object TripsSql extends Sql[TripId] {
 
   val update: Command[dto.Trip] =
     sql"""UPDATE trips
-       SET start_date = $date,
-       end_date = ${date.opt},
+       SET start_date = $zonedDateTime,
+       end_date = ${zonedDateTime.opt},
        serial_number = ${nes.opt},
        first_tab = ${nes.opt},
        second_tab = ${nes.opt},
-       third_tab = ${nes.opt},
        work_order = ${workingModeType.opt},
        summation = ${nes.opt},
        vehicle_id = ${VehiclesSql.id},
@@ -52,7 +50,7 @@ private[repos] object TripsSql extends Sql[TripId] {
       .command
       .contramap {
         case trip: dto.Trip =>
-          trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *: trip.thirdTab *:
+          trip.startDate *: trip.endDate *: trip.serialNumber *: trip.firstTab *: trip.secondTab *:
             trip.workingMode *: trip.summation *: trip.vehicleId *: trip.notes *: trip.id *: EmptyTuple
       }
 }
