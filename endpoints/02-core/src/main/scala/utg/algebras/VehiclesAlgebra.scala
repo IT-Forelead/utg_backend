@@ -89,16 +89,17 @@ object VehiclesAlgebra {
       override def get(filters: VehicleFilters): F[ResponseData[VehicleInfo]] =
         for {
           vehicles <- vehiclesRepository.get(filters)
-          vehiclePhotoIds = vehicles.data.flatMap(_.vehiclePhotoIds).distinct
-          vehiclePhotos <- assetsAlgebra.getByIds(vehiclePhotoIds)
-          vehicleLicensePhotoIds = vehicles.data.flatMap(_.vehicleLicensePhotoIds).distinct
-          vehicleLicensePhotos <- assetsAlgebra.findByIds(vehicleLicensePhotoIds)
+          assetIds = vehicles
+            .data
+            .flatMap(v => v.vehiclePhotoIds ++ v.vehicleLicensePhotoIds)
+            .distinct
+          vehicleAssets <- assetsAlgebra.getByIds(assetIds)
           data = vehicles
             .data
-            .map( v =>
+            .map(v =>
               v.toDomain(
-                vehiclePhotos.filter(s => v.vehiclePhotoIds.contains(s.id)),
-                vehicleLicensePhotos.view.values.toList,
+                vehicleAssets.filter(ai => v.vehiclePhotoIds.contains(ai.id)),
+                vehicleAssets.filter(ai => v.vehicleLicensePhotoIds.contains(ai.id)),
               )
             )
         } yield ResponseData(data, vehicles.total)

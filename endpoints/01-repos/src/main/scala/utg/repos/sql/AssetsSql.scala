@@ -11,8 +11,8 @@ private[repos] object AssetsSql extends Sql[AssetId] {
   val insert: Command[Asset] =
     sql"""INSERT INTO assets VALUES ($codec)""".command
 
-  def getByIds(assetIds: List[AssetId]): Query[assetIds.type, Asset] =
-    sql"""SELECT * FROM assets WHERE id in ${id.values.list(assetIds)}""".query(codec)
+  def getByIds(ids: List[AssetId]): Query[ids.type, Asset] =
+    sql"""SELECT * FROM assets WHERE id IN (${id.values.list(ids)})""".query(codec)
 
   val findById: Query[AssetId, Asset] =
     sql"""SELECT * FROM assets WHERE id = $id LIMIT 1""".query(codec)
