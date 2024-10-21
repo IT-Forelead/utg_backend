@@ -30,6 +30,7 @@ object TripGivenFuelsAlgebra {
       tripGivenFuelsRepository: TripGivenFuelsRepository[F],
       tripsRepository: TripsRepository[F],
       usersRepository: UsersRepository[F],
+      assetsAlgebra: AssetsAlgebra[F],
     ): TripGivenFuelsAlgebra[F] =
     new TripGivenFuelsAlgebra[F] {
       override def create(input: TripGivenFuelInput, refuelerId: UserId): F[TripGivenFuelId] =
@@ -49,6 +50,7 @@ object TripGivenFuelsAlgebra {
                 fuelBrand = input.fuelBrand,
                 brandCode = input.brandCode,
                 fuelGiven = input.fuelGiven,
+                paymentCheckId = input.paymentCheckId,
                 refuelerId = refuelerId,
                 refuelerSignature = input.refuelerSignature,
               )
@@ -64,6 +66,8 @@ object TripGivenFuelsAlgebra {
             .fold(Map.empty[UserId, User].pure[F]) { userIds =>
               usersRepository.findByIds(userIds)
             }
+          assetIds = dtoTripGivenFuels.flatMap(_.paymentCheckId)
+          assetsById <- assetsAlgebra.findByIds(assetIds)
           tripGivenFuels = dtoTripGivenFuels.map(tgf =>
             TripGivenFuel(
               id = tgf.id,
@@ -73,6 +77,7 @@ object TripGivenFuelsAlgebra {
               fuelBrand = tgf.fuelBrand,
               brandCode = tgf.brandCode,
               fuelGiven = tgf.fuelGiven,
+              paymentCheck = tgf.paymentCheckId.flatMap(assetsById.get),
               refueler = refuelers.get(tgf.refuelerId),
               refuelerSignature = tgf.refuelerSignature,
             )

@@ -74,6 +74,7 @@ object Algebras {
       repositories.tripGivenFuels,
       repositories.trips,
       repositories.users,
+      assetsAlgebra,
     )
     val tripFuelInspectionsAlgebra = TripFuelInspectionsAlgebra.make[F](
       repositories.tripFuelInspections,

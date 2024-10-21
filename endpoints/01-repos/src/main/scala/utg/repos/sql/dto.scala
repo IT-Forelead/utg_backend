@@ -358,6 +358,7 @@ object dto {
       fuelBrand: FuelType,
       brandCode: Option[NonEmptyString],
       fuelGiven: NonNegDouble,
+      paymentCheckId: Option[AssetId],
       refuelerId: UserId,
       refuelerSignature: AssetId,
       deleted: Boolean = false,

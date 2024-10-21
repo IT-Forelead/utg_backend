@@ -10,7 +10,7 @@ import utg.domain.TripId
 private[repos] object TripGivenFuelsSql extends Sql[TripGivenFuelId] {
   private[repos] val codec: Codec[dto.TripGivenFuel] =
     (id *: zonedDateTime *: TripsSql.id *: VehiclesSql.id *: fuelType *: nes.opt *: nonNegDouble
-      *: UsersSql.id *: AssetsSql.id *: bool).to[dto.TripGivenFuel]
+      *: AssetsSql.id.opt *: UsersSql.id *: AssetsSql.id *: bool).to[dto.TripGivenFuel]
 
   val insert: Command[dto.TripGivenFuel] =
     sql"""INSERT INTO trip_given_fuels VALUES ($codec)""".command

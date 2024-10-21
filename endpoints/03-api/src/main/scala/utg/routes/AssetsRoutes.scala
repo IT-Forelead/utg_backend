@@ -1,20 +1,18 @@
 package utg.routes
 
 import java.util.Base64
-
 import cats.effect.Async
 import cats.effect.std.Random
 import cats.implicits._
+import io.estatico.newtype.ops.toCoercibleIdOps
 import org.http4s._
 import org.http4s.circe.JsonDecoder
 import org.http4s.multipart.Multipart
 import org.typelevel.log4cats.Logger
 import uz.scala.http4s.syntax.all._
 import uz.scala.http4s.utils.Routes
-
 import utg.algebras.AssetsAlgebra
-import utg.domain.AuthedUser
-import utg.domain.FileMeta
+import utg.domain.{AssetId, AuthedUser, FileMeta}
 import utg.domain.args.users.AssetInput
 import utg.randomStr
 
@@ -66,5 +64,8 @@ final case class AssetsRoutes[F[_]: Logger: JsonDecoder: Async: Random](
         }
         fileMeta.traverse(fm => assetsAlgebra.create(fm)).flatMap(Created(_))
       }
+
+    case GET -> Root / UUIDVar(id) as _ =>
+      assetsAlgebra.getAssetInfo(id.coerce[AssetId]).flatMap(Ok(_))
   }
 }

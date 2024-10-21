@@ -629,6 +629,8 @@ CREATE TABLE IF NOT EXISTS trip_given_fuels (
   fuel_brand FUEL_TYPE NOT NULL,
   brand_code VARCHAR NULL,
   fuel_given DOUBLE PRECISION NOT NULL,
+  payment_check_id UUID NOT NULL
+    CONSTRAINT fk_payment_check_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   refueler_id UUID NOT NULL
     CONSTRAINT fk_refueler_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
   refueler_signature UUID NOT NULL
