@@ -76,10 +76,10 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
                   drivingLicenseCategories.map(DrivingLicenseCategory.withName)
                 )
                 val machineOperatorLicenseCategories =
-                  if (row(10).trim.isEmpty)
+                  if (row(19).trim.isEmpty)
                     List.empty[String]
                   else
-                    row(10).trim.split(",").map(_.trim).toList
+                    row(19).trim.split(",").map(_.trim).toList
                 val makePrettyMachineOperatorLicense = NonEmptyList.fromList(
                   machineOperatorLicenseCategories.map(MachineOperatorLicenseCategory.withName)
                 )
@@ -89,22 +89,28 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
                 ) { roleId =>
                   users.create(
                     UserInput(
-                      roleId,
                       row(1),
                       row(2),
                       row.lift(3),
-                      NonNegInt.unsafeFrom(row(4).toInt),
-                      row(5),
-                      row(6),
+                      row.lift(4).map( a => NonNegInt.unsafeFrom(a.toInt)),
+                      row.lift(5).map(parseLocalDate(_)),
+                      row.lift(6),
                       row.lift(7),
+                      NonNegInt.unsafeFrom(row(8).toInt),
+                      row(9),
+                      roleId,
+                      row(12),
+                      row.lift(12),
                       makePrettyDrivingLicense,
-                      row.lift(9),
-                      makePrettyMachineOperatorLicense,
-                      row.lift(11).map(parseLocalDate(_)),
-                      row.lift(12).map(parseLocalDate(_)),
-                      row.lift(13).map(parseLocalDate(_)),
-                      row.lift(14).map(parseLocalDate(_)),
                       row.lift(15).map(parseLocalDate(_)),
+                      row.lift(15).map(parseLocalDate(_)),
+                      row.lift(16),
+                      row.lift(17),
+                      makePrettyMachineOperatorLicense,
+                      row.lift(20).map(parseLocalDate(_)),
+                      row.lift(21).map(parseLocalDate(_)),
+                      row.lift(22),
+                      None
                     )
                   )
                 }

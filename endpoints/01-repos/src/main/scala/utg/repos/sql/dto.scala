@@ -28,20 +28,24 @@ object dto {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
+      personalId: Option[NonNegInt],
       birthday: Option[LocalDate],
+      placeOfBirth: Option[NonEmptyString],
+      address: Option[NonEmptyString],
       personalNumber: NonNegInt,
       phone: Phone,
       roleId: RoleId,
-      assetId: Option[AssetId],
       branchCode: Option[NonEmptyString],
       drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[List[DrivingLicenseCategory]],
       drivingLicenseGiven: Option[LocalDate],
       drivingLicenseExpire: Option[LocalDate],
+      drivingLicenseIssuingAuthority: Option[NonEmptyString],
       machineOperatorLicenseNumber: Option[NonEmptyString],
       machineOperatorLicenseCategories: Option[List[MachineOperatorLicenseCategory]],
       machineOperatorLicenseGiven: Option[LocalDate],
       machineOperatorLicenseExpire: Option[LocalDate],
+      machineOperatorLicenseIssuingAuthority: Option[NonEmptyString],
     ) {
     def toDomain(
         role: domain.Role,
@@ -56,6 +60,7 @@ object dto {
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .withFieldConst(_.machineOperatorLicenseCategories, machineOperatorLicenseCategories)
+        .withFieldConst(_.licensePhotos, None)
         .transform
 
     private def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =
@@ -69,6 +74,13 @@ object dto {
         phone.value,
       )
   }
+
+  case class UserLicensePhoto(
+      id: UserLicensePhotoId,
+      userId: UserId,
+      assetId: AssetId,
+      deleted: Boolean = false,
+    )
 
   object User {
     def fromDomain(user: AuthedUser.User): User =

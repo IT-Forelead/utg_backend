@@ -24,7 +24,6 @@ sealed trait AuthedUser {
   val personalNumber: NonNegInt
   val phone: Phone
   val fullName: NonEmptyString
-  val assetId: Option[AssetId]
   def access(privilege: Privilege): Boolean
 }
 
@@ -36,20 +35,25 @@ object AuthedUser {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
-      personalNumber: NonNegInt,
-      role: Role,
-      phone: Phone,
-      assetId: Option[AssetId],
-      branch: Option[Branch],
+      personalId: Option[NonNegInt],
+      birthday: Option[LocalDate],
+      placeOfBirth: Option[NonEmptyString],
+      address: Option[NonEmptyString],
       drivingLicenseNumber: Option[NonEmptyString],
       drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
-      machineOperatorLicenseNumber: Option[NonEmptyString],
-      machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
-      birthday: Option[LocalDate],
       drivingLicenseGiven: Option[LocalDate],
       drivingLicenseExpire: Option[LocalDate],
+      drivingLicenseIssuingAuthority: Option[NonEmptyString],
+      machineOperatorLicenseNumber: Option[NonEmptyString],
+      machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
       machineOperatorLicenseGiven: Option[LocalDate],
       machineOperatorLicenseExpire: Option[LocalDate],
+      machineOperatorLicenseIssuingAuthority: Option[NonEmptyString],
+      personalNumber: NonNegInt,
+      phone: Phone,
+      role: Role,
+      branch: Option[Branch],
+      licensePhotos: Option[List[AssetId]],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)

@@ -148,6 +148,7 @@ object UsersRepository {
         .flatMap(makeUsers)
         .map(_.map(user => user.id -> user).toMap)
     }
+
     override def get(filters: UserFilters): F[ResponseData[User]] = {
       val af = UsersSql
         .select(filters)

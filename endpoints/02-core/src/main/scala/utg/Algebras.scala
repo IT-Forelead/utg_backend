@@ -116,7 +116,11 @@ object Algebras {
     Algebras[F](
       auth = auth,
       assets = assetsAlgebra,
-      users = UsersAlgebra.make[F](repositories.users, assetsAlgebra, smsMessagesAlgebra),
+      users = UsersAlgebra.make[F](
+        repositories.users,
+        repositories.userLicensePhotos,
+        smsMessagesAlgebra
+      ),
       roles = RolesAlgebra.make[F](repositories.roles),
       regions = RegionsAlgebra.make[F](repositories.regions),
       branches = BranchesAlgebra.make[F](repositories.branches, repositories.regions),

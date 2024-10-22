@@ -184,21 +184,34 @@ CREATE TABLE IF NOT EXISTS users (
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
   middle_name VARCHAR NULL,
+  personal_id INT NULL UNIQUE,
   birthday DATE NULL,
+  place_of_birth VARCHAR NULL,
+  address VARCHAR NULL,
   personal_number INT NOT NULL UNIQUE,
   phone VARCHAR NOT NULL UNIQUE,
   role_id UUID NOT NULL CONSTRAINT fk_user_role REFERENCES roles (id) ON UPDATE CASCADE ON DELETE CASCADE,
-  asset_id UUID NULL CONSTRAINT fk_user_asset REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
   branch_code VARCHAR NULL,
   driving_license_number VARCHAR NULL UNIQUE,
   driving_license_categories _DRIVING_LICENSE_CATEGORY NULL,
   driving_license_given DATE NULL,
   driving_license_expire DATE NULL,
+  driving_license_issuing_authority VARCHAR NULL,
   machine_operator_license_number VARCHAR NULL UNIQUE,
   machine_operator_license_category _MACHINE_OPERATOR_LICENSE_CATEGORY NULL,
   machine_operator_license_given DATE NULL,
   machine_operator_license_expire DATE NULL,
+  machine_operator_license_issuing_authority VARCHAR NULL,
   password VARCHAR NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_license_photos (
+  id UUID PRIMARY KEY NOT NULL,
+  user_id UUID NOT NULL
+    CONSTRAINT fk_user_id REFERENCES users (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  asset_id UUID NOT NULL
+    CONSTRAINT fk_asset_id REFERENCES assets (id) ON UPDATE CASCADE ON DELETE CASCADE,
+  deleted BOOLEAN NOT NULL DEFAULT false
 );
 
 INSERT INTO

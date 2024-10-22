@@ -67,7 +67,7 @@ object Environment {
       }
       assets = AssetsAlgebra.make[F](repositories.assets, s3Client)
       smsMessages = SmsMessagesAlgebra.make[F](repositories.smsMessages, smsBroker)
-      users = UsersAlgebra.make[F](repositories.users, assets, smsMessages)
+      users = UsersAlgebra.make[F](repositories.users, repositories.userLicensePhotos, smsMessages)
       auth = Auth.make[F](config.auth, redis, users, smsMessages)
     } yield Environment[F](
       config,

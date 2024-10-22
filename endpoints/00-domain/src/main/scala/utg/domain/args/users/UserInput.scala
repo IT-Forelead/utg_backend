@@ -9,26 +9,33 @@ import io.circe.generic.JsonCodec
 import io.circe.refined._
 
 import utg.Phone
+import utg.domain.AssetId
 import utg.domain.RoleId
 import utg.domain.enums.DrivingLicenseCategory
 import utg.domain.enums.MachineOperatorLicenseCategory
 
 @JsonCodec
 case class UserInput(
-    roleId: RoleId,
     firstname: NonEmptyString,
     lastname: NonEmptyString,
     middleName: Option[NonEmptyString],
+    personalId: Option[NonNegInt],
+    birthday: Option[LocalDate],
+    placeOfBirth: Option[NonEmptyString],
+    address: Option[NonEmptyString],
     personalNumber: NonNegInt,
     phone: Phone,
+    roleId: RoleId,
     branchCode: NonEmptyString,
     drivingLicenseNumber: Option[NonEmptyString],
     drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
-    machineOperatorLicenseNumber: Option[NonEmptyString],
-    machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
-    birthday: Option[LocalDate],
     drivingLicenseGiven: Option[LocalDate],
     drivingLicenseExpire: Option[LocalDate],
+    drivingLicenseIssuingAuthority: Option[NonEmptyString],
+    machineOperatorLicenseNumber: Option[NonEmptyString],
+    machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
     machineOperatorLicenseGiven: Option[LocalDate],
     machineOperatorLicenseExpire: Option[LocalDate],
+    machineOperatorLicenseIssuingAuthority: Option[NonEmptyString],
+    licensePhotoIds: Option[NonEmptyList[AssetId]],
   )

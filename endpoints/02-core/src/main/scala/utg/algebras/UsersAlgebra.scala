@@ -9,9 +9,13 @@ import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined._
+
 import utg.Phone
+import utg.domain.AssetId
 import utg.domain.AuthedUser.User
-import utg.domain.{FileMeta, ResponseData, UserId}
+import utg.domain.FileMeta
+import utg.domain.ResponseData
+import utg.domain.UserId
 import utg.domain.args.smsMessages.SmsMessageInput
 import utg.domain.args.users._
 import utg.domain.auth._
@@ -19,6 +23,7 @@ import utg.domain.enums.DeliveryStatus
 import utg.effects.Calendar
 import utg.effects.GenUUID
 import utg.randomStr
+import utg.repos.UserLicensePhotosRepository
 import utg.repos.UsersRepository
 import utg.repos.sql.dto
 import utg.utils.ID
@@ -28,10 +33,10 @@ trait UsersAlgebra[F[_]] {
   def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]]
   def findById(id: UserId): F[Option[User]]
   def findByIds(ids: List[UserId]): F[Map[UserId, User]]
-  def create(userInput: UserInput): F[UserId]
+  def create(input: UserInput): F[UserId]
   def update(
       id: UserId,
-      userInput: UpdateUserInput,
+      input: UpdateUserInput,
       fileMeta: Option[FileMeta[F]] = None,
     ): F[Unit]
   def delete(id: UserId): F[Unit]
@@ -43,7 +48,7 @@ trait UsersAlgebra[F[_]] {
 object UsersAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
-      assets: AssetsAlgebra[F],
+      userLicensePhotosRepository: UserLicensePhotosRepository[F],
       smsMessagesAlgebra: SmsMessagesAlgebra[F],
     )(implicit
       F: MonadThrow[F],
@@ -62,70 +67,84 @@ object UsersAlgebra {
           usersRepository.findByIds(userIds)
         }
 
-      override def create(userInput: UserInput): F[UserId] =
+      override def create(input: UserInput): F[UserId] =
         for {
           id <- ID.make[F, UserId]
           now <- Calendar[F].currentZonedDateTime
           user = dto.User(
             id = id,
             createdAt = now,
-            firstname = userInput.firstname,
-            lastname = userInput.lastname,
-            middleName = userInput.middleName,
-            personalNumber = userInput.personalNumber,
-            roleId = userInput.roleId,
-            phone = userInput.phone,
-            assetId = None,
-            branchCode = Option(userInput.branchCode),
-            drivingLicenseNumber = userInput.drivingLicenseNumber,
-            drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
-            machineOperatorLicenseNumber = userInput.machineOperatorLicenseNumber,
-            machineOperatorLicenseCategories = userInput.machineOperatorLicenseCategories.map(_.toList),
-            birthday = userInput.birthday,
-            drivingLicenseGiven = userInput.drivingLicenseGiven,
-            drivingLicenseExpire = userInput.drivingLicenseExpire,
-            machineOperatorLicenseGiven = userInput.machineOperatorLicenseGiven,
-            machineOperatorLicenseExpire = userInput.machineOperatorLicenseExpire,
+            firstname = input.firstname,
+            lastname = input.lastname,
+            middleName = input.middleName,
+            personalId = input.personalId,
+            personalNumber = input.personalNumber,
+            birthday = input.birthday,
+            placeOfBirth = input.placeOfBirth,
+            address = input.address,
+            roleId = input.roleId,
+            phone = input.phone,
+            branchCode = Option(input.branchCode),
+            drivingLicenseNumber = input.drivingLicenseNumber,
+            drivingLicenseCategories = input.drivingLicenseCategories.map(_.toList),
+            drivingLicenseGiven = input.drivingLicenseGiven,
+            drivingLicenseExpire = input.drivingLicenseExpire,
+            drivingLicenseIssuingAuthority = input.drivingLicenseIssuingAuthority,
+            machineOperatorLicenseNumber = input.machineOperatorLicenseNumber,
+            machineOperatorLicenseCategories = input.machineOperatorLicenseCategories.map(_.toList),
+            machineOperatorLicenseGiven = input.machineOperatorLicenseGiven,
+            machineOperatorLicenseExpire = input.machineOperatorLicenseExpire,
+            machineOperatorLicenseIssuingAuthority = input.machineOperatorLicenseIssuingAuthority,
           )
           password <- randomStr[F](8)
           hash <- SCrypt.hashpw[F](password)
           accessCredentials = AccessCredentials(user, hash)
           _ <- usersRepository.create(accessCredentials)
+          _ <- input.licensePhotoIds.traverse { photoIds =>
+            userLicensePhotosRepository.create(id, photoIds)
+          }
           smsText =
             s"Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n %%UTG_DOMAIN%%\n Parolingiz: $password"
-          smsMessageInput = SmsMessageInput(userInput.phone, smsText, DeliveryStatus.Sent)
+          smsMessageInput = SmsMessageInput(input.phone, smsText, DeliveryStatus.Sent)
           _ <- smsMessagesAlgebra.create(smsMessageInput)
         } yield id
 
       override def update(
           id: UserId,
-          userInput: UpdateUserInput,
+          input: UpdateUserInput,
           fileMeta: Option[FileMeta[F]],
         ): F[Unit] =
         for {
-          assetId <- fileMeta.traverse(assets.create)
           _ <- usersRepository.update(id)(
             _.copy(
-              firstname = userInput.firstname,
-              lastname = userInput.lastname,
-              middleName = userInput.middleName,
-              personalNumber = userInput.personalNumber,
-              phone = userInput.phone,
-              branchCode = userInput.branchCode,
-              roleId = userInput.roleId,
-              assetId = assetId,
-              drivingLicenseNumber = userInput.drivingLicenseNumber,
-              drivingLicenseCategories = userInput.drivingLicenseCategories.map(_.toList),
-              machineOperatorLicenseNumber = userInput.machineOperatorLicenseNumber,
-              machineOperatorLicenseCategories = userInput.machineOperatorLicenseCategories.map(_.toList),
-              birthday = userInput.birthday,
-              drivingLicenseGiven = userInput.drivingLicenseGiven,
-              drivingLicenseExpire = userInput.drivingLicenseExpire,
-              machineOperatorLicenseGiven = userInput.machineOperatorLicenseGiven,
-              machineOperatorLicenseExpire = userInput.machineOperatorLicenseExpire,
+              firstname = input.firstname,
+              lastname = input.lastname,
+              middleName = input.middleName,
+              personalId = input.personalId,
+              birthday = input.birthday,
+              placeOfBirth = input.placeOfBirth,
+              address = input.address,
+              personalNumber = input.personalNumber,
+              phone = input.phone,
+              branchCode = Option(input.branchCode),
+              roleId = input.roleId,
+              drivingLicenseNumber = input.drivingLicenseNumber,
+              drivingLicenseCategories = input.drivingLicenseCategories.map(_.toList),
+              drivingLicenseGiven = input.drivingLicenseGiven,
+              drivingLicenseExpire = input.drivingLicenseExpire,
+              drivingLicenseIssuingAuthority = input.drivingLicenseIssuingAuthority,
+              machineOperatorLicenseNumber = input.machineOperatorLicenseNumber,
+              machineOperatorLicenseCategories =
+                input.machineOperatorLicenseCategories.map(_.toList),
+              machineOperatorLicenseGiven = input.machineOperatorLicenseGiven,
+              machineOperatorLicenseExpire = input.machineOperatorLicenseExpire,
+              machineOperatorLicenseIssuingAuthority = input.machineOperatorLicenseIssuingAuthority,
             )
           )
-        } yield {}
+          _ <- input.licensePhotoIds.traverse { assetIds =>
+            updateLicensePhotos(id, assetIds)
+          }
+        } yield ()
 
       override def updatePrivilege(userRole: UpdateUserRole): F[Unit] =
         usersRepository.update(userRole.userId)(
@@ -150,5 +169,16 @@ object UsersAlgebra {
           hash <- SCrypt.hashpw[F](password)
           _ <- usersRepository.updatePassword(id, hash)
         } yield {}
+
+      private def updateLicensePhotos(
+          userId: UserId,
+          assetIds: NonEmptyList[AssetId],
+        ): F[Unit] =
+        for {
+          _ <- userLicensePhotosRepository.deleteByUserId(userId)
+          _ <- assetIds.traverse_ { assetId =>
+            userLicensePhotosRepository.create(userId, NonEmptyList.one(assetId))
+          }
+        } yield ()
     }
 }

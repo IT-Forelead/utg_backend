@@ -8,6 +8,7 @@ import utg.repos._
 
 case class Repositories[F[_]](
     users: UsersRepository[F],
+    userLicensePhotos: UserLicensePhotosRepository[F],
     assets: AssetsRepository[F],
     roles: RolesRepository[F],
     regions: RegionsRepository[F],
@@ -47,6 +48,7 @@ object Repositories {
     val usersRepo = UsersRepository.make[F]
     Repositories(
       users = usersRepo,
+      userLicensePhotos = UserLicensePhotosRepository.make[F],
       assets = AssetsRepository.make[F],
       roles = RolesRepository.make[F],
       regions = RegionsRepository.make[F],

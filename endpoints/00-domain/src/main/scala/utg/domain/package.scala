@@ -33,6 +33,8 @@ package object domain {
   @derive(eqv, show, uuid)
   @newtype case class UserId(value: UUID)
   @derive(eqv, show, uuid)
+  @newtype case class UserLicensePhotoId(value: UUID)
+  @derive(eqv, show, uuid)
   @newtype case class AssetId(value: UUID)
   @derive(eqv, show, uuid)
   @newtype case class VehicleId(value: UUID)
