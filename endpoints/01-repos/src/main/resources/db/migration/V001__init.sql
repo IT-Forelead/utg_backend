@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS users (
   firstname VARCHAR NOT NULL,
   lastname VARCHAR NOT NULL,
   middle_name VARCHAR NULL,
-  personal_id INT NULL UNIQUE,
+  personal_id BIGINT NULL UNIQUE,
   birthday DATE NULL,
   place_of_birth VARCHAR NULL,
   address VARCHAR NULL,

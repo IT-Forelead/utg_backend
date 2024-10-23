@@ -30,6 +30,7 @@ import utg.exception.AError
 import utg.repos.sql.BranchesSql
 import utg.repos.sql.RegionsSql
 import utg.repos.sql.RolesSql
+import utg.repos.sql.UserLicensePhotosSql
 import utg.repos.sql.UsersSql
 import utg.repos.sql.dto
 
@@ -67,12 +68,22 @@ object UsersRepository {
             region <- OptionT(RegionsSql.findById.queryOption(branch.regionId))
           } yield branch.toDomain(region.toDomain.some)).value
         }
+        licensePhotoIds <- UserLicensePhotosSql
+          .selectByUserId
+          .queryList(userDto.id)
+          .map(_.map(_.assetId))
         drivingLicenseCategories =
           userDto.drivingLicenseCategories.flatMap(NonEmptyList.fromList)
         machineOperatorLicenseCategories =
           userDto.machineOperatorLicenseCategories.flatMap(NonEmptyList.fromList)
       } yield optRole.map { role =>
-        userDto.toDomain(role, branch, drivingLicenseCategories, machineOperatorLicenseCategories)
+        userDto.toDomain(
+          role,
+          branch,
+          drivingLicenseCategories,
+          machineOperatorLicenseCategories,
+          licensePhotoIds,
+        )
       }
 
     private def makeUsers(dtos: List[dto.User]): F[List[User]] = {
@@ -103,6 +114,15 @@ object UsersRepository {
             .queryList(regionIdList)
             .map(a => a.map(r => r.id -> r).toMap)
         }
+        licensePhotos <- NonEmptyList
+          .fromList(dtos.map(_.id))
+          .fold(Map.empty[UserId, List[dto.UserLicensePhoto]].pure[F]) { userIds =>
+            val ids = userIds.toList
+            UserLicensePhotosSql
+              .findByUserIds(ids)
+              .queryList(ids)
+              .map(_.groupBy(_.userId))
+          }
       } yield dtos.flatMap { userDto =>
         val roleOpt = roles.get(userDto.roleId)
         roleOpt.map { role =>
@@ -124,6 +144,7 @@ object UsersRepository {
             maybeBranch,
             drivingLicenseCategories,
             machineOperatorLicenseCategories,
+            licensePhotos.getOrElse(userDto.id, Nil).map(_.assetId),
           )
         }
       }

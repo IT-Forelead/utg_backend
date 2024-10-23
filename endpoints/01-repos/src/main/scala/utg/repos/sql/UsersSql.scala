@@ -17,7 +17,7 @@ import utg.domain.auth.AccessCredentials
 
 private[repos] object UsersSql extends Sql[UserId] {
   private[repos] val codec =
-    (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegInt.opt *: date.opt *: nes.opt *: nes.opt *: nonNegInt
+    (id *: zonedDateTime *: nes *: nes *: nes.opt *: nonNegLong.opt *: date.opt *: nes.opt *: nes.opt *: nonNegInt
       *: phone *: RolesSql.id *: nes.opt *: nes.opt *: drivingLicenseCategories.opt *: date.opt *: date.opt *: nes.opt
       *: nes.opt *: machineOperatorLicenseCategory.opt *: date.opt *: date.opt *: nes.opt)
       .to[dto.User]
@@ -94,7 +94,7 @@ private[repos] object UsersSql extends Sql[UserId] {
           $nes,
           $nes,
           ${nes.opt},
-          ${nonNegInt.opt}
+          ${nonNegLong.opt},
           ${date.opt},
           ${nes.opt},
           ${nes.opt},
@@ -132,7 +132,7 @@ private[repos] object UsersSql extends Sql[UserId] {
        SET firstname = $nes,
        lastname = $nes,
        middle_name = ${nes.opt},
-       personal_id = ${nonNegInt.opt},
+       personal_id = ${nonNegLong.opt},
        birthday = ${date.opt},
        place_of_birth = ${nes.opt},
        address = ${nes.opt},

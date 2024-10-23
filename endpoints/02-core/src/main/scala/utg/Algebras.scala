@@ -119,7 +119,8 @@ object Algebras {
       users = UsersAlgebra.make[F](
         repositories.users,
         repositories.userLicensePhotos,
-        smsMessagesAlgebra
+        assetsAlgebra,
+        smsMessagesAlgebra,
       ),
       roles = RolesAlgebra.make[F](repositories.roles),
       regions = RegionsAlgebra.make[F](repositories.regions),
@@ -130,7 +131,7 @@ object Algebras {
         repositories.vehicleFuelItems,
         repositories.vehiclePhotos,
         repositories.vehicleLicensePhotos,
-        assetsAlgebra
+        assetsAlgebra,
       ),
       trips = tripsAlgebra,
       tripDrivers = tripDriversAlgebra,

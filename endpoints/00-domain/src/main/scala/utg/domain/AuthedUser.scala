@@ -5,12 +5,14 @@ import java.time.ZonedDateTime
 
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.NonNegLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
 
 import utg.Phone
+import utg.domain.Asset.AssetInfo
 import utg.domain.enums.DrivingLicenseCategory
 import utg.domain.enums.MachineOperatorLicenseCategory
 import utg.domain.enums.Privilege
@@ -35,7 +37,7 @@ object AuthedUser {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
-      personalId: Option[NonNegInt],
+      personalId: Option[NonNegLong],
       birthday: Option[LocalDate],
       placeOfBirth: Option[NonEmptyString],
       address: Option[NonEmptyString],
@@ -53,9 +55,38 @@ object AuthedUser {
       phone: Phone,
       role: Role,
       branch: Option[Branch],
-      licensePhotos: Option[List[AssetId]],
+      licensePhotoIds: List[AssetId],
     ) extends AuthedUser {
     val fullName = s"$firstname $lastname"
     def access(privilege: Privilege): Boolean = role.privileges.contains(privilege)
   }
+
+  @JsonCodec
+  case class UserInfo(
+      id: UserId,
+      createdAt: ZonedDateTime,
+      firstname: NonEmptyString,
+      lastname: NonEmptyString,
+      middleName: Option[NonEmptyString],
+      fullName: NonEmptyString,
+      personalId: Option[NonNegLong],
+      birthday: Option[LocalDate],
+      placeOfBirth: Option[NonEmptyString],
+      address: Option[NonEmptyString],
+      drivingLicenseNumber: Option[NonEmptyString],
+      drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
+      drivingLicenseGiven: Option[LocalDate],
+      drivingLicenseExpire: Option[LocalDate],
+      drivingLicenseIssuingAuthority: Option[NonEmptyString],
+      machineOperatorLicenseNumber: Option[NonEmptyString],
+      machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
+      machineOperatorLicenseGiven: Option[LocalDate],
+      machineOperatorLicenseExpire: Option[LocalDate],
+      machineOperatorLicenseIssuingAuthority: Option[NonEmptyString],
+      personalNumber: NonNegInt,
+      phone: Phone,
+      role: Role,
+      branch: Option[Branch],
+      licensePhotos: List[AssetInfo],
+    )
 }

@@ -12,6 +12,7 @@ import cats.implicits.catsSyntaxOptionId
 import com.github.tototoshi.csv.CSVWriter
 import eu.timepit.refined.types.all.NonNegDouble
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.NonNegLong
 import eu.timepit.refined.types.string.NonEmptyString
 import fs2.text.utf8
 import io.scalaland.chimney.dsl._
@@ -28,7 +29,7 @@ object dto {
       firstname: NonEmptyString,
       lastname: NonEmptyString,
       middleName: Option[NonEmptyString],
-      personalId: Option[NonNegInt],
+      personalId: Option[NonNegLong],
       birthday: Option[LocalDate],
       placeOfBirth: Option[NonEmptyString],
       address: Option[NonEmptyString],
@@ -52,6 +53,7 @@ object dto {
         branch: Option[utg.domain.Branch],
         drivingLicenseCategories: Option[NonEmptyList[DrivingLicenseCategory]],
         machineOperatorLicenseCategories: Option[NonEmptyList[MachineOperatorLicenseCategory]],
+        licensePhotos: List[AssetId],
       ): AuthedUser.User =
       this
         .into[AuthedUser.User]
@@ -60,7 +62,7 @@ object dto {
         .withFieldConst(_.branch, branch)
         .withFieldConst(_.drivingLicenseCategories, drivingLicenseCategories)
         .withFieldConst(_.machineOperatorLicenseCategories, machineOperatorLicenseCategories)
-        .withFieldConst(_.licensePhotos, None)
+        .withFieldConst(_.licensePhotoIds, licensePhotos)
         .transform
 
     private def ldtToString(date: ZonedDateTime, format: String = "yyyy MM dd HH:mm"): String =

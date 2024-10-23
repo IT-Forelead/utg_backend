@@ -9,10 +9,9 @@ import org.typelevel.log4cats.Logger
 import tsec.passwordhashers.PasswordHasher
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined._
-
 import utg.Phone
 import utg.domain.AssetId
-import utg.domain.AuthedUser.User
+import utg.domain.AuthedUser.{User, UserInfo}
 import utg.domain.FileMeta
 import utg.domain.ResponseData
 import utg.domain.UserId
@@ -29,7 +28,7 @@ import utg.repos.sql.dto
 import utg.utils.ID
 
 trait UsersAlgebra[F[_]] {
-  def get(filters: UserFilters): F[ResponseData[User]]
+  def get(filters: UserFilters): F[ResponseData[UserInfo]]
   def getAsStream(filters: UserFilters): F[fs2.Stream[F, dto.User]]
   def findById(id: UserId): F[Option[User]]
   def findByIds(ids: List[UserId]): F[Map[UserId, User]]
@@ -49,6 +48,7 @@ object UsersAlgebra {
   def make[F[_]: Calendar: GenUUID: Random](
       usersRepository: UsersRepository[F],
       userLicensePhotosRepository: UserLicensePhotosRepository[F],
+      assetsAlgebra: AssetsAlgebra[F],
       smsMessagesAlgebra: SmsMessagesAlgebra[F],
     )(implicit
       F: MonadThrow[F],
@@ -56,8 +56,46 @@ object UsersAlgebra {
       logger: Logger[F],
     ): UsersAlgebra[F] =
     new UsersAlgebra[F] {
-      override def get(filters: UserFilters): F[ResponseData[User]] =
-        usersRepository.get(filters)
+      override def get(filters: UserFilters): F[ResponseData[UserInfo]] =
+        for {
+          users <- usersRepository.get(filters)
+          assetIds = users
+            .data
+            .flatMap(_.licensePhotoIds).distinct
+          userAssets <- assetsAlgebra.getByIds(assetIds)
+          data = users
+            .data
+            .map(u =>
+              UserInfo(
+                id = u.id,
+                createdAt = u.createdAt,
+                firstname = u.firstname,
+                lastname = u.lastname,
+                middleName = u.middleName,
+                fullName = u.fullName,
+                personalId = u.personalId,
+                birthday = u.birthday,
+                placeOfBirth = u.placeOfBirth,
+                address = u.address,
+                drivingLicenseNumber = u.drivingLicenseNumber,
+                drivingLicenseCategories = u.drivingLicenseCategories,
+                drivingLicenseGiven = u.drivingLicenseGiven,
+                drivingLicenseExpire = u.drivingLicenseExpire,
+                drivingLicenseIssuingAuthority = u.drivingLicenseIssuingAuthority,
+                machineOperatorLicenseNumber = u.machineOperatorLicenseNumber,
+                machineOperatorLicenseCategories = u.machineOperatorLicenseCategories,
+                machineOperatorLicenseGiven = u.machineOperatorLicenseGiven,
+                machineOperatorLicenseExpire = u.machineOperatorLicenseExpire,
+                machineOperatorLicenseIssuingAuthority = u.machineOperatorLicenseIssuingAuthority,
+                personalNumber = u.personalNumber,
+                phone = u.phone,
+                role = u.role,
+                branch = u.branch,
+                licensePhotos =
+                  userAssets.filter(ai => u.licensePhotoIds.contains(ai.id)),
+              )
+            )
+        } yield ResponseData(data, users.total)
 
       override def findById(id: UserId): F[Option[User]] =
         usersRepository.findById(id)
@@ -104,7 +142,7 @@ object UsersAlgebra {
             userLicensePhotosRepository.create(id, photoIds)
           }
           smsText =
-            s"Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n %%UTG_DOMAIN%%\n Parolingiz: $password"
+            s"%%UTG_DOMAIN%%\n Sizning telefon raqamingiz UTG platformasidan ro'yxatdan o'tkazildi.\n Parolingiz: $password"
           smsMessageInput = SmsMessageInput(input.phone, smsText, DeliveryStatus.Sent)
           _ <- smsMessagesAlgebra.create(smsMessageInput)
         } yield id

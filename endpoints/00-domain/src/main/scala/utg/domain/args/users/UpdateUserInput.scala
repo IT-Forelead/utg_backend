@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import cats.data.NonEmptyList
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.numeric.NonNegLong
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.generic.JsonCodec
 import io.circe.refined._
@@ -21,7 +22,7 @@ case class UpdateUserInput(
     firstname: NonEmptyString,
     lastname: NonEmptyString,
     middleName: Option[NonEmptyString],
-    personalId: Option[NonNegInt],
+    personalId: Option[NonNegLong],
     birthday: Option[LocalDate],
     placeOfBirth: Option[NonEmptyString],
     address: Option[NonEmptyString],

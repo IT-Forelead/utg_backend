@@ -1,10 +1,9 @@
 package utg.repos
 
 import java.time.ZonedDateTime
-
 import enumeratum.Enum
 import enumeratum.EnumEntry
-import eu.timepit.refined.types.numeric._
+import eu.timepit.refined.types.numeric.{NonNegLong, _}
 import eu.timepit.refined.types.string.NonEmptyString
 import skunk.Codec
 import skunk.codec.all._
@@ -13,7 +12,6 @@ import skunk.data.Type
 import tsec.passwordhashers.PasswordHash
 import tsec.passwordhashers.jca.SCrypt
 import uz.scala.syntax.refined.commonSyntaxAutoRefineV
-
 import utg._
 import utg.domain.DocumentId
 import utg.domain.enums._
@@ -41,6 +39,8 @@ package object sql {
     float8.imap[NonNegDouble](double => NonNegDouble.unsafeFrom(double))(_.value)
   val nonNegInt: Codec[NonNegInt] =
     int4.imap[NonNegInt](int => NonNegInt.unsafeFrom(int))(_.value)
+  val nonNegLong: Codec[NonNegLong] =
+    int8.imap[NonNegLong](long => NonNegLong.unsafeFrom(long))(_.value)
   val vehicleType: Codec[VehicleType] =
     `enum`[VehicleType](VehicleType, Type("vehicle_type"))
   val conditionType: Codec[ConditionType] =

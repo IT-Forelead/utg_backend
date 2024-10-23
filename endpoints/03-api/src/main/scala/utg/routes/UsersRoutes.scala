@@ -92,7 +92,7 @@ final case class UsersRoutes[F[_]: JsonDecoder: Async](
                       row(1),
                       row(2),
                       row.lift(3),
-                      row.lift(4).map( a => NonNegInt.unsafeFrom(a.toInt)),
+                      row.lift(4).map(_.toLong),
                       row.lift(5).map(parseLocalDate(_)),
                       row.lift(6),
                       row.lift(7),
